@@ -1,48 +1,55 @@
 :root {
-    --bs-primary: #2f7f69;
-    --bs-primary-rgb: 47, 127, 105;
-    --bs-link-color: #2f7f69;
-    --bs-link-hover-color: #1f5f4e;
+    --bs-primary: #2a7f72;
+    --bs-primary-rgb: 42, 127, 114;
+    --bs-link-color: #2a7f72;
+    --bs-link-hover-color: #1f6459;
 }
 
 .btn-primary {
-    --bs-btn-bg: #2f7f69;
-    --bs-btn-border-color: #2f7f69;
-    --bs-btn-hover-bg: #256653;
-    --bs-btn-hover-border-color: #256653;
-    --bs-btn-active-bg: #1f5f4e;
-    --bs-btn-active-border-color: #1f5f4e;
-    --bs-btn-disabled-bg: #2f7f69;
-    --bs-btn-disabled-border-color: #2f7f69;
+    --bs-btn-bg: #2a7f72;
+    --bs-btn-border-color: #2a7f72;
+    --bs-btn-hover-bg: #226a60;
+    --bs-btn-hover-border-color: #226a60;
+    --bs-btn-active-bg: #1b564e;
+    --bs-btn-active-border-color: #1b564e;
+    --bs-btn-disabled-bg: #2a7f72;
+    --bs-btn-disabled-border-color: #2a7f72;
 }
 
 .btn-outline-primary {
-    --bs-btn-color: #2f7f69;
-    --bs-btn-border-color: #2f7f69;
-    --bs-btn-hover-bg: #2f7f69;
-    --bs-btn-hover-border-color: #2f7f69;
-    --bs-btn-active-bg: #2f7f69;
-    --bs-btn-active-border-color: #2f7f69;
+    --bs-btn-color: #2a7f72;
+    --bs-btn-border-color: #2a7f72;
+    --bs-btn-hover-bg: #2a7f72;
+    --bs-btn-hover-border-color: #2a7f72;
+    --bs-btn-active-bg: #2a7f72;
+    --bs-btn-active-border-color: #2a7f72;
 }
 
 .form-control:focus {
-    border-color: #4aa88c;
-    box-shadow: 0 0 0 0.25rem rgba(74, 168, 140, 0.25);
+    border-color: #5aa89b;
+    box-shadow: 0 0 0 0.25rem rgba(90, 168, 155, 0.25);
+}
+
+.konten-utama {
+    min-width: 0;
 }
 
 .sidebar {
-    width: 100%;
-    background: #4aa88c;
+    width: 230px;
+    flex-shrink: 0;
+    background: #5aa89b;
     color: #fff;
-}
-
-.sidebar .brand {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .sidebar .nav-link {
     color: #fff;
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: 0.6rem;
+    padding: 0.65rem 0.85rem;
 }
 
 .sidebar .nav-link:hover {
@@ -50,12 +57,13 @@
 }
 
 .sidebar .nav-link.active {
-    background: #2f7f69;
+    background: #3b8c7e;
 }
 
 .sidebar .nav-link svg {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
@@ -63,15 +71,70 @@
     stroke-linejoin: round;
 }
 
-.avatar {
-    width: 36px;
-    height: 36px;
-    flex-shrink: 0;
+.topbar {
+    background: #5aa89b;
+    color: #fff;
+}
+
+.btn-hamburger {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+}
+
+.btn-hamburger:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-hamburger svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.btn-profil {
+    padding: 0;
+    color: #fff;
+    background: transparent;
+    border: 0;
+}
+
+.btn-profil svg {
+    width: 34px;
+    height: 34px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 @media (min-width: 768px) {
+    body.sidebar-tutup .sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 767.98px) {
     .sidebar {
-        width: 230px;
-        flex-shrink: 0;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+    }
+
+    body.sidebar-buka .sidebar {
+        display: block;
     }
 }

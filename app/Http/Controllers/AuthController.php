@@ -59,7 +59,10 @@ class AuthController extends Controller
 
     protected function redirectBasedOnRole($user)
     {
-        return redirect()->intended(route('layanan.index'));
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+        return redirect()->intended(route('user.dashboard'));
     }
 
     public function showForgotPasswordForm()
@@ -149,9 +152,5 @@ class AuthController extends Controller
 
         $maskedName = substr($name, 0, 1) . str_repeat('*', max(strlen($name) - 1, 3));
         return $maskedName . '@' . $domain;
-    }
-    protected function redirectBasedOnRole($user)
-    {
-        return redirect()->intended(route('layanan.index'));
     }
 }

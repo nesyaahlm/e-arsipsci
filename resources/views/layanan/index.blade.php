@@ -17,7 +17,7 @@
     <div class="alert alert-danger">{{ session('galat') }}</div>
 @endif
 
-<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 border-bottom border-2 border-primary">
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
     <ul class="nav tab-layanan" role="tablist">
         <li class="nav-item" role="presentation">
             <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#panel-layanan" role="tab">LAYANAN</button>
@@ -28,13 +28,13 @@
     </ul>
     @if ($bisaKelola)
         <div class="d-flex gap-2 pb-2">
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-tambah">+ Tambah Layanan</button>
-            <button type="button" class="btn btn-warning btn-sm" disabled title="Dikerjakan di tahap berikutnya">+ Tambah Jenis</button>
+            <button type="button" class="btn btn-sm btn-tambah-layanan" data-bs-toggle="modal" data-bs-target="#modal-tambah">+ Tambah Layanan</button>
+            <button type="button" class="btn btn-sm btn-tambah-jenis" disabled title="Dikerjakan di tahap berikutnya">+ Tambah Jenis</button>
         </div>
     @endif
 </div>
 
-<div class="tab-content pt-4">
+<div class="tab-content panel-layanan">
     <div class="tab-pane fade show active" id="panel-layanan" role="tabpanel">
         <div class="row g-4 justify-content-center">
             @forelse ($daftarLayanan as $layanan)
@@ -43,7 +43,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h3 class="h6 fw-bold text-uppercase text-primary mb-0">{{ $layanan->nama }}</h3>
+                                    <h3 class="fw-bold text-uppercase text-primary mb-0" style="font-size: 0.85rem;">{{ $layanan->nama }}</h3>
                                     <p class="small text-secondary mb-0">{{ $layanan->jenisDokumen->count() }} jenis dokumen</p>
                                 </div>
                                 <span class="kartu-ikon text-primary">@include('layanan._ikon', ['nama' => $layanan->nama])</span>
@@ -51,7 +51,7 @@
 
                             <div class="d-flex flex-column align-items-start gap-1 mt-3">
                                 @forelse ($layanan->jenisDokumen as $jenis)
-                                    <span class="badge text-bg-light border fw-normal">{{ $jenis->nama }}</span>
+                                    <span class="tag-jenis">{{ $jenis->nama }}</span>
                                 @empty
                                     <span class="small text-secondary fst-italic">Belum ada jenis dokumen</span>
                                 @endforelse
@@ -86,33 +86,31 @@
     </div>
 
     <div class="tab-pane fade" id="panel-jenis" role="tabpanel">
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 tabel-jenis">
-                    <thead>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 tabel-jenis">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Jenis Dokumen</th>
+                        <th>Retensi</th>
+                        <th>Layanan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($daftarJenis as $jenis)
                         <tr>
-                            <th>Kode</th>
-                            <th>Nama Jenis Dokumen</th>
-                            <th>Retensi</th>
-                            <th>Layanan</th>
+                            <td class="fw-bold">{{ $jenis->kode }}</td>
+                            <td>{{ $jenis->nama }}</td>
+                            <td>{{ $jenis->retensi_tahun ? $jenis->retensi_tahun.' tahun' : '-' }}</td>
+                            <td>{{ $jenis->layanan->pluck('nama')->implode(', ') ?: '-' }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($daftarJenis as $jenis)
-                            <tr>
-                                <td class="fw-bold">{{ $jenis->kode }}</td>
-                                <td>{{ $jenis->nama }}</td>
-                                <td>{{ $jenis->retensi_tahun ? $jenis->retensi_tahun.' tahun' : '-' }}</td>
-                                <td>{{ $jenis->layanan->pluck('nama')->implode(', ') ?: '-' }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center text-secondary py-4">Belum ada jenis dokumen.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-secondary py-4">Belum ada jenis dokumen.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
