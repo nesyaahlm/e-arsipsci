@@ -45,7 +45,7 @@
             <label class="form-label small text-muted fw-semibold">Password</label>
             <div class="input-icon-group">
                 <i class="bi bi-lock field-icon"></i>
-                <input type="password" id="passwordInput" name="password" class="form-control" placeholder="••••••••" required>
+                <input type="password" id="passwordInput" name="password" class="form-control"  required>
                 <i class="bi bi-eye toggle-password" id="togglePassword"></i>
             </div>
         </div>
@@ -71,15 +71,27 @@
 
 @section('scripts')
 <script>
-    // Toggle Show/Hide Password
     const togglePassword = document.querySelector('#togglePassword');
     const passwordInput = document.querySelector('#passwordInput');
 
     togglePassword.addEventListener('click', function () {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.classList.toggle('bi-eye');
-        this.classList.toggle('bi-eye-slash');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            togglePassword.classList.remove('bi-eye');
+            togglePassword.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            togglePassword.classList.remove('bi-eye-slash');
+            togglePassword.classList.add('bi-eye');
+        }
+    });
+
+    const loginForm = document.querySelector('form');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    loginForm.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...';
     });
 </script>
 @endsection

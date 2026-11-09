@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -89,12 +91,21 @@ class AuthController extends Controller
             ]
         );
 
+        $resetUrl = route('password.reset', ['token' => $token, 'email' => $email]);
+
+        $user = User::where('email', $email)->first();
+        
+        $isDummyCorporateEmail = str_ends_with($email, '@sucofindo.co.id');
+        $targetEmail = ($isDummyCorporateEmail && app()->environment('local')) 
+            ? env('MAIL_USERNAME', $email) 
+            : $email;
+        
+        Mail::to($targetEmail)->send(new ResetPasswordMail($resetUrl, $user->name));
+        
         $maskedEmail = $this->maskEmail($email);
 
         return redirect()->route('password.check_email')->with([
             'masked_email' => $maskedEmail,
-            'demo_token' => $token, 
-            'demo_email' => $email,
         ]);
     }
 
