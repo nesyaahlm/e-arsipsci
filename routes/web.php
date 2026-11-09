@@ -1,9 +1,8 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\User\DashboardController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -30,15 +29,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/dokumen', function () {
-        return "<h1>Halaman Dokumen User (" . auth()->user()->name . ")</h1><form action='" . route('logout') . "' method='POST'>" . csrf_field() . "<button type='submit'>Logout</button></form>";
-    })->name('user.dokumen.index');
-});
-
-Route::get('/uji-layout-user', function () {
-    abort_unless(app()->isLocal(), 404);
-
-    Auth::login(User::where('email', 'siti.r@sucofindo.co.id')->firstOrFail());
-
-    return view('user.layout-test');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
 });
