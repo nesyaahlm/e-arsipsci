@@ -1,0 +1,43 @@
+.tombol-penuh {
+    width: 100%;
+    padding: 10px;
+}
+
+.halaman-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+}
+
+.login-kotak {
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 28px;
+    box-shadow: 0 4px 16px rgba(47, 127, 105, 0.15);
+}
+
+.login-brand {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--hijau);
+}
+
+.login-brand .brand-nama {
+    color: var(--hijau-tua);
+}
+
+.login-brand .brand-sub {
+    color: var(--teks-redup);
+}
+
+.ingat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
