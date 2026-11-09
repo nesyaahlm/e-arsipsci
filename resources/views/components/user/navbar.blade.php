@@ -1,7 +1,7 @@
 <header class="ua-topbar">
     <div class="ua-topbar__brand">
         <span class="ua-brand__name">PT SUCOFINDO</span>
-        <span class="ua-brand__sub">Kerasipan Dokumen</span>
+        <span class="ua-brand__sub">Kearsipan Dokumen</span>
     </div>
 
     <button type="button" class="ua-topbar__toggle" data-ua-toggle aria-controls="ua-sidebar" aria-expanded="false" aria-label="Buka atau tutup menu">
