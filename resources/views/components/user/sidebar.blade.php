@@ -10,7 +10,7 @@
 <aside class="ua-sidebar" id="ua-sidebar" aria-label="Navigasi pengguna">
     <div class="ua-sidebar__brand">
         <span class="ua-brand__name">PT SUCOFINDO</span>
-        <span class="ua-brand__sub">Kerasipan Dokumen</span>
+        <span class="ua-brand__sub">Kearsipan Dokumen</span>
     </div>
 
     <nav class="ua-nav">

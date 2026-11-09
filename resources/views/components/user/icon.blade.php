@@ -45,5 +45,15 @@
             <path d="m16 17 5-5-5-5"/>
             <path d="M21 12H9"/>
             @break
+        @case('star')
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            @break
+        @case('clock')
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 2"/>
+            @break
+        @case('folder')
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            @break
     @endswitch
 </svg>
