@@ -118,7 +118,6 @@ class AuthController extends Controller
         return view('auth.check-email', compact('maskedEmail'));
     }
 
-
     public function showResetPasswordForm(Request $request, $token)
     {
         return view('auth.reset-password', [
@@ -139,7 +138,6 @@ class AuthController extends Controller
             ->where('email', $request->email)
             ->first();
 
-    
         if (!$resetRecord || !Hash::check($request->token, $resetRecord->token)) {
             return back()->withErrors(['email' => 'Tautan reset password tidak valid.']);
         }
