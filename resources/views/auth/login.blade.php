@@ -1,44 +1,85 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Masuk - E-Arsip</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-</head>
-<body class="bg-body-tertiary">
-<div class="container min-vh-100 d-flex align-items-center">
-    <div class="row justify-content-center w-100">
-        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <div class="pb-3 mb-4 border-bottom border-2 border-primary">
-                        <div class="fs-5 fw-bold text-primary">PT SUCOFINDO</div>
-                        <div class="small text-secondary">E-Arsip - Sistem Elektronik Arsip</div>
-                    </div>
-                    <form method="POST" action="{{ route('login.proses') }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" id="email" name="email" class="form-control {{ $errors->has('email') ? 'is-invalid' : '' }}" value="{{ old('email') }}" required autofocus>
-                            <div class="invalid-feedback">{{ $errors->first('email') }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" required>
-                            <div class="invalid-feedback">{{ $errors->first('password') }}</div>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input type="checkbox" id="ingat" name="ingat" value="1" class="form-check-input">
-                            <label for="ingat" class="form-check-label">Ingat saya</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Masuk</button>
-                    </form>
-                </div>
+@extends('layouts.auth')
+
+@section('title', 'Login - Sistem E-Arsip PT Sucofindo Cilacap')
+
+@section('content')
+    <div class="text-center mb-3">
+        <img src="{{ asset('assets/sucofindo-nobg.png') }}" 
+             alt="Logo PT Sucofindo" 
+             class="img-fluid" 
+             style="max-height: 55px; width: auto; object-fit: contain;">
+    </div>
+
+    <div class="text-center mb-4">
+        <h3 class="fw-bold text-teal mb-1">Selamat Datang!</h3>
+        <p class="text-muted small mb-0">Masuk ke akun Anda untuk mengakses<br>Sistem E-Arsip PT Sucofindo Cilacap</p>
+    </div>
+
+    
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show small" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+            {{ $errors->first() }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <form action="{{ route('login.post') }}" method="POST">
+        @csrf
+
+        <div class="mb-3">
+            <label class="form-label small text-muted fw-semibold">Username / Email</label>
+            <div class="input-icon-group">
+                <i class="bi bi-person field-icon"></i>
+                <input type="text" name="login" value="{{ old('login') }}" class="form-control @error('login') is-invalid @enderror" placeholder="Masukkan username atau email" required autofocus>
             </div>
         </div>
-    </div>
-</div>
-</body>
-</html>
+
+        <div class="mb-3">
+            <label class="form-label small text-muted fw-semibold">Password</label>
+            <div class="input-icon-group">
+                <i class="bi bi-lock field-icon"></i>
+                <input type="password" id="passwordInput" name="password" class="form-control" placeholder="••••••••" required>
+                <i class="bi bi-eye toggle-password" id="togglePassword"></i>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="rememberMe">
+                <label class="form-check-label small text-muted" for="rememberMe">
+                    Ingat saya
+                </label>
+            </div>
+            <a href="{{ route('password.request') }}" class="small text-teal text-decoration-none fw-semibold">Lupa password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-teal w-100 py-2 mb-4">Login</button>
+
+        <div class="text-center text-muted" style="font-size: 0.72rem; line-height: 1.4;">
+            <p class="mb-1 fw-semibold">&copy; 2026 PT Sucofindo Cabang Cilacap</p>
+            <p class="mb-0 text-secondary">Jl. Soekarno Hatta No.280, Kemambang, Menganti, Kec. Kesugihan, Kabupaten Cilacap, Jawa Tengah 53274</p>
+        </div>
+    </form>
+@endsection
+
+@section('scripts')
+<script>
+    // Toggle Show/Hide Password
+    const togglePassword = document.querySelector('#togglePassword');
+    const passwordInput = document.querySelector('#passwordInput');
+
+    togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('bi-eye');
+        this.classList.toggle('bi-eye-slash');
+    });
+</script>
+@endsection
