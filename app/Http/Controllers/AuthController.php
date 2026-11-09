@@ -64,7 +64,7 @@ class AuthController extends Controller
         if ($user->role === 'admin') {
             return redirect()->intended(route('admin.dashboard'));
         }
-        return redirect()->intended(route('user.dokumen.index'));
+        return redirect()->intended(route('user.dashboard'));
     }
 
     public function showForgotPasswordForm()
