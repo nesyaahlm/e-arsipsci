@@ -8,7 +8,7 @@ Route::get('/', function () {
     if (auth()->check()) {
         return auth()->user()->role === 'admin'
             ? redirect()->route('admin.dashboard')
-            : redirect()->route('user.dokumen.index');
+            : redirect()->route('user.dashboard');
     }
     return redirect()->route('login');
 });
