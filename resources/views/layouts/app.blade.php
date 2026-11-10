@@ -6,7 +6,7 @@
     <title>@yield('judul') - E-Arsip</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/sucofindo-nobg.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/app.css') }}">
     @stack('css')
 </head>
 <body class="bg-white">

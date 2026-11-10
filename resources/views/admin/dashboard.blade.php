@@ -1,8 +1,4 @@
-@extends('layouts.app')
-
-@section('judul', 'Dashboard')
-
-@section('konten')
+<x-admin.layout title="Dashboard">
 <div class="rounded-4 p-4 mb-4 shadow-sm" style="background: linear-gradient(90deg, #9ec8b5 0%, #ccefe0 100%);">
     <h1 class="h3 fw-bold text-white mb-1">Selamat Datang, {{ auth()->user()->name }}!</h1>
     <p class="text-white mb-3" style="font-size: 0.95rem; opacity: 0.95;">
