@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\JenisDokumenController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -31,12 +33,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
+
+
+    Route::post('/jenis-dokumen', [JenisDokumenController::class, 'store'])->name('jenis.store');
+    Route::put('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'update'])->name('jenis.update');
+    Route::delete('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'destroy'])->name('jenis.destroy');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
     Route::get('/dokumen', function () {
-        return "<h1>Halaman Dokumen User (" . auth()->user()->name . ")</h1><form action='" . route('logout') . "' method='POST'>" . csrf_field() . "<button type='submit'>Logout</button></form>";
+        return "<h1>Halaman Dokumen User (" . request()->user()->name . ")</h1><form action='" . route('logout') . "' method='POST'>" . csrf_field() . "<button type='submit'>Logout</button></form>";
     })->name('user.dokumen.index');
 });
