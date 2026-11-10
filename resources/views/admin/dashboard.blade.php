@@ -87,5 +87,4 @@
             </div>
         @endforeach
     </div>
-</div>
-@endsection
+    </x-admin.layout>

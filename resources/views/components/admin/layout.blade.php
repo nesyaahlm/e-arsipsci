@@ -17,12 +17,14 @@
     </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('css/user/layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/layanan.css') }}">
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/konfirmasi.css') }}">
 </head>
 <body class="ua-body">
     <a class="ua-skip" href="#ua-content">Lewati ke konten</a>
 
-    <x-user.navbar />
+    <x-admin.navbar />
     <x-admin.sidebar />
     <div class="ua-overlay" data-ua-overlay></div>
 
@@ -31,9 +33,11 @@
     </main>
 
     @stack('overlays')
+    <x-konfirmasi-hapus />
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/user/layout.js') }}" defer></script>
+    <script src="{{ asset('js/konfirmasi.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>

@@ -6,10 +6,12 @@ use App\Http\Controllers\LayananController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\JenisDokumenController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return auth()->user()->role === 'admin'
+    if (Auth::check()) {
+        return Auth::user()->role === 'admin'
             ? redirect()->route('admin.dashboard')
             : redirect()->route('user.dashboard');
     }
@@ -38,6 +40,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
 
+
+    Route::post('/jenis-dokumen', [JenisDokumenController::class, 'store'])->name('jenis.store');
+    Route::put('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'update'])->name('jenis.update');
+    Route::delete('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'destroy'])->name('jenis.destroy');
     Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
     Route::get('/dokumen/{id}', function () {
         return redirect()->route('dokumen.index');
