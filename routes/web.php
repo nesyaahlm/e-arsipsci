@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,12 +37,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
+
+    Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
+    Route::get('/dokumen/{id}', function () {
+        return redirect()->route('dokumen.index');
+    });
+    Route::post('/dokumen', [DokumenController::class, 'store'])->name('dokumen.store');
+    Route::put('/dokumen/{dokumen}', [DokumenController::class, 'update'])->name('dokumen.update');
+    Route::delete('/dokumen/{id}', [DokumenController::class, 'destroy'])->name('dokumen.destroy');
+    Route::get('/dokumen/{dokumen}/download', [DokumenController::class, 'download'])->name('dokumen.download');
+    Route::get('/dokumen/{dokumen}/preview', [DokumenController::class, 'preview'])->name('dokumen.preview');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
-
-    Route::get('/dokumen', function () {
-        return "<h1>Halaman Dokumen User (" . auth()->user()->name . ")</h1><form action='" . route('logout') . "' method='POST'>" . csrf_field() . "<button type='submit'>Logout</button></form>";
-    })->name('user.dokumen.index');
 });
