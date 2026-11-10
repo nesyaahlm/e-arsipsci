@@ -157,25 +157,25 @@
                 <table class="table table-hover align-middle mb-0 tabel-jenis">
                     <thead>
                         <tr>
-                            <th>Kode</th>
-                            <th>Nama Jenis Dokumen</th>
-                            <th>Retensi</th>
-                            <th>Layanan</th>
+                            <th class="text-center">Kode</th>
+                            <th class="text-center">Nama Jenis Dokumen</th>
+                            <th class="text-center">Retensi</th>
+                            <th class="text-center">Layanan</th>
                             @if ($bisaKelola)
-                                <th>Aksi</th>
+                                <th class="text-center">Aksi</th>
                             @endif
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($daftarJenis as $jenis)
                             <tr>
-                                <td class="fw-bold">{{ $jenis->kode }}</td>
+                                <td class="fw-bold text-center">{{ $jenis->kode }}</td>
                                 <td>{{ $jenis->nama }}</td>
-                                <td>{{ $jenis->retensi_tahun ? $jenis->retensi_tahun.' tahun' : '-' }}</td>
-                                <td>{{ $jenis->layanan->pluck('nama')->implode(', ') ?: '-' }}</td>
+                                <td class="text-center">{{ $jenis->retensi_tahun ? $jenis->retensi_tahun.' tahun' : '-' }}</td>
+                                <td class="text-center">{{ $jenis->layanan->pluck('nama')->implode(', ') ?: '-' }}</td>
                                 @if ($bisaKelola)
-                                    <td>
-                                        <div class="d-flex gap-2">
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-primary btn-edit-jenis"
                                                     data-action="{{ route('jenis.update', $jenis) }}"
@@ -392,13 +392,6 @@
                 });
             });
     
-            // document.querySelectorAll('form[data-konfirmasi]').forEach(function (form) {
-            //     form.addEventListener('submit', function (event) {
-            //         if (!confirm(form.dataset.konfirmasi)) {
-            //             event.preventDefault();
-            //         }
-            //     });
-            // });
     
             @if ($errors->tambah->any())
                 bootstrap.Modal.getOrCreateInstance(modalTambah).show();
