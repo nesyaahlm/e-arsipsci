@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dokumen extends Model
 {
+    use SoftDeletes; 
+
     protected $table = 'dokumen';
 
     protected $fillable = [
@@ -18,6 +21,7 @@ class Dokumen extends Model
         'tanggal_dokumen',
         'deskripsi',
         'file_path',
+        'file_nama_asli',
         'file_ukuran',
         'lokasi_arsip_fisik',
         'diunggah_oleh',
