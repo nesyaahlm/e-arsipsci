@@ -29,6 +29,11 @@ class DashboardController extends Controller
         return DB::table('dokumen')->whereNull('dokumen.deleted_at');
     }
 
+    private function dokumenArsip(): Builder
+    {
+        return $this->dokumenAktif()->where('dokumen.status', 'disetujui');
+    }
+
     private function statistik(int $userId): array
     {
         $milikSaya = $this->dokumenAktif()->where('dokumen.diunggah_oleh', $userId);
@@ -39,34 +44,32 @@ class DashboardController extends Controller
             'favorit' => DB::table('favorit')
                 ->join('dokumen', 'dokumen.id', '=', 'favorit.dokumen_id')
                 ->whereNull('dokumen.deleted_at')
+                ->where('dokumen.status', 'disetujui')
                 ->where('favorit.user_id', $userId)
                 ->count(),
-            'total' => $this->dokumenAktif()->count(),
+            'total' => $this->dokumenArsip()->count(),
             'bulan' => now()->locale('id')->translatedFormat('F Y'),
         ];
     }
 
     private function dokumenTerbaru(): Collection
     {
-        return $this->dokumenAktif()
+        return $this->dokumenArsip()
             ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
-            ->orderByDesc('dokumen.created_at')
+            ->orderByDesc('dokumen.tanggal_dokumen')
             ->orderByDesc('dokumen.id')
-            ->limit(3)
+            ->limit(5)
             ->get([
                 'dokumen.id',
                 'dokumen.nomor',
                 'dokumen.judul',
-                'dokumen.created_at',
+                'dokumen.tanggal_dokumen',
                 'layanan.nama as layanan',
             ])
             ->map(fn ($d) => [
                 'id' => $d->id,
                 'judul' => $d->judul,
-                'keterangan' => collect([
-                    $d->nomor,
-                    'Diunggah '.$this->tanggal($d->created_at),
-                ])->filter()->implode(' · '),
+                'keterangan' => $d->nomor.' · '.$this->tanggal($d->tanggal_dokumen),
                 'layanan' => $d->layanan,
             ]);
     }
@@ -77,6 +80,7 @@ class DashboardController extends Controller
             ->join('dokumen', 'dokumen.id', '=', 'favorit.dokumen_id')
             ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
             ->whereNull('dokumen.deleted_at')
+            ->where('dokumen.status', 'disetujui')
             ->where('favorit.user_id', $userId)
             ->orderByDesc('dokumen.tanggal_dokumen')
             ->limit(3)
@@ -92,6 +96,7 @@ class DashboardController extends Controller
             ->join('dokumen', 'dokumen.id', '=', 'riwayat_dibuka.dokumen_id')
             ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
             ->whereNull('dokumen.deleted_at')
+            ->where('dokumen.status', 'disetujui')
             ->where('riwayat_dibuka.user_id', $userId)
             ->orderByDesc('riwayat_dibuka.dibuka_pada')
             ->limit(3)

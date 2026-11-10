@@ -12,6 +12,10 @@
             <circle cx="11" cy="11" r="4"/>
             <path d="m14 14 3 3"/>
             @break
+        @case('magnify')
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m21 21-4.3-4.3"/>
+            @break
         @case('upload')
             <path d="M12 16V4"/>
             <path d="m7 9 5-5 5 5"/>
