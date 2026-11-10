@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'E-Arsip PT Sucofindo')</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('assets/sucofindo-nobg.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,12 +44,18 @@
             border: none;
             border-radius: 0.5rem;
             padding: 0.75rem;
-            transition: all 0.2s ease-in-out;
+            transition: all 0.25s ease;
         }
 
         .btn-teal:hover {
             background-color: var(--primary-teal-hover);
             color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(27, 107, 99, 0.25);
+        }
+
+        .btn-teal:active {
+            transform: translateY(0);
         }
 
         .text-teal {
