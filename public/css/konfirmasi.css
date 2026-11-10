@@ -1,0 +1,123 @@
+.kf-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 40, 36, 0.45);
+    animation: kf-muncul 0.15s ease-out;
+}
+
+.kf-overlay[hidden] {
+    display: none;
+}
+
+.kf-dialog {
+    width: 100%;
+    max-width: 380px;
+    padding: 1.75rem 1.5rem 1.5rem;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 40px rgba(15, 40, 36, 0.25);
+    text-align: center;
+    animation: kf-naik 0.18s ease-out;
+}
+
+.kf-ikon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 0.75rem;
+    border-radius: 50%;
+    background: #fde8e8;
+    color: #d64545;
+}
+
+.kf-judul {
+    margin: 0 0 0.5rem;
+    color: #1f5f56;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.kf-pesan {
+    margin: 0 0 0.25rem;
+    color: #2f3e3b;
+    font-size: 0.92rem;
+    overflow-wrap: anywhere;
+}
+
+.kf-catatan {
+    margin: 0 0 1.25rem;
+    color: #7a8a85;
+    font-size: 0.78rem;
+}
+
+.kf-aksi {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.kf-batal,
+.kf-ya {
+    min-width: 110px;
+    padding: 0.5rem 1rem;
+    border: 0;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.kf-batal {
+    background: #e3ece9;
+    color: #1f5f56;
+}
+
+.kf-batal:hover {
+    background: #d3e1dd;
+}
+
+.kf-ya {
+    background: #d64545;
+    color: #fff;
+}
+
+.kf-ya:hover {
+    background: #bf3737;
+}
+
+.kf-batal:focus-visible,
+.kf-ya:focus-visible {
+    outline: 3px solid rgba(42, 127, 114, 0.45);
+    outline-offset: 2px;
+}
+
+body.kf-terkunci {
+    overflow: hidden;
+}
+
+@keyframes kf-muncul {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes kf-naik {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}

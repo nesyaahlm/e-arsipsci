@@ -9,8 +9,8 @@ use App\Http\Controllers\Admin\JenisDokumenController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return auth()->user()->role === 'admin'
+    if (Auth::check()) {
+        return Auth::user()->role === 'admin'
             ? redirect()->route('admin.dashboard')
             : redirect()->route('user.dashboard');
     }

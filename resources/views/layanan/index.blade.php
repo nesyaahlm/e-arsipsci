@@ -392,13 +392,13 @@
                 });
             });
     
-            document.querySelectorAll('form[data-konfirmasi]').forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!confirm(form.dataset.konfirmasi)) {
-                        event.preventDefault();
-                    }
-                });
-            });
+            // document.querySelectorAll('form[data-konfirmasi]').forEach(function (form) {
+            //     form.addEventListener('submit', function (event) {
+            //         if (!confirm(form.dataset.konfirmasi)) {
+            //             event.preventDefault();
+            //         }
+            //     });
+            // });
     
             @if ($errors->tambah->any())
                 bootstrap.Modal.getOrCreateInstance(modalTambah).show();
