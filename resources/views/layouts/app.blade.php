@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('judul') - E-Arsip</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/sucofindo-nobg.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @stack('css')
@@ -21,7 +22,7 @@
                 <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-link d-flex align-items-center gap-2">
+            <a href="{{ route('dokumen.index') }}" class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('dokumen.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
                 <span>Dokumen</span>
             </a>
