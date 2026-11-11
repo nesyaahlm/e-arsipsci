@@ -90,7 +90,7 @@
                         </div>
 
                         <div class="ug-field">
-                            <label for="portofolio" class="ug-label">Portofolio</label>
+                            <label for="portofolio" class="ug-label">Layanan</label>
                             <input type="text" id="portofolio" value="{{ $layanan?->nama ?? '-' }}" class="ug-input" readonly tabindex="-1">
                         </div>
                     </div>
