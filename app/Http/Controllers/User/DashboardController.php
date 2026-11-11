@@ -58,7 +58,7 @@ class DashboardController extends Controller
             ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
             ->orderByDesc('dokumen.tanggal_dokumen')
             ->orderByDesc('dokumen.id')
-            ->limit(5)
+            ->limit(3)
             ->get([
                 'dokumen.id',
                 'dokumen.nomor',

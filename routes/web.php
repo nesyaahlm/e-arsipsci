@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\DokumenSayaController;
+use App\Http\Controllers\User\UnggahDokumenController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,4 +34,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
     Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
+    Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
+    Route::post('/unggah', [UnggahDokumenController::class, 'store'])->name('user.unggah.store');
 });
