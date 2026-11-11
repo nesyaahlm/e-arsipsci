@@ -1,16 +1,141 @@
-E-Arsip
+<div align="center">
 
-Aplikasi web untuk menyimpan dan mengelola arsip dokumen perusahaan secara digital.
+# 🗂️ Sistem Arsip Dokumen
 
-Dulu dokumen tersebar di lemari, folder komputer, dan email, sehingga sulit dicari dan tidak jelas kapan boleh dimusnahkan. E-Arsip mengumpulkan semuanya di satu tempat, lengkap dengan nomor, jenis, dan masa simpannya.
+### PT Sucofindo (Persero) Cabang Cilacap
 
-Cara kerja
-Pegawai mengunggah dokumen: memilih layanan, jenis dokumen, tanggal, lalu berkas (PDF, Word, atau Excel, maksimal 20 MB).
-Sistem mencatat otomatis: nomor arsip dibuat sendiri (contoh LHU/CLC/2026/0001), tahun arsip diisi dari tanggal dokumen, dan masa retensi (batas waktu dokumen wajib disimpan) dihitung dari jenis dokumennya.
-Admin memeriksa: dokumen baru berstatus Menunggu Verifikasi, lalu admin menyetujui atau menolaknya dan mengisi lokasi arsip fisik (label box).
-Pegawai memantau: dokumen yang sudah diunggah bisa dicari dan dilihat statusnya di menu Dokumen Saya.
-Layanan
+**Simpan, cari, dan kendalikan dokumen perusahaan dalam satu sistem.**
 
-Dokumen dikelompokkan berdasarkan 5 layanan: Pengujian, Inspeksi, Sertifikasi, Pelatihan, Konsultansi.
+![Cabang](https://img.shields.io/badge/Cabang-Cilacap-1f7a6d)
+![Peran](https://img.shields.io/badge/Peran-Admin%20%26%20User-blue)
+![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)
 
-Setiap layanan punya jenis dokumen sendiri, misalnya Laporan Hasil Uji untuk Pengujian atau Kontrak untuk Konsultansi.
+</div>
+
+---
+
+## 📌 Tentang Sistem
+
+Sistem ini dipakai untuk **menyimpan, mencari, dan mengendalikan dokumen** di PT Sucofindo (Persero) Cabang Cilacap.
+
+Ada dua peran:
+
+| | Peran | Tugas |
+|:---:|---|---|
+| 🛡️ | **Admin** | Mengelola arsip: memverifikasi unggahan, mengatur klasifikasi, dan memutuskan nasib dokumen |
+| 👤 | **User** | Mencari dokumen dan mengunggah dokumen baru |
+
+## 🎯 Tujuan
+
+Empat hal yang harus bisa dilakukan sistem sejak versi pertama:
+
+| | Tujuan | Penjelasan |
+|:---:|---|---|
+| 📚 | **Satu tempat untuk semua dokumen** | Laporan hasil uji, kontrak, SOP, sertifikat kalibrasi, dan berita acara tidak lagi tersebar di folder pribadi |
+| 🔎 | **Mudah ditemukan** | Cari lewat nomor, judul, kategori, klasifikasi, dan tahun |
+| 🔐 | **Akses terkendali** | Dokumen *Rahasia* hanya dibuka oleh yang berhak, dan setiap unduhan tercatat di log |
+| ⏰ | **Masa simpan jelas** | Sistem memberi tanda saat masa retensi hampir habis, supaya Admin bisa memutuskan nasib dokumen |
+
+## 🔄 Siklus Dokumen
+
+Setiap dokumen melewati **lima status**. Urutan ini menjadi dasar fitur verifikasi dan retensi.
+
+```mermaid
+flowchart LR
+    A["📝 1. Draft<br/>oleh User"] --> B["⏳ 2. Menunggu verifikasi<br/>oleh Admin"]
+    B -->|disetujui| C["📁 3. Terarsip<br/>oleh Sistem"]
+    B -.->|ditolak + catatan| A
+    C --> D["⏰ 4. Retensi habis<br/>oleh Sistem"]
+    D --> E["🗑️ 5. Musnah atau dipertahankan<br/>oleh Admin"]
+```
+
+| # | Status | Oleh | Yang terjadi |
+|:---:|---|:---:|---|
+| 1 | 📝 **Draft** | User | Mengisi data dan memilih berkas. Belum dikirim, belum bernomor |
+| 2 | ⏳ **Menunggu verifikasi** | Admin | Admin memeriksa kelengkapan, kategori, dan klasifikasi. Unggahan bisa ditolak dengan catatan |
+| 3 | 📁 **Terarsip** | Sistem | Dokumen mendapat nomor resmi dan lokasi arsip fisik, lalu bisa dicari semua yang berhak |
+| 4 | ⏰ **Retensi habis** | Sistem | Dokumen yang lewat masa simpan aktif ditandai dan muncul di dasbor Admin |
+| 5 | 🗑️ **Musnah / dipertahankan** | Admin | Admin memutuskan. Keputusan dan alasannya masuk log |
+
+> 💡 Unggahan yang ditolak kembali ke User bersama catatan perbaikan, lalu bisa dikirim ulang.
+
+## 🔢 Penomoran Dokumen
+
+Nomor dibuat **otomatis** saat Admin menyetujui dokumen, jadi draft yang batal tidak membuat urutan berlubang.
+
+```text
+   LHU   /   CLC   /   2026   /   0412
+```
+
+| Bagian | Arti |
+|:---:|---|
+| `LHU` | Kode kategori |
+| `CLC` | Kode cabang |
+| `2026` | Tahun arsip |
+| `0412` | Urutan per kategori dan tahun |
+
+## 🧱 Modul
+
+| | Modul | Fungsi |
+|:---:|---|---|
+| 🔎 | **Pencarian dan penelusuran** | Kata kunci, filter kategori, klasifikasi, unit, dan tahun |
+| 📤 | **Unggah dan versi** | Berkas baru, revisi dengan nomor versi, dan sidik berkas untuk mengecek keutuhan |
+| ✅ | **Verifikasi** | Antrean unggahan untuk Admin, dengan tombol setujui atau tolak beserta catatan |
+| 🔐 | **Klasifikasi dan hak akses** | Aturan siapa boleh melihat apa, berdasarkan peran dan klasifikasi dokumen |
+| ⏰ | **Retensi dan pemusnahan** | Penanda masa simpan, daftar dokumen jatuh tempo, dan berita acara pemusnahan |
+| 🧾 | **Log audit** | Siapa mengunggah, membuka, mengunduh, mengubah, atau menghapus, dan kapan |
+
+## 🧩 Layanan
+
+Dokumen dikelompokkan berdasarkan 5 layanan:
+
+| 🧪 Pengujian | 🔎 Inspeksi | 📜 Sertifikasi | 🎓 Pelatihan | 💼 Konsultansi |
+|:---:|:---:|:---:|:---:|:---:|
+
+Setiap layanan punya jenis dokumen sendiri, misalnya **Laporan Hasil Uji** untuk Pengujian atau **Kontrak** untuk Konsultansi.
+
+## 🚀 Menjalankan di Komputer
+
+**Butuh:** PHP 8.3+, Composer, dan MySQL (XAMPP).
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan storage:link
+php artisan serve
+```
+
+1. Buat database **`earsip-db`** di phpMyAdmin, lalu impor file `earsip-db.sql`.
+2. Buka **http://127.0.0.1:8000**.
+
+<details>
+<summary>📦 Agar bisa unggah file sampai 20 MB (XAMPP)</summary>
+
+Ubah di `php.ini`, lalu restart Apache:
+
+```ini
+upload_max_filesize = 20M
+post_max_size = 25M
+```
+
+</details>
+
+## 🔑 Akun Percobaan
+
+| Peran | Email | Password |
+|---|---|---|
+| Admin | `admin@sucofindo.co.id` | `password` |
+| User | `user@sucofindo.co.id` | `password` |
+
+> ⚠️ Ganti password ini sebelum dipakai sungguhan.
+
+---
+
+<div align="center">
+
+**PT Sucofindo (Persero) Cabang Cilacap** · Konsep awal 4 November 2026
+
+</div>
