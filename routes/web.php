@@ -7,6 +7,13 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\JenisDokumenController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProfileController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+});
 
 Route::get('/', function () {
     if (Auth::check()) {
