@@ -1,0 +1,234 @@
+:root {
+    --bs-primary: #2a7f72;
+    --bs-primary-rgb: 42, 127, 114;
+    --bs-link-color: #2a7f72;
+    --bs-link-color-rgb: 42, 127, 114;
+    --bs-link-hover-color: #1f5f56;
+    --bs-link-hover-color-rgb: 31, 95, 86;
+    --bs-focus-ring-color: rgba(42, 127, 114, 0.25);
+}
+
+.btn-primary {
+    --bs-btn-bg: #2a7f72;
+    --bs-btn-border-color: #2a7f72;
+    --bs-btn-hover-bg: #236b60;
+    --bs-btn-hover-border-color: #236b60;
+    --bs-btn-active-bg: #1f5f56;
+    --bs-btn-active-border-color: #1f5f56;
+    --bs-btn-disabled-bg: #2a7f72;
+    --bs-btn-disabled-border-color: #2a7f72;
+    --bs-btn-focus-shadow-rgb: 42, 127, 114;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #2a7f72;
+    --bs-btn-border-color: #2a7f72;
+    --bs-btn-hover-bg: #2a7f72;
+    --bs-btn-hover-border-color: #2a7f72;
+    --bs-btn-active-bg: #236b60;
+    --bs-btn-active-border-color: #236b60;
+    --bs-btn-disabled-color: #2a7f72;
+    --bs-btn-disabled-border-color: #2a7f72;
+    --bs-btn-focus-shadow-rgb: 42, 127, 114;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #7fbfb4;
+    box-shadow: 0 0 0 0.25rem rgba(42, 127, 114, 0.2);
+}
+
+.progress {
+    --bs-progress-bar-bg: #2a7f72;
+}
+
+.tab-layanan {
+    position: relative;
+    z-index: 1;
+    margin-bottom: -1px;
+    border-bottom: 0;
+}
+
+.tab-layanan .nav-link {
+    margin-right: 2px;
+    padding: 0.45rem 1.1rem;
+    border: 0;
+    border-radius: 6px 6px 0 0;
+    background: #cfdcd7;
+    color: #5f726c;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.tab-layanan .nav-link:hover {
+    color: #2a7f72;
+}
+
+.tab-layanan .nav-link.active {
+    background: #2a7f72;
+    color: #fff;
+}
+
+.btn-tambah-layanan {
+    background: #b9e4d6;
+    border: 1px solid #3b8c7e;
+    color: #1f5f56;
+    font-weight: 600;
+}
+
+.btn-tambah-layanan:hover,
+.btn-tambah-layanan:focus {
+    background: #a3d9c8;
+    border-color: #3b8c7e;
+    color: #1f5f56;
+}
+
+.btn-tambah-layanan:disabled {
+    background: #b9e4d6;
+    border-color: #3b8c7e;
+    color: #1f5f56;
+    opacity: 0.45;
+}
+
+.btn-tambah-jenis {
+    background: #fbf5a8;
+    border: 1px solid #d8cc4f;
+    color: #5c5612;
+    font-weight: 600;
+}
+
+.btn-tambah-jenis:hover,
+.btn-tambah-jenis:focus {
+    background: #f6ee8a;
+    border-color: #d8cc4f;
+    color: #5c5612;
+}
+
+.btn-tambah-jenis:disabled {
+    background: #fbf5a8;
+    border-color: #d8cc4f;
+    color: #5c5612;
+    opacity: 0.45;
+}
+
+.panel-layanan {
+    padding: 2rem 1.5rem;
+    border: 1px solid #d6dbe0;
+    border-radius: 0 14px 14px 14px;
+    background: #fff;
+}
+
+.kartu-layanan {
+    max-width: 300px;
+    margin-inline: auto;
+    border: 1px solid #2a7f72;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(42, 127, 114, 0.15);
+}
+
+.kartu-ikon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.deskripsi-layanan {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    color: #5f726c;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.tag-jenis {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    background: #d4ece6;
+    color: #2a7f72;
+    font-size: 0.68rem;
+    font-weight: 500;
+}
+
+.tabel-jenis thead th {
+    background: #e6f4ee;
+    color: #2a7f72;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.form-jenis {
+    padding: 0.25rem;
+}
+
+.form-jenis-judul {
+    margin-bottom: 1rem;
+    color: #2a7f72;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.form-jenis .form-label {
+    margin-bottom: 0.25rem;
+    color: #1f5f56;
+    font-size: 0.8rem;
+}
+
+.form-jenis .form-control {
+    border: 1px solid #2a7f72;
+    border-radius: 8px;
+}
+
+.form-jenis .form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-jenis .form-check-label {
+    color: #1f5f56;
+    font-size: 0.85rem;
+}
+
+.form-check-input {
+    border-color: #2a7f72;
+}
+
+.form-check-input:checked {
+    background-color: #2a7f72;
+    border-color: #2a7f72;
+}
+
+.btn-form-tambah {
+    background: #2a7f72;
+    border: 1px solid #2a7f72;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-form-tambah:hover,
+.btn-form-tambah:focus {
+    background: #236b60;
+    border-color: #236b60;
+    color: #fff;
+}
+
+.btn-form-kembali {
+    background: #9dbdb5;
+    border: 1px solid #9dbdb5;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-form-kembali:hover,
+.btn-form-kembali:focus {
+    background: #86aaa1;
+    border-color: #86aaa1;
+    color: #fff;
+}
