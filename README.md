@@ -123,19 +123,10 @@ post_max_size = 25M
 
 </details>
 
-## 🔑 Akun Percobaan
-
-| Peran | Email | Password |
-|---|---|---|
-| Admin | `admin@sucofindo.co.id` | `password` |
-| User | `user@sucofindo.co.id` | `password` |
-
-> ⚠️ Ganti password ini sebelum dipakai sungguhan.
-
 ---
 
 <div align="center">
 
-**PT Sucofindo (Persero) Cabang Cilacap** · Konsep awal 4 November 2026
+**PT Sucofindo (Persero) Cabang Cilacap** 
 
 </div>
