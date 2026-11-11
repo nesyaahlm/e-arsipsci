@@ -96,30 +96,6 @@ Dokumen dikelompokkan berdasarkan 5 layanan:
 
 Setiap layanan punya jenis dokumen sendiri, misalnya **Laporan Hasil Uji** untuk Pengujian atau **Kontrak** untuk Konsultansi.
 
-## 🚀 Menjalankan di Komputer
-
-**Butuh:** PHP 8.3+, Composer, dan MySQL (XAMPP).
-
-```bash
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan storage:link
-php artisan serve
-```
-
-1. Buat database **`earsip-db`** di phpMyAdmin, lalu impor file `earsip-db.sql`.
-2. Buka **http://127.0.0.1:8000**.
-
-<details>
-<summary>📦 Agar bisa unggah file sampai 20 MB (XAMPP)</summary>
-
-Ubah di `php.ini`, lalu restart Apache:
-
-```ini
-upload_max_filesize = 20M
-post_max_size = 25M
-```
 
 </details>
 
