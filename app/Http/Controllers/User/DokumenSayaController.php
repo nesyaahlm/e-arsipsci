@@ -32,6 +32,7 @@ class DokumenSayaController extends Controller
         return view('user.dokumen-saya.index', [
             'dokumen' => $dokumen,
             'kata' => $kata,
+            ...app(UnggahDokumenController::class)->dataForm($request->user()),
         ]);
     }
 
