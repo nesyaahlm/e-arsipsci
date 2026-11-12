@@ -1,8 +1,4 @@
-@extends('layouts.app')
-
-@section('judul', 'Dokumen')
-
-@section('konten')
+<x-admin.layout title="Dokumen">
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
         <h1 class="h3 fw-bold text-primary mb-1">Dokumen</h1>
@@ -523,9 +519,8 @@
         </button>
     </div>
 </div>
-@endsection
 
-@push('skrip')
+@push('scripts')
 <script>
     const masterLayanan = @json($layananList);
 
@@ -808,3 +803,4 @@
     );
 </script>
 @endpush
+</x-admin.layout>
