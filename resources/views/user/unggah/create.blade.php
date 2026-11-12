@@ -9,7 +9,7 @@
 <x-layouts.user title="Unggah Dokumen">
     <div class="ua-page-header">
         <h1 class="ua-page-title">Unggah Dokumen</h1>
-        <p class="ua-page-subtitle">Dokumen akan diperiksa admin sebelum tampil di arsip.</p>
+        <p class="ua-page-subtitle">Dokumen yang lolos validasi langsung tersimpan dan tersedia di arsip.</p>
     </div>
 
     @if (session('success'))
@@ -170,7 +170,7 @@
 
                     <div class="ug-note">
                         <strong>Label box arsip</strong>
-                        <p>Portofolio mengikuti layanan akun Anda, Tahun diambil dari tanggal dokumen, dan Isi diambil dari judul. Kode Rak hanya dapat ditetapkan admin setelah dokumen diperiksa; Nomor Rak, No. Tingkat, dan No. Box File yang Anda isi akan diverifikasi admin.</p>
+                        <p>Portofolio mengikuti layanan akun Anda, Tahun diambil dari tanggal dokumen, dan Isi diambil dari judul. Kode Rak dapat ditetapkan admin; Nomor Rak, No. Tingkat, dan No. Box File yang Anda isi langsung dicatat.</p>
                     </div>
 
                     <div class="ug-actions">
@@ -188,13 +188,12 @@
                 <a href="{{ route('user.dokumen-saya.show', $item['id']) }}" class="ug-recent">
                     <span class="ug-recent__title">{{ $item['judul'] }}</span>
                     <span class="ug-recent__meta">{{ $item['jenis'] }} · {{ $item['tanggal'] }}</span>
-                    <span class="ua-badge ua-badge--{{ $item['status'] }}">{{ $item['status_label'] }}</span>
                 </a>
             @empty
                 <div class="ug-empty">
                     <span class="ug-empty__icon"><x-user.icon name="upload" :size="26" /></span>
                     <strong class="ug-empty__title">Belum ada unggahan</strong>
-                    <span class="ug-empty__text">Dokumen yang Anda kirim akan muncul di sini beserta status pemeriksaannya.</span>
+                    <span class="ug-empty__text">Dokumen yang Anda unggah akan muncul di sini.</span>
                 </div>
             @endforelse
 

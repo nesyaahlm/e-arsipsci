@@ -17,12 +17,6 @@ use Throwable;
 
 class UnggahDokumenController extends Controller
 {
-    private const LABEL_STATUS = [
-        'menunggu' => 'Menunggu Verifikasi',
-        'disetujui' => 'Disetujui',
-        'ditolak' => 'Ditolak',
-    ];
-
     public function create(Request $request): View
     {
         $user = $request->user();
@@ -93,7 +87,7 @@ class UnggahDokumenController extends Controller
         }
 
         return redirect()->route('user.unggah.create')
-            ->with('success', 'Dokumen berhasil diunggah dengan nomor '.$nomor.' dan menunggu pemeriksaan admin.');
+            ->with('success', 'Dokumen berhasil diunggah dengan nomor '.$nomor.' dan langsung tersedia di Cari Arsip.');
     }
 
     private function simpan(int $userId, int $layananId, object $jenis, array $data, string $path, string $namaAsli, int $ukuran): string
@@ -143,7 +137,7 @@ class UnggahDokumenController extends Controller
                         'no_tingkat' => $noTingkat,
                         'no_box_file' => $noBox,
                         'diunggah_oleh' => $userId,
-                        'status' => 'menunggu',
+                        'status' => 'disetujui',
                         'retensi_sampai' => $retensi,
                         'created_at' => $sekarang,
                         'updated_at' => $sekarang,
@@ -202,7 +196,6 @@ class UnggahDokumenController extends Controller
             ->get([
                 'dokumen.id',
                 'dokumen.judul',
-                'dokumen.status',
                 'dokumen.created_at',
                 'jenis_dokumen.nama as jenis',
             ])
@@ -215,8 +208,6 @@ class UnggahDokumenController extends Controller
                     'id' => $d->id,
                     'judul' => $d->judul,
                     'jenis' => $d->jenis,
-                    'status' => $d->status,
-                    'status_label' => self::LABEL_STATUS[$d->status] ?? ucfirst((string) $d->status),
                     'tanggal' => $waktu->translatedFormat('d M Y').' · '.$waktu->format('H:i').' WIB',
                 ];
             });

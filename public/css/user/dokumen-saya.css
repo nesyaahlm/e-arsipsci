@@ -395,6 +395,57 @@
     overflow-wrap: anywhere;
 }
 
+.dks-status-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border-left: 4px solid;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dks-status-banner__icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.dks-status-banner__body {
+    min-width: 0;
+}
+
+.dks-status-banner--menunggu {
+    background: #fffbeb;
+    border-color: #f59e0b;
+    color: #78350f;
+}
+
+.dks-status-banner--menunggu .dks-status-banner__icon {
+    color: #d97706;
+}
+
+.dks-status-banner--disetujui {
+    background: #f0fdf4;
+    border-color: #22c55e;
+    color: #14532d;
+}
+
+.dks-status-banner--disetujui .dks-status-banner__icon {
+    color: #16a34a;
+}
+
+.dks-status-banner--ditolak {
+    background: #fff1f2;
+    border-color: #f43f5e;
+    color: #881337;
+}
+
+.dks-status-banner--ditolak .dks-status-banner__icon {
+    color: #e11d48;
+}
+
 @media (max-width: 991.98px) {
     .dk-detail {
         grid-template-columns: minmax(0, 1fr);
@@ -449,5 +500,20 @@
     .dk-label__row,
     .dk-label--compact .dk-label__row {
         grid-template-columns: 96px minmax(0, 1fr);
+    }
+}
+
+.dk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 16px;
+}
+
+@media (max-width: 479.98px) {
+    .dk-actions .ua-btn {
+        flex: 1 1 100%;
+        text-align: center;
     }
 }

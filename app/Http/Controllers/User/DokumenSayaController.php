@@ -8,15 +8,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DokumenSayaController extends Controller
 {
-    private const LABEL_STATUS = [
-        'menunggu' => 'Menunggu Verifikasi',
-        'disetujui' => 'Disetujui',
-        'ditolak' => 'Ditolak',
-    ];
-
     public function index(Request $request): View
     {
         $kata = trim((string) $request->query('q', ''));
@@ -75,8 +70,7 @@ class DokumenSayaController extends Controller
                 'dokumen.file_nama_asli',
                 'dokumen.file_ukuran',
                 'dokumen.retensi_sampai',
-                'dokumen.status',
-                'dokumen.catatan_admin',
+                'dokumen.file_path',
                 'dokumen.created_at',
                 'layanan.nama as portofolio',
                 'jenis_dokumen.nama as jenis',
@@ -112,9 +106,9 @@ class DokumenSayaController extends Controller
             'retensi' => $d->retensi_sampai
                 ? Carbon::parse($d->retensi_sampai)->locale('id')->translatedFormat('d F Y')
                 : null,
-            'status' => $d->status,
-            'status_label' => self::LABEL_STATUS[$d->status] ?? ucfirst((string) $d->status),
-            'catatan' => $d->catatan_admin,
+            'berkas_ada' => Storage::disk('public')->exists($d->file_path),
+            'bisa_pratinjau' => in_array(strtolower(pathinfo($d->file_path, PATHINFO_EXTENSION)), ['pdf', 'png', 'jpg', 'jpeg'], true)
+                && Storage::disk('public')->exists($d->file_path),
         ];
     }
 

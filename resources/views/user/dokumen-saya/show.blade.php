@@ -1,10 +1,13 @@
-<x-layouts.user title="Detail Arsip">
+@push('styles')
     <link rel="stylesheet" href="{{ asset('css/user/dokumen-saya.css') }}">
+@endpush
+
+<x-layouts.user title="Detail Dokumen Saya">
 
     <div class="ua-page-header dk-head">
         <div>
-            <h1 class="ua-page-title">Detail Arsip</h1>
-            <p class="ua-page-subtitle">{{ $dokumen['nomor'] }}</p>
+            <h1 class="ua-page-title">Detail Dokumen Saya</h1>
+            <p class="ua-page-subtitle">{{ $dokumen['nomor'] }} &mdash; dokumen yang kamu unggah</p>
         </div>
         <a href="{{ route('user.dokumen-saya.index') }}" class="ua-btn ua-btn--outline">Kembali</a>
     </div>
@@ -22,16 +25,6 @@
         <section class="ua-card">
             <h2 class="dk-section-title">Informasi Dokumen</h2>
             <dl class="dk-info">
-                <div class="dk-info__item">
-                    <dt>Status</dt>
-                    <dd><span class="ua-badge ua-badge--{{ $dokumen['status'] }}">{{ $dokumen['status_label'] }}</span></dd>
-                </div>
-                @if (filled($dokumen['catatan']))
-                    <div class="dk-info__item">
-                        <dt>Catatan Admin</dt>
-                        <dd>{{ $dokumen['catatan'] }}</dd>
-                    </div>
-                @endif
                 <div class="dk-info__item">
                     <dt>Nomor Dokumen</dt>
                     <dd>{{ $dokumen['nomor'] }}</dd>
@@ -61,6 +54,17 @@
                     <dd>{{ filled($dokumen['deskripsi']) ? $dokumen['deskripsi'] : '-' }}</dd>
                 </div>
             </dl>
+
+            @if ($dokumen['berkas_ada'])
+                <div class="dk-actions">
+                    @if ($dokumen['bisa_pratinjau'])
+                        <a href="{{ route('user.arsip.pratinjau', $dokumen['id']) }}" target="_blank" rel="noopener" class="ua-btn ua-btn--outline">Buka Dokumen</a>
+                    @endif
+                    <a href="{{ route('user.arsip.unduh', $dokumen['id']) }}" class="ua-btn ua-btn--primary">Unduh Dokumen</a>
+                </div>
+            @else
+                <p class="dk-note">Berkas digital belum tersedia di server. Hubungi admin bila dokumen ini seharusnya dapat diunduh.</p>
+            @endif
         </section>
     </div>
 </x-layouts.user>

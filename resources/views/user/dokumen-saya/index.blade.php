@@ -44,8 +44,6 @@
                             <th>Jenis</th>
                             <th>Lokasi Box</th>
                             <th>Tgl Unggah</th>
-                            <th>Status</th>
-                            <th>Catatan Admin</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,10 +71,6 @@
                                     @endif
                                 </td>
                                 <td data-label="Tgl Unggah">{{ $arsip['diunggah_singkat'] }}</td>
-                                <td data-label="Status">
-                                    <span class="ua-badge ua-badge--{{ $arsip['status'] }}">{{ $arsip['status_label'] }}</span>
-                                </td>
-                                <td data-label="Catatan Admin">{{ filled($arsip['catatan']) ? $arsip['catatan'] : '-' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
