@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LogAktivitas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,11 +46,15 @@ class ProfileController extends Controller
             $user->foto = $request->file('foto')->store('avatars', 'public');
         }
 
-        if ($request->filled('password')) {
+        $gantiPassword = $request->filled('password');
+
+        if ($gantiPassword) {
             $user->password = Hash::make($validated['password']);
         }
 
         $user->save();
+
+        LogAktivitas::catat('mengubah_profil', null, $gantiPassword ? 'Mengubah profil dan password' : 'Mengubah profil');
 
         return redirect()->route('profile.index')->with('sukses', 'Profil berhasil diperbarui.');
     }

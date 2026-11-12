@@ -1,9 +1,15 @@
 <x-admin.layout title="Log Aktivitas">
     <link rel="stylesheet" href="{{ asset('css/log.css') }}">
 
-    <div class="mb-3">
-        <h1 class="h4 fw-bold text-primary mb-0">Log Aktivitas</h1>
-        <p class="text-secondary small mb-0">Rekam jejak aktivitas pengguna. Catatan ini hanya bisa ditambah.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 fw-bold text-primary mb-0">Log Aktivitas</h1>
+            <p class="text-secondary small mb-0">Rekam jejak aktivitas pengguna. Log lebih dari 7 hari dipindahkan otomatis ke arsip.</p>
+        </div>
+        <a href="{{ route('log.arsip.index') }}" class="btn btn-sm btn-outline-secondary px-3 shadow-sm">
+            Arsip Log
+            <span class="badge text-bg-secondary ms-1">{{ $totalArsip }}</span>
+        </a>
     </div>
 
     <form method="GET" action="{{ route('log.index') }}" class="row g-2 align-items-end mb-3">

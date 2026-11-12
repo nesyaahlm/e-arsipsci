@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JenisDokumenController;
 use App\Http\Controllers\Admin\KelolaController;
 use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Http\Controllers\Admin\LogArsipController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\LayananController;
@@ -68,6 +69,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/kelola-user/{user}', [KelolaController::class, 'destroy'])->name('users.destroy');
 
     Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log.index');
+    Route::get('/log-aktivitas/arsip', [LogArsipController::class, 'index'])->name('log.arsip.index');
+    Route::delete('/log-aktivitas/arsip/terpilih', [LogArsipController::class, 'hapusTerpilih'])->name('log.arsip.hapus-terpilih');
+    Route::delete('/log-aktivitas/arsip', [LogArsipController::class, 'hapusSemua'])->name('log.arsip.hapus-semua');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {

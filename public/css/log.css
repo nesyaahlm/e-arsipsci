@@ -31,6 +31,12 @@
     border-bottom: 0;
 }
 
+.log-tabel .kolom-cek {
+    width: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
 .log-cari .input-group-text {
     background-color: #fff;
     border-right: 0;
