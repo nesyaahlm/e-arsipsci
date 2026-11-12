@@ -32,7 +32,7 @@
             <span class="ud-shortcut__icon"><x-user.icon name="upload" :size="24" /></span>
             <span class="ud-shortcut__body">
                 <span class="ud-shortcut__title">Unggah Dokumen</span>
-                <span class="ud-shortcut__text">Kirim dokumen baru untuk diperiksa admin sebelum masuk arsip.</span>
+                <span class="ud-shortcut__text">Unggah dokumen baru, langsung tersedia di arsip.</span>
             </span>
         </a>
     </section>

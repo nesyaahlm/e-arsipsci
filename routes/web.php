@@ -12,11 +12,16 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\User\DashboardController;
+use App\Http\Controllers\User\DokumenSayaController;
+use App\Http\Controllers\User\UnggahDokumenController;
+use App\Http\Controllers\User\ArsipController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -76,4 +81,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
+    Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
+    Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
+    Route::post('/unggah', [UnggahDokumenController::class, 'store'])->name('user.unggah.store');
+    Route::get('/arsip', [ArsipController::class, 'index'])->name('user.arsip.index');
+    Route::get('/arsip/{dokumen}', [ArsipController::class, 'show'])->whereNumber('dokumen')->name('user.arsip.show');
+    Route::get('/arsip/{dokumen}/pratinjau', [ArsipController::class, 'pratinjau'])->whereNumber('dokumen')->name('user.arsip.pratinjau');
+    Route::get('/arsip/{dokumen}/unduh', [ArsipController::class, 'unduh'])->whereNumber('dokumen')->name('user.arsip.unduh');
 });
