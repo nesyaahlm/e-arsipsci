@@ -27,7 +27,7 @@ class KelolaController extends Controller
                         ->orWhere('email', 'like', "%{$q}%");
                 });
             })
-            ->orderBy('id')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 

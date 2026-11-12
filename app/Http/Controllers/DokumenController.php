@@ -21,7 +21,7 @@ class DokumenController extends Controller
             $cari = $request->cari;
             $query->where(function ($q) use ($cari) {
                 $q->where('nomor', 'like', "%{$cari}%")
-                  ->orWhere('judul', 'like', "%{$cari}%");
+                    ->orWhere('judul', 'like', "%{$cari}%");
             });
         }
 
@@ -205,7 +205,7 @@ class DokumenController extends Controller
 
         LogAktivitas::catat('mengunduh', $dokumen->id, $dokumen->judul);
 
-        return Storage::disk('public')->download($dokumen->file_path, $dokumen->file_nama_asli);
+        return response()->download(storage_path('app/public/' . $dokumen->file_path), $dokumen->file_nama_asli);
     }
 
     public function preview(Dokumen $dokumen)
@@ -217,7 +217,7 @@ class DokumenController extends Controller
         LogAktivitas::catat('melihat', $dokumen->id, $dokumen->judul);
 
         $filePath = Storage::disk('public')->path($dokumen->file_path);
-        $mimeType = Storage::disk('public')->mimeType($dokumen->file_path);
+        $mimeType = mime_content_type($filePath);
 
         return response()->file($filePath, [
             'Content-Type' => $mimeType,
