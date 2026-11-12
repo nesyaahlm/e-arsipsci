@@ -1,19 +1,20 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LayananController;
-use App\Http\Controllers\DokumenController;
-use App\Http\Controllers\User\DashboardController as UserDashboardController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\JenisDokumenController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\KelolaController;
+use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DokumenController;
+use App\Http\Controllers\LayananController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::get('/', function () {
@@ -47,10 +48,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
 
-
     Route::post('/jenis-dokumen', [JenisDokumenController::class, 'store'])->name('jenis.store');
     Route::put('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'update'])->name('jenis.update');
     Route::delete('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'destroy'])->name('jenis.destroy');
+
     Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
     Route::get('/dokumen/{id}', function () {
         return redirect()->route('dokumen.index');
@@ -60,6 +61,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/dokumen/{id}', [DokumenController::class, 'destroy'])->name('dokumen.destroy');
     Route::get('/dokumen/{dokumen}/download', [DokumenController::class, 'download'])->name('dokumen.download');
     Route::get('/dokumen/{dokumen}/preview', [DokumenController::class, 'preview'])->name('dokumen.preview');
+
+    Route::get('/kelola-user', [KelolaController::class, 'index'])->name('users.index');
+    Route::post('/kelola-user', [KelolaController::class, 'store'])->name('users.store');
+    Route::put('/kelola-user/{user}', [KelolaController::class, 'update'])->name('users.update');
+    Route::delete('/kelola-user/{user}', [KelolaController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log.index');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {

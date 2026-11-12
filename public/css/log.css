@@ -1,0 +1,41 @@
+.log-wrap {
+    border: 1.5px solid #5eead4;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.log-tabel {
+    margin-bottom: 0;
+}
+
+.log-tabel thead th {
+    background-color: #a7f3d0;
+    color: #064e3b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.85rem 1.25rem;
+    border: 0;
+    text-align: center;
+}
+
+.log-tabel tbody td {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.85rem;
+    border-color: #f1f5f9;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.log-tabel tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.log-cari .input-group-text {
+    background-color: #fff;
+    border-right: 0;
+}
+
+.log-cari .form-control {
+    border-left: 0;
+}
