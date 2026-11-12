@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Dokumen;
 use App\Models\JenisDokumen;
 use App\Models\Layanan;
+use App\Models\LogAktivitas;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class DokumenController extends Controller
             $cari = $request->cari;
             $query->where(function ($q) use ($cari) {
                 $q->where('nomor', 'like', "%{$cari}%")
-                  ->orWhere('judul', 'like', "%{$cari}%");
+                    ->orWhere('judul', 'like', "%{$cari}%");
             });
         }
 
@@ -105,7 +106,7 @@ class DokumenController extends Controller
             }
             $lokasiArsipFisik = !empty($lokasiParts) ? implode(' / ', $lokasiParts) : null;
 
-            Dokumen::create([
+            $dokumen = Dokumen::create([
                 'nomor' => $nomorOtomatis,
                 'judul' => $validated['judul'],
                 'layanan_id' => $validated['layanan_id'],
@@ -120,6 +121,8 @@ class DokumenController extends Controller
                 'file_ukuran' => $ukuran,
                 'diunggah_oleh' => Auth::id(),
             ]);
+
+            LogAktivitas::catat('mengunggah', $dokumen->id, $dokumen->judul);
 
             return redirect()->route('dokumen.index')->with('success', "Dokumen berhasil diunggah dengan nomor {$nomorOtomatis}.");
         } catch (\Throwable $e) {
@@ -164,7 +167,7 @@ class DokumenController extends Controller
 
         if ($request->hasFile('file_dokumen')) {
             $file = $request->file('file_dokumen');
-            
+
             if (Storage::disk('public')->exists($dokumen->file_path)) {
                 Storage::disk('public')->delete($dokumen->file_path);
             }
@@ -176,6 +179,8 @@ class DokumenController extends Controller
 
         $dokumen->update($updateData);
 
+        LogAktivitas::catat('mengubah', $dokumen->id, $dokumen->judul);
+
         return redirect()->route('dokumen.index')->with('success', 'Dokumen berhasil diperbarui.');
     }
 
@@ -185,6 +190,8 @@ class DokumenController extends Controller
 
         if ($dokumen && !$dokumen->trashed()) {
             $dokumen->delete();
+
+            LogAktivitas::catat('menghapus', $dokumen->id, $dokumen->judul);
         }
 
         return redirect()->route('dokumen.index')->with('success', 'Dokumen berhasil dipindahkan ke arsip terhapus.');
@@ -196,7 +203,9 @@ class DokumenController extends Controller
             return back()->with('error', 'Berkas fisik tidak ditemukan di server.');
         }
 
-        return Storage::disk('public')->download($dokumen->file_path, $dokumen->file_nama_asli);
+        LogAktivitas::catat('mengunduh', $dokumen->id, $dokumen->judul);
+
+        return response()->download(storage_path('app/public/' . $dokumen->file_path), $dokumen->file_nama_asli);
     }
 
     public function preview(Dokumen $dokumen)
@@ -205,8 +214,10 @@ class DokumenController extends Controller
             return abort(404, 'Berkas fisik tidak ditemukan.');
         }
 
+        LogAktivitas::catat('melihat', $dokumen->id, $dokumen->judul);
+
         $filePath = Storage::disk('public')->path($dokumen->file_path);
-        $mimeType = Storage::disk('public')->mimeType($dokumen->file_path);
+        $mimeType = mime_content_type($filePath);
 
         return response()->file($filePath, [
             'Content-Type' => $mimeType,

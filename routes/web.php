@@ -1,13 +1,27 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LayananController;
-use App\Http\Controllers\DokumenController;
-use App\Http\Controllers\User\DashboardController as UserDashboardController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\JenisDokumenController;
+use App\Http\Controllers\Admin\KelolaController;
+use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Http\Controllers\Admin\LogArsipController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DokumenController;
+use App\Http\Controllers\LayananController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\User\DashboardController;
+use App\Http\Controllers\User\DokumenSayaController;
+use App\Http\Controllers\User\UnggahDokumenController;
+use App\Http\Controllers\User\ArsipController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+});
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -40,10 +54,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
 
-
     Route::post('/jenis-dokumen', [JenisDokumenController::class, 'store'])->name('jenis.store');
     Route::put('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'update'])->name('jenis.update');
     Route::delete('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'destroy'])->name('jenis.destroy');
+
     Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
     Route::get('/dokumen/{id}', function () {
         return redirect()->route('dokumen.index');
@@ -53,8 +67,27 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/dokumen/{id}', [DokumenController::class, 'destroy'])->name('dokumen.destroy');
     Route::get('/dokumen/{dokumen}/download', [DokumenController::class, 'download'])->name('dokumen.download');
     Route::get('/dokumen/{dokumen}/preview', [DokumenController::class, 'preview'])->name('dokumen.preview');
+
+    Route::get('/kelola-user', [KelolaController::class, 'index'])->name('users.index');
+    Route::post('/kelola-user', [KelolaController::class, 'store'])->name('users.store');
+    Route::put('/kelola-user/{user}', [KelolaController::class, 'update'])->name('users.update');
+    Route::delete('/kelola-user/{user}', [KelolaController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log.index');
+    Route::get('/log-aktivitas/arsip', [LogArsipController::class, 'index'])->name('log.arsip.index');
+    Route::delete('/log-aktivitas/arsip/terpilih', [LogArsipController::class, 'hapusTerpilih'])->name('log.arsip.hapus-terpilih');
+    Route::delete('/log-aktivitas/arsip', [LogArsipController::class, 'hapusSemua'])->name('log.arsip.hapus-semua');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
+    Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
+    Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
+    Route::post('/unggah', [UnggahDokumenController::class, 'store'])->name('user.unggah.store');
+    Route::get('/arsip', [ArsipController::class, 'index'])->name('user.arsip.index');
+    Route::get('/arsip/{dokumen}', [ArsipController::class, 'show'])->whereNumber('dokumen')->name('user.arsip.show');
+    Route::get('/arsip/{dokumen}/pratinjau', [ArsipController::class, 'pratinjau'])->whereNumber('dokumen')->name('user.arsip.pratinjau');
+    Route::get('/arsip/{dokumen}/unduh', [ArsipController::class, 'unduh'])->whereNumber('dokumen')->name('user.arsip.unduh');
 });

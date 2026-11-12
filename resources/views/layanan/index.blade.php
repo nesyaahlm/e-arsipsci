@@ -147,8 +147,8 @@
                     </div>
     
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <button type="submit" id="btn-simpan-jenis" class="btn btn-sm btn-form-tambah">{{ $modeEdit ? 'Simpan Perubahan' : '+ Tambah' }}</button>
-                        <button type="button" id="btn-kembali-jenis" class="btn btn-sm btn-form-kembali">Kembali</button>
+                        <button type="submit" id="btn-simpan-jenis" class="btn-simpan">{{ $modeEdit ? 'Simpan Perubahan' : '+ Tambah' }}</button>
+                        <button type="button" id="btn-kembali-jenis" class="btn-batal">Kembali</button>
                     </div>
                 </form>
             @endif
@@ -172,7 +172,7 @@
                                 <td class="fw-bold text-center">{{ $jenis->kode }}</td>
                                 <td>{{ $jenis->nama }}</td>
                                 <td class="text-center">{{ $jenis->retensi_tahun ? $jenis->retensi_tahun.' tahun' : '-' }}</td>
-                                <td class="text-center">{{ $jenis->layanan->pluck('nama')->implode(', ') ?: '-' }}</td>
+                                <td>{{ $jenis->layanan->pluck('nama')->implode(', ') ?: '-' }}</td>
                                 @if ($bisaKelola)
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
@@ -231,8 +231,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="button" class="btn-batal" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-simpan">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -264,8 +264,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <button type="button" class="btn-batal" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-simpan">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
@@ -391,7 +391,6 @@
                     el.classList.remove('is-invalid');
                 });
             });
-    
     
             @if ($errors->tambah->any())
                 bootstrap.Modal.getOrCreateInstance(modalTambah).show();
