@@ -31,7 +31,6 @@ class UnggahDokumenController extends Controller
         return view('user.unggah.create', [
             'layanan' => $layanan,
             'jenisList' => $layanan ? $this->jenisUntuk($layanan->id) : collect(),
-            'unitList' => $this->unitList(),
             'terakhir' => $this->unggahanTerakhir($user->id),
             'hariIni' => now('Asia/Jakarta')->toDateString(),
         ]);
@@ -53,24 +52,22 @@ class UnggahDokumenController extends Controller
                 'integer',
                 Rule::exists('jenis_dokumen_layanan', 'jenis_dokumen_id')->where('layanan_id', $layanan->id),
             ],
-            'tanggal_dokumen' => ['required', 'date', 'before_or_equal:'.now('Asia/Jakarta')->toDateString()],
+            'tanggal_dokumen' => ['required', 'date'],
             'unit' => ['nullable', 'string', 'max:100'],
-            'deskripsi' => ['nullable', 'string', 'max:2000'],
-            'file_dokumen' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:20480'],
+            'nomor_rak' => ['nullable', 'string', 'max:30'],
+            'no_tingkat' => ['nullable', 'string', 'max:30'],
+            'no_box' => ['nullable', 'string', 'max:30'],
+            'deskripsi' => ['nullable', 'string'],
+            'file_dokumen' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg', 'max:20480'],
         ], [
             'judul.required' => 'Judul dokumen wajib diisi.',
-            'judul.max' => 'Judul dokumen maksimal 255 karakter.',
             'jenis_dokumen_id.required' => 'Jenis dokumen wajib dipilih.',
             'jenis_dokumen_id.exists' => 'Jenis dokumen tidak tersedia untuk layanan Anda.',
             'tanggal_dokumen.required' => 'Tanggal dokumen wajib diisi.',
-            'tanggal_dokumen.date' => 'Format tanggal dokumen tidak valid.',
-            'tanggal_dokumen.before_or_equal' => 'Tanggal dokumen tidak boleh melewati hari ini.',
-            'unit.max' => 'Unit kerja maksimal 100 karakter.',
-            'deskripsi.max' => 'Deskripsi maksimal 2000 karakter.',
-            'file_dokumen.required' => 'Berkas dokumen wajib dipilih.',
+            'file_dokumen.required' => 'Berkas file dokumen wajib diunggah.',
             'file_dokumen.uploaded' => 'Berkas gagal diunggah. Periksa ukuran berkas lalu coba lagi.',
-            'file_dokumen.mimes' => 'Format berkas harus PDF, Word (DOC, DOCX), atau Excel (XLS, XLSX).',
-            'file_dokumen.max' => 'Ukuran berkas maksimal 20 MB.',
+            'file_dokumen.mimes' => 'Format berkas harus berupa PDF, DOC, DOCX, XLS, XLSX, PNG, atau JPG.',
+            'file_dokumen.max' => 'Ukuran berkas file dokumen melebihi batas maksimal 20 MB.',
         ]);
 
         $jenis = DB::table('jenis_dokumen')
@@ -96,7 +93,7 @@ class UnggahDokumenController extends Controller
         }
 
         return redirect()->route('user.unggah.create')
-            ->with('success', 'Dokumen berhasil dikirim dengan nomor '.$nomor.' dan menunggu pemeriksaan admin.');
+            ->with('success', 'Dokumen berhasil diunggah dengan nomor '.$nomor.' dan menunggu pemeriksaan admin.');
     }
 
     private function simpan(int $userId, int $layananId, object $jenis, array $data, string $path, string $namaAsli, int $ukuran): string
@@ -108,9 +105,19 @@ class UnggahDokumenController extends Controller
             : null;
         $sekarang = now();
 
+        $nomorRak = $this->bersih($data['nomor_rak'] ?? null);
+        $noTingkat = $this->bersih($data['no_tingkat'] ?? null);
+        $noBox = $this->bersih($data['no_box'] ?? null);
+
+        $lokasi = array_filter([
+            $nomorRak !== null ? 'Rak '.$nomorRak : null,
+            $noTingkat !== null ? 'Tingkat '.$noTingkat : null,
+            $noBox !== null ? 'Box '.$noBox : null,
+        ]);
+
         for ($percobaan = 1; ; $percobaan++) {
             try {
-                return DB::transaction(function () use ($userId, $layananId, $jenis, $data, $path, $namaAsli, $ukuran, $tanggal, $prefix, $retensi, $sekarang) {
+                return DB::transaction(function () use ($userId, $layananId, $jenis, $data, $path, $namaAsli, $ukuran, $tanggal, $prefix, $retensi, $sekarang, $nomorRak, $noTingkat, $noBox, $lokasi) {
                     $terakhir = DB::table('dokumen')
                         ->where('nomor', 'like', $prefix.'%')
                         ->orderByDesc('nomor')
@@ -125,12 +132,16 @@ class UnggahDokumenController extends Controller
                         'judul' => $data['judul'],
                         'layanan_id' => $layananId,
                         'jenis_dokumen_id' => $jenis->id,
-                        'unit' => filled($data['unit'] ?? null) ? trim($data['unit']) : null,
+                        'unit' => $this->bersih($data['unit'] ?? null),
                         'tanggal_dokumen' => $tanggal->toDateString(),
-                        'deskripsi' => filled($data['deskripsi'] ?? null) ? trim($data['deskripsi']) : null,
+                        'deskripsi' => $this->bersih($data['deskripsi'] ?? null),
                         'file_path' => $path,
                         'file_nama_asli' => $namaAsli,
                         'file_ukuran' => $ukuran,
+                        'lokasi_arsip_fisik' => $lokasi ? implode(' / ', $lokasi) : null,
+                        'nomor_rak' => $nomorRak,
+                        'no_tingkat' => $noTingkat,
+                        'no_box_file' => $noBox,
                         'diunggah_oleh' => $userId,
                         'status' => 'menunggu',
                         'retensi_sampai' => $retensi,
@@ -156,6 +167,11 @@ class UnggahDokumenController extends Controller
         }
     }
 
+    private function bersih(?string $nilai): ?string
+    {
+        return filled($nilai) ? trim($nilai) : null;
+    }
+
     private function layananUser(?int $layananId): ?object
     {
         if ($layananId === null) {
@@ -172,17 +188,6 @@ class UnggahDokumenController extends Controller
             ->where('jenis_dokumen_layanan.layanan_id', $layananId)
             ->orderBy('jenis_dokumen.nama')
             ->get(['jenis_dokumen.id', 'jenis_dokumen.kode', 'jenis_dokumen.nama']);
-    }
-
-    private function unitList(): Collection
-    {
-        return DB::table('dokumen')
-            ->whereNull('deleted_at')
-            ->whereNotNull('unit')
-            ->where('unit', '!=', '')
-            ->distinct()
-            ->orderBy('unit')
-            ->pluck('unit');
     }
 
     private function unggahanTerakhir(int $userId): Collection

@@ -13,49 +13,88 @@
     </div>
 
     @if (session('success'))
-        <div class="ug-alert ug-alert--success" role="status">
-            <span>{{ session('success') }}</span>
-            <a href="{{ route('user.dokumen-saya.index') }}">Lihat di Dokumen Saya</a>
+        <div class="ug-alert ug-alert--success" role="alert">
+            <div class="ug-alert__body">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ug-svg" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <div>
+                    <strong>Sukses!</strong> {{ session('success') }}
+                    <a href="{{ route('user.dokumen-saya.index') }}">Lihat di Dokumen Saya</a>
+                </div>
+            </div>
+            <button type="button" class="ug-alert__close" data-alert-close aria-label="Tutup">&times;</button>
         </div>
     @endif
 
     @if (session('error'))
         <div class="ug-alert ug-alert--error" role="alert">
-            <span>{{ session('error') }}</span>
+            <div class="ug-alert__body">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ug-svg" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div><strong>Gagal!</strong> {{ session('error') }}</div>
+            </div>
+            <button type="button" class="ug-alert__close" data-alert-close aria-label="Tutup">&times;</button>
         </div>
-    @elseif ($errors->any())
-        <div class="ug-alert ug-alert--error" role="alert">
-            <span>Periksa kembali isian Anda. Ada {{ $errors->count() }} bagian yang perlu diperbaiki.</span>
+    @endif
+
+    @if ($errors->any())
+        <div class="ug-alert ug-alert--error ug-alert--list" role="alert">
+            <div class="ug-alert__body">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ug-svg" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <strong>Gagal Memproses Dokumen:</strong>
+            </div>
+            <ul>
+                @foreach ($errors->all() as $pesanError)
+                    <li>{{ $pesanError }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="ug-alert__close" data-alert-close aria-label="Tutup">&times;</button>
         </div>
     @endif
 
     @if ($layanan === null)
         <div class="ug-alert ug-alert--warning" role="alert">
-            <span>Akun Anda belum terhubung ke layanan, jadi belum bisa mengunggah dokumen. Hubungi admin untuk mengaturnya.</span>
+            <div class="ug-alert__body">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ug-svg" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div>Akun Anda belum terhubung ke layanan, jadi belum bisa mengunggah dokumen. Hubungi admin untuk mengaturnya.</div>
+            </div>
         </div>
     @endif
 
     <div class="ug-grid">
-        <section class="ua-card" aria-labelledby="judul-form">
-            <h2 class="ug-title" id="judul-form">Data Dokumen</h2>
+        <section class="ua-card ug-card" aria-labelledby="judul-form">
+            <h2 class="ug-title" id="judul-form">Unggah Dokumen Baru</h2>
 
-            <form method="POST" action="{{ route('user.unggah.store') }}" enctype="multipart/form-data" id="form-unggah">
+            <form method="POST" action="{{ route('user.unggah.store') }}" enctype="multipart/form-data" id="form-unggah" autocomplete="off">
                 @csrf
 
                 <fieldset class="ug-fieldset" @disabled($layanan === null)>
-                    <div class="ug-field">
-                        <label for="judul" class="ug-label">Judul Dokumen</label>
-                        <input type="text" id="judul" name="judul" value="{{ old('judul') }}" maxlength="255" placeholder="Contoh: Laporan Hasil Uji Batubara" class="ug-input @error('judul') is-invalid @enderror" required>
-                        @error('judul')
-                            <p class="ug-error">{{ $message }}</p>
-                        @enderror
+                    <div class="ug-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ug-svg" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        <span><strong>Nomor Dokumen</strong> dan <strong>Masa Retensi</strong> akan dihasilkan secara otomatis oleh sistem berdasarkan jenis dokumen dan tanggal dokumen yang dipilih.</span>
+                    </div>
+
+                    <div class="ug-row ug-row--full">
+                        <div class="ug-field">
+                            <label for="judul" class="ug-label">Judul Dokumen <span class="ug-req">*</span></label>
+                            <input type="text" id="judul" name="judul" value="{{ old('judul') }}" maxlength="255" placeholder="Contoh: Laporan Hasil Uji Batubara Lot 2610-C" class="ug-control @error('judul') is-invalid @enderror" required>
+                            @error('judul')
+                                <p class="ug-error">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="ug-row">
                         <div class="ug-field">
-                            <label for="jenis_dokumen_id" class="ug-label">Jenis Dokumen</label>
-                            <select id="jenis_dokumen_id" name="jenis_dokumen_id" class="ug-input @error('jenis_dokumen_id') is-invalid @enderror" required>
-                                <option value="">Pilih jenis dokumen</option>
+                            <label for="layanan_id" class="ug-label">Layanan <span class="ug-req">*</span></label>
+                            <select id="layanan_id" class="ug-control" disabled>
+                                <option>{{ $layanan?->nama ?? 'Belum terhubung ke layanan' }}</option>
+                            </select>
+                            <p class="ug-hint">Layanan mengikuti akun Anda.</p>
+                        </div>
+
+                        <div class="ug-field">
+                            <label for="jenis_dokumen_id" class="ug-label">Jenis Dokumen <span class="ug-req">*</span></label>
+                            <select id="jenis_dokumen_id" name="jenis_dokumen_id" class="ug-control @error('jenis_dokumen_id') is-invalid @enderror" required>
+                                <option value="" disabled @selected(old('jenis_dokumen_id') === null)>Pilih Jenis Dokumen</option>
                                 @foreach ($jenisList as $jenis)
                                     <option value="{{ $jenis->id }}" @selected((string) old('jenis_dokumen_id') === (string) $jenis->id)>{{ $jenis->nama }} ({{ $jenis->kode }})</option>
                                 @endforeach
@@ -64,12 +103,21 @@
                                 <p class="ug-error">{{ $message }}</p>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="ug-row">
+                        <div class="ug-field">
+                            <label for="tanggal_dokumen" class="ug-label">Tanggal Dokumen <span class="ug-req">*</span></label>
+                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', $hariIni) }}" class="ug-control @error('tanggal_dokumen') is-invalid @enderror" required>
+                            @error('tanggal_dokumen')
+                                <p class="ug-error">{{ $message }}</p>
+                            @enderror
+                        </div>
 
                         <div class="ug-field">
-                            <label for="tanggal_dokumen" class="ug-label">Tanggal Dokumen</label>
-                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen') }}" max="{{ $hariIni }}" class="ug-input @error('tanggal_dokumen') is-invalid @enderror" required>
-                            <p class="ug-hint">Tahun arsip: <strong data-tahun>-</strong></p>
-                            @error('tanggal_dokumen')
+                            <label for="unit" class="ug-label">Unit Kerja</label>
+                            <input type="text" id="unit" name="unit" value="{{ old('unit') }}" maxlength="100" placeholder="Contoh: Cilacap" class="ug-control @error('unit') is-invalid @enderror">
+                            @error('unit')
                                 <p class="ug-error">{{ $message }}</p>
                             @enderror
                         </div>
@@ -77,74 +125,64 @@
 
                     <div class="ug-row">
                         <div class="ug-field">
-                            <label for="unit" class="ug-label">Unit Kerja <span class="ug-opt">(opsional)</span></label>
-                            <input type="text" id="unit" name="unit" value="{{ old('unit') }}" list="daftar-unit" maxlength="100" placeholder="Contoh: Laboratorium" autocomplete="off" class="ug-input @error('unit') is-invalid @enderror">
-                            <datalist id="daftar-unit">
-                                @foreach ($unitList as $unit)
-                                    <option value="{{ $unit }}"></option>
-                                @endforeach
-                            </datalist>
-                            @error('unit')
+                            <label for="file_dokumen" class="ug-label">Berkas File <span class="ug-req">*</span></label>
+                            <input type="file" id="file_dokumen" name="file_dokumen" class="ug-control ug-control--file @error('file_dokumen') is-invalid @enderror" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
+                            <div class="ug-error ug-error--strong" data-file-error @if (! $errors->has('file_dokumen')) hidden @endif>{{ $errors->first('file_dokumen') }}</div>
+                            <small class="ug-hint" data-file-hint>Format: PDF, DOCX, XLSX (Maks. 20MB)</small>
+                        </div>
+
+                        <div class="ug-field">
+                            <label for="nomor_rak" class="ug-label">Nomor Rak</label>
+                            <input type="text" id="nomor_rak" name="nomor_rak" value="{{ old('nomor_rak') }}" maxlength="30" placeholder="Contoh: 01" class="ug-control @error('nomor_rak') is-invalid @enderror">
+                            @error('nomor_rak')
+                                <p class="ug-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="ug-row">
+                        <div class="ug-field">
+                            <label for="no_tingkat" class="ug-label">No. Tingkat</label>
+                            <input type="text" id="no_tingkat" name="no_tingkat" value="{{ old('no_tingkat') }}" maxlength="30" placeholder="Contoh: 2" class="ug-control @error('no_tingkat') is-invalid @enderror">
+                            @error('no_tingkat')
                                 <p class="ug-error">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="ug-field">
-                            <label for="portofolio" class="ug-label">Layanan</label>
-                            <input type="text" id="portofolio" value="{{ $layanan?->nama ?? '-' }}" class="ug-input" readonly tabindex="-1">
+                            <label for="no_box" class="ug-label">No. Box File</label>
+                            <input type="text" id="no_box" name="no_box" value="{{ old('no_box') }}" maxlength="30" placeholder="Contoh: 04" class="ug-control @error('no_box') is-invalid @enderror">
+                            @error('no_box')
+                                <p class="ug-error">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
-                    <div class="ug-field">
-                        <label for="deskripsi" class="ug-label">Deskripsi <span class="ug-opt">(opsional)</span></label>
-                        <textarea id="deskripsi" name="deskripsi" rows="3" maxlength="2000" placeholder="Isi atau keterangan singkat dokumen" class="ug-input @error('deskripsi') is-invalid @enderror">{{ old('deskripsi') }}</textarea>
-                        @error('deskripsi')
-                            <p class="ug-error">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="ug-field">
-                        <span class="ug-label">Berkas</span>
-
-                        <label for="file_dokumen" class="ug-drop @error('file_dokumen') is-invalid @enderror" data-drop>
-                            <input type="file" id="file_dokumen" name="file_dokumen" accept=".pdf,.doc,.docx,.xls,.xlsx" class="ug-drop__input" required>
-                            <span class="ug-drop__icon"><x-user.icon name="upload" :size="26" /></span>
-                            <span class="ug-drop__text"><strong>Pilih berkas</strong> atau seret ke sini</span>
-                            <span class="ug-drop__hint">PDF, Word, atau Excel. Maksimal 20 MB.</span>
-                        </label>
-
-                        <div class="ug-file" data-file hidden>
-                            <span class="ug-file__icon"><x-user.icon name="file" :size="22" /></span>
-                            <span class="ug-file__body">
-                                <strong class="ug-file__name" data-file-name></strong>
-                                <span class="ug-file__meta" data-file-meta></span>
-                            </span>
-                            <button type="button" class="ug-file__remove" data-file-remove>Hapus</button>
+                    <div class="ug-row ug-row--full">
+                        <div class="ug-field">
+                            <label for="deskripsi" class="ug-label">Deskripsi / Isi Dokumen</label>
+                            <textarea id="deskripsi" name="deskripsi" rows="2" placeholder="Contoh: - Kontrak Pengadaan" class="ug-control @error('deskripsi') is-invalid @enderror">{{ old('deskripsi') }}</textarea>
+                            @error('deskripsi')
+                                <p class="ug-error">{{ $message }}</p>
+                            @enderror
                         </div>
-
-                        <p class="ug-error" data-file-error @if (! $errors->has('file_dokumen')) hidden @endif>{{ $errors->first('file_dokumen') }}</p>
                     </div>
 
                     <div class="ug-note">
                         <strong>Label box arsip</strong>
-                        <p>Portofolio mengikuti layanan akun Anda, Tahun diambil dari tanggal dokumen, dan Isi diambil dari judul. Kode Rak, Nomor Rak, No. Tingkat, dan No. Box File diisi admin setelah dokumen diperiksa.</p>
+                        <p>Portofolio mengikuti layanan akun Anda, Tahun diambil dari tanggal dokumen, dan Isi diambil dari judul. Kode Rak hanya dapat ditetapkan admin setelah dokumen diperiksa; Nomor Rak, No. Tingkat, dan No. Box File yang Anda isi akan diverifikasi admin.</p>
                     </div>
 
                     <div class="ug-actions">
-                        <button type="submit" class="ua-btn ua-btn--primary ug-submit" data-submit>
-                            <span class="ug-submit__spinner" data-spinner hidden></span>
-                            <span data-submit-text>Kirim Dokumen</span>
-                        </button>
-                        <a href="{{ route('user.dashboard') }}" class="ua-btn ua-btn--outline">Batal</a>
+                        <a href="{{ route('user.dashboard') }}" class="ug-btn ug-btn--light">Batal</a>
+                        <button type="submit" class="ug-btn ug-btn--primary" data-submit>Unggah &amp; Simpan</button>
                     </div>
-
-                    <div class="ug-progress" data-progress hidden role="progressbar" aria-label="Sedang mengunggah"><span></span></div>
                 </fieldset>
             </form>
         </section>
 
         <aside class="ua-card" aria-labelledby="judul-terakhir">
-            <h2 class="ug-title" id="judul-terakhir">Status Unggahan Terakhir</h2>
+            <h2 class="ug-title" id="judul-terakhir">Unggahan Terakhir</h2>
 
             @forelse ($terakhir as $item)
                 <a href="{{ route('user.dokumen-saya.show', $item['id']) }}" class="ug-recent">
@@ -165,4 +203,18 @@
             @endif
         </aside>
     </div>
-</x-layouts.user>   
+
+    <div class="ug-popup" data-popup hidden>
+        <div class="ug-popup__card" role="alertdialog" aria-modal="true" aria-labelledby="popup-judul">
+            <span class="ug-popup__icon"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ug-svg" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></span>
+            <h2 class="ug-popup__title" id="popup-judul">Ukuran Berkas Terlalu Besar</h2>
+            <p class="ug-popup__text">Berkas <strong data-popup-nama></strong> melebihi batas maksimal yang diizinkan sistem.</p>
+            <div class="ug-popup__box">
+                <div>Ukuran berkas Anda: <strong class="ug-popup__danger" data-popup-ukuran></strong></div>
+                <div>Batas maksimal berkas: <strong>20 MB</strong></div>
+            </div>
+            <p class="ug-popup__text">Silakan pilih kembali berkas lain yang berukuran lebih kecil.</p>
+            <button type="button" class="ug-btn ug-btn--primary ug-btn--block" data-popup-close>Saya Mengerti</button>
+        </div>
+    </div>
+</x-layouts.user>
