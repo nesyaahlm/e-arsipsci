@@ -86,7 +86,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/log-aktivitas/arsip/terpilih', [LogArsipController::class, 'hapusTerpilih'])->name('log.arsip.hapus-terpilih');
     Route::delete('/log-aktivitas/arsip', [LogArsipController::class, 'hapusSemua'])->name('log.arsip.hapus-semua');
 });
-
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
@@ -102,4 +101,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/sampel-saya', [UserSampelController::class, 'index'])->name('user.sampel.index');
     Route::get('/sampel-saya/tambah', [UserSampelController::class, 'create'])->name('user.sampel.create');
     Route::post('/sampel-saya', [UserSampelController::class, 'store'])->name('user.sampel.store');
+    Route::get('/sampel-saya/{sampel}', [UserSampelController::class, 'show'])->whereNumber('sampel')->name('user.sampel.show');
+    Route::get('/sampel-saya/{sampel}/foto', [UserSampelController::class, 'foto'])->whereNumber('sampel')->name('user.sampel.foto');
 });
