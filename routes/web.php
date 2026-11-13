@@ -13,7 +13,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\DokumenSayaController;
 use App\Http\Controllers\User\UnggahDokumenController;
 use App\Http\Controllers\User\ArsipController;
@@ -23,7 +22,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });
-
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -73,9 +71,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/sampel', [AdminSampelController::class, 'index'])->name('admin.sampel.index');
     Route::get('/sampel/create', [AdminSampelController::class, 'create'])->name('admin.sampel.create');
     Route::post('/sampel', [AdminSampelController::class, 'store'])->name('admin.sampel.store');
+    Route::get('/sampel/{sampel}', [AdminSampelController::class, 'show'])->whereNumber('sampel')->name('admin.sampel.show');
     Route::get('/sampel/{id}/edit', [AdminSampelController::class, 'edit'])->name('admin.sampel.edit');
     Route::put('/sampel/{id}', [AdminSampelController::class, 'update'])->name('admin.sampel.update');
-    
+    Route::delete('/sampel/{sampel}', [AdminSampelController::class, 'destroy'])->whereNumber('sampel')->name('admin.sampel.destroy');
+
     Route::get('/kelola-user', [KelolaController::class, 'index'])->name('users.index');
     Route::post('/kelola-user', [KelolaController::class, 'store'])->name('users.store');
     Route::put('/kelola-user/{user}', [KelolaController::class, 'update'])->name('users.update');
@@ -89,7 +89,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
     Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
     Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
@@ -102,4 +101,5 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/sampel-saya', [UserSampelController::class, 'index'])->name('user.sampel.index');
     Route::get('/sampel-saya/tambah', [UserSampelController::class, 'create'])->name('user.sampel.create');
     Route::post('/sampel-saya', [UserSampelController::class, 'store'])->name('user.sampel.store');
+
 });
