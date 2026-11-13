@@ -183,7 +183,10 @@ class ArsipController extends Controller
             report($e);
         }
 
-        return Storage::disk('public')->download($baris->file_path, $this->namaBerkas($baris));
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->download($baris->file_path, $this->namaBerkas($baris));
     }
 
     private function arsipTersedia(): Builder
@@ -225,13 +228,52 @@ class ArsipController extends Controller
         ]);
     }
 
+    private function petaLokasi(object $d): array
+    {
+        $lokasi = (string) ($d->lokasi_arsip_fisik ?? '');
+
+        $ambil = function (string $pola) use ($lokasi): ?string {
+            if (preg_match($pola, $lokasi, $cocok)) {
+                $nilai = trim($cocok[1]);
+
+                return $nilai !== '' ? $nilai : null;
+            }
+
+            return null;
+        };
+
+        $kolom = [
+            'kode_rak' => $d->kode_rak,
+            'nomor_rak' => $d->nomor_rak,
+            'no_tingkat' => $d->no_tingkat,
+            'no_box_file' => $d->no_box_file,
+        ];
+
+        $cadangan = [
+            'kode_rak' => null,
+            'nomor_rak' => $ambil('/Rak\s*([^\/]+)/i'),
+            'no_tingkat' => $ambil('/Tingkat\s*([^\/]+)/i'),
+            'no_box_file' => $ambil('/Box\s*([^\/]+)/i'),
+        ];
+
+        $hasil = [];
+
+        foreach ($kolom as $nama => $nilai) {
+            $hasil[$nama] = filled($nilai) ? $nilai : $cadangan[$nama];
+        }
+
+        return $hasil;
+    }
+
     private function susunDaftar(object $d): array
     {
+        $lokasi = $this->petaLokasi($d);
+
         $slot = [
-            'Kode Rak' => $d->kode_rak,
-            'No. Rak' => $d->nomor_rak,
-            'Tingkat' => $d->no_tingkat,
-            'Box' => $d->no_box_file,
+            'Kode Rak' => $lokasi['kode_rak'],
+            'No. Rak' => $lokasi['nomor_rak'],
+            'Tingkat' => $lokasi['no_tingkat'],
+            'Box' => $lokasi['no_box_file'],
         ];
 
         return [
@@ -254,6 +296,7 @@ class ArsipController extends Controller
         $tanggal = Carbon::parse($d->tanggal_dokumen)->locale('id');
         $ekstensi = strtolower(pathinfo($d->file_path, PATHINFO_EXTENSION));
         $ada = Storage::disk('public')->exists($d->file_path);
+        $lokasi = $this->petaLokasi($d);
 
         return [
             'id' => $d->id,
@@ -262,12 +305,11 @@ class ArsipController extends Controller
             'deskripsi' => $d->deskripsi,
             'jenis' => $d->jenis,
             'layanan' => $d->layanan,
-            'kode_rak' => $d->kode_rak,
-            'nomor_rak' => $d->nomor_rak,
-            'no_tingkat' => $d->no_tingkat,
-            'no_box_file' => $d->no_box_file,
-            'lokasi_terisi' => collect([$d->kode_rak, $d->nomor_rak, $d->no_tingkat, $d->no_box_file])
-                ->contains(fn ($nilai) => filled($nilai)),
+            'kode_rak' => $lokasi['kode_rak'],
+            'nomor_rak' => $lokasi['nomor_rak'],
+            'no_tingkat' => $lokasi['no_tingkat'],
+            'no_box_file' => $lokasi['no_box_file'],
+            'lokasi_terisi' => collect($lokasi)->contains(fn ($nilai) => filled($nilai)),
             'lokasi_lama' => $d->lokasi_arsip_fisik,
             'unit_kerja' => $d->unit,
             'portofolio' => $d->layanan,
