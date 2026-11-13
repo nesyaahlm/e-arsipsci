@@ -4,7 +4,7 @@
 
 @php
     $urlCari = Route::has('user.arsip.index') ? route('user.arsip.index') : '#';
-    $urlUnggah = Route::has('user.unggah.create') ? route('user.unggah.create') : '#';
+    $urlUnggah = Route::has('user.dokumen-saya.index') ? route('user.dokumen-saya.index').'#unggah' : '#';
 @endphp
 
 <x-layouts.user title="Dashboard">

@@ -115,3 +115,47 @@
         }
     });
 })();
+
+(function () {
+    var modal = document.querySelector('[data-modal]');
+
+    if (!modal) {
+        return;
+    }
+
+    function open() {
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-modal-open]').forEach(function (button) {
+        button.addEventListener('click', open);
+    });
+
+    modal.querySelectorAll('[data-modal-close]').forEach(function (button) {
+        button.addEventListener('click', close);
+    });
+
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            close();
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        var popup = document.querySelector('[data-popup]');
+
+        if (event.key === 'Escape' && !modal.hidden && (!popup || popup.hidden)) {
+            close();
+        }
+    });
+
+    if (!modal.hidden || window.location.hash === '#unggah') {
+        open();
+    }
+})();

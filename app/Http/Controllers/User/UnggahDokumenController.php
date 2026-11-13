@@ -4,7 +4,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,17 +16,15 @@ use Throwable;
 
 class UnggahDokumenController extends Controller
 {
-    public function create(Request $request): View
+    public function dataForm(object $user): array
     {
-        $user = $request->user();
         $layanan = $this->layananUser($user->layanan_id);
 
-        return view('user.unggah.create', [
+        return [
             'layanan' => $layanan,
             'jenisList' => $layanan ? $this->jenisUntuk($layanan->id) : collect(),
-            'terakhir' => $this->unggahanTerakhir($user->id),
             'hariIni' => now('Asia/Jakarta')->toDateString(),
-        ]);
+        ];
     }
 
     public function store(Request $request): RedirectResponse
@@ -86,7 +83,7 @@ class UnggahDokumenController extends Controller
             return back()->withInput()->with('error', 'Dokumen gagal disimpan. Silakan coba lagi atau hubungi admin.');
         }
 
-        return redirect()->route('user.unggah.create')
+        return redirect()->route('user.dokumen-saya.index')
             ->with('success', 'Dokumen berhasil diunggah dengan nomor '.$nomor.' dan langsung tersedia di Cari Arsip.');
     }
 
@@ -182,34 +179,5 @@ class UnggahDokumenController extends Controller
             ->where('jenis_dokumen_layanan.layanan_id', $layananId)
             ->orderBy('jenis_dokumen.nama')
             ->get(['jenis_dokumen.id', 'jenis_dokumen.kode', 'jenis_dokumen.nama']);
-    }
-
-    private function unggahanTerakhir(int $userId): Collection
-    {
-        return DB::table('dokumen')
-            ->join('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
-            ->whereNull('dokumen.deleted_at')
-            ->where('dokumen.diunggah_oleh', $userId)
-            ->orderByDesc('dokumen.created_at')
-            ->orderByDesc('dokumen.id')
-            ->limit(3)
-            ->get([
-                'dokumen.id',
-                'dokumen.judul',
-                'dokumen.created_at',
-                'jenis_dokumen.nama as jenis',
-            ])
-            ->map(function ($d) {
-                $waktu = Carbon::parse($d->created_at, config('app.timezone'))
-                    ->setTimezone('Asia/Jakarta')
-                    ->locale('id');
-
-                return [
-                    'id' => $d->id,
-                    'judul' => $d->judul,
-                    'jenis' => $d->jenis,
-                    'tanggal' => $waktu->translatedFormat('d M Y').' · '.$waktu->format('H:i').' WIB',
-                ];
-            });
     }
 }

@@ -1,12 +1,22 @@
 <x-layouts.user title="Dokumen Saya">
     @push('styles')
         <link rel="stylesheet" href="{{ asset('css/user/dokumen-saya.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/user/unggah.css') }}">
     @endpush
 
-    <div class="ua-page-header">
-        <h1 class="ua-page-title">Dokumen Saya</h1>
-        <p class="ua-page-subtitle">Daftar dokumen yang saya unggah. Klik judul untuk melihat detail dan label box arsip.</p>
+    @push('scripts')
+        <script src="{{ asset('js/user/unggah.js') }}" defer></script>
+    @endpush
+
+    <div class="ua-page-header dk-head">
+        <div>
+            <h1 class="ua-page-title">Dokumen Saya</h1>
+            <p class="ua-page-subtitle">Daftar dokumen yang saya unggah. Klik judul untuk melihat detail dan label box arsip.</p>
+        </div>
+        <button type="button" class="ua-btn ua-btn--primary" data-modal-open="unggah">Tambah Dokumen</button>
     </div>
+
+    @include('user.unggah._form')
 
     <form method="GET" action="{{ route('user.dokumen-saya.index') }}" class="dk-search" role="search">
         <div class="dk-search__field">
