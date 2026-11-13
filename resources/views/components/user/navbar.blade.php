@@ -30,7 +30,7 @@
         </button>
 
         <div class="ua-user__menu" data-ua-user-menu hidden>
-            <a href="{{ Route::has('profile.edit') ? route('profile.edit') : '#' }}">
+            <a href="{{ Route::has('profile.index') ? route('profile.index') : '#' }}">
                 <x-user.icon name="user" :size="18" />
                 Profile
             </a>
