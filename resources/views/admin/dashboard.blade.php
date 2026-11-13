@@ -24,34 +24,52 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <div class="card h-100 shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
-                <div class="card-body p-4">
-                    <div class="small text-primary fw-semibold mb-1">Dokumen Terarsip</div>
-                    <div class="display-6 fw-bold text-primary mb-1">{{ $totalDokumen }}</div>
-                    <div class="small text-muted">Semua Layanan</div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{{ route('dokumen.index') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-3">
+                        <div class="small text-primary fw-semibold mb-1">Dokumen Terarsip</div>
+                        <div class="h4 fw-bold text-primary mb-1">{{ $totalDokumen }}</div>
+                        <div class="small text-muted" style="font-size: 0.78rem;">Semua Layanan</div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <div class="col-12 col-md-4">
-            <div class="card h-100 shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
-                <div class="card-body p-4">
-                    <div class="small text-primary fw-semibold mb-1">Retensi 60 Hari Lagi</div>
-                    <div class="display-6 fw-bold text-primary mb-1">{{ $retensiDekat }}</div>
-                    <div class="small text-muted">Perlu Keputusan</div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{{ route('dokumen.index') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-3">
+                        <div class="small text-primary fw-semibold mb-1">Retensi 60 Hari Lagi</div>
+                        <div class="h4 fw-bold text-primary mb-1">{{ $retensiDekat }}</div>
+                        <div class="small text-muted" style="font-size: 0.78rem;">Perlu Keputusan</div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <div class="col-12 col-md-4">
-            <div class="card h-100 shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
-                <div class="card-body p-4">
-                    <div class="small text-primary fw-semibold mb-1">Jenis Dokumen</div>
-                    <div class="display-6 fw-bold text-primary mb-1">{{ $totalJenis }}</div>
-                    <div class="small text-muted">Di {{ $totalLayanan }} Layanan</div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{{ route('layanan.index') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-3">
+                        <div class="small text-primary fw-semibold mb-1">Jenis Dokumen</div>
+                        <div class="h4 fw-bold text-primary mb-1">{{ $totalJenis }}</div>
+                        <div class="small text-muted" style="font-size: 0.78rem;">Di {{ $totalLayanan }} Layanan</div>
+                    </div>
                 </div>
-            </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{{ route('admin.sampel.index') }}" class="text-decoration-none">
+                <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    <div class="card-body p-3">
+                        <div class="small text-primary fw-semibold mb-1">Sampel Terarsip</div>
+                        <div class="h4 fw-bold text-primary mb-1">{{ $totalSampel }}</div>
+                        <div class="small text-muted" style="font-size: 0.78rem;">Semua Layanan</div>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 
@@ -83,4 +101,13 @@
             @endforeach
         </div>
     </div>
+
+    @push('styles')
+    <style>
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+        }
+    </style>
+    @endpush
 </x-admin.layout>

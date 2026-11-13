@@ -1,5 +1,5 @@
-@props(['label', 'value', 'hint' => null, 'icon' => 'file'])
-<div class="ud-stat">
+@props(['label', 'value', 'hint' => null, 'icon' => 'file', 'utama' => false])
+<div class="ud-stat {{ $utama ? 'ud-stat--utama' : '' }}">
     <span class="ud-stat__icon"><x-user.icon :name="$icon" :size="22" /></span>
     <div class="ud-stat__body">
         <span class="ud-stat__label">{{ $label }}</span>

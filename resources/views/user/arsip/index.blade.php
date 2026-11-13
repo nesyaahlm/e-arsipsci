@@ -6,7 +6,13 @@
 @php
     $adaPencarian = $kata !== '' || $adaFilter;
     $namaKategori = ['semua' => 'arsip', 'dokumen' => 'dokumen', 'sampel' => 'sampel'][$kategori];
-    $urlResetFilter = route('user.arsip.index', ['q' => $kata !== '' ? $kata : null, 'kategori' => $kategori]);
+    $labelLayanan = $kategori === 'sampel' ? 'Jenis Sampel' : 'Layanan';
+    $semuaLayanan = $kategori === 'sampel' ? 'Semua jenis sampel' : 'Semua layanan';
+    $urlResetFilter = route('user.arsip.index', array_filter([
+        'q' => $kata !== '' ? $kata : null,
+        'kategori' => $kategori,
+        'urut' => $filter['urut'],
+    ]));
 
     if ($adaPencarian) {
         $judulKosong = ['semua' => 'Arsip tidak ditemukan', 'dokumen' => 'Dokumen tidak ditemukan', 'sampel' => 'Sampel tidak ditemukan'][$kategori];
@@ -27,7 +33,7 @@
         <p class="ua-page-subtitle">Temukan dokumen dan sampel arsip berdasarkan judul, nomor, isi, atau lokasi penyimpanan.</p>
     </div>
 
-    <form method="GET" action="{{ route('user.arsip.index') }}" class="ar-form" role="search">
+    <form method="GET" action="{{ route('user.arsip.index') }}" id="form-cari" class="ar-form" role="search">
         <div class="dk-search">
             <div class="dk-search__field">
                 <x-user.icon name="magnify" :size="20" class="dk-search__icon" />
@@ -45,73 +51,57 @@
             @endforeach
         </div>
 
-        <div class="ar-filter-bar">
-            <label class="ar-field">
-                <span class="ar-field__label">Layanan</span>
-                <select name="layanan_id" class="ar-select" onchange="this.form.submit()">
-                    <option value="">Semua layanan</option>
-                    @foreach ($layananList as $layanan)
-                        <option value="{{ $layanan->id }}" @selected($filter['layanan_id'] === $layanan->id)>{{ $layanan->nama }}</option>
-                    @endforeach
-                </select>
-            </label>
+        <div class="ar-filterbox">
+            <div class="ar-filterbox__head">
+                <span class="ar-filterbox__title">Filter Pencarian</span>
+                @if ($adaFilter)
+                    <a href="{{ $urlResetFilter }}" class="ar-filterbox__reset">Reset Filter</a>
+                @endif
+            </div>
 
-            @if ($kategori === 'dokumen')
+            <div class="ar-filterbox__grid">
                 <label class="ar-field">
-                    <span class="ar-field__label">Jenis Dokumen</span>
-                    <select name="jenis_dokumen_id" class="ar-select" onchange="this.form.submit()">
-                        <option value="">Semua jenis</option>
-                        @foreach ($jenisList as $jenis)
-                            <option value="{{ $jenis->id }}" @selected($filter['jenis_dokumen_id'] === $jenis->id)>{{ $jenis->nama }}</option>
+                    <span class="ar-field__label">{{ $labelLayanan }}</span>
+                    <select name="layanan_id" class="ar-select {{ $filter['layanan_id'] ? 'is-aktif' : '' }}" onchange="this.form.submit()">
+                        <option value="">{{ $semuaLayanan }}</option>
+                        @foreach ($layananList as $layanan)
+                            <option value="{{ $layanan->id }}" @selected((int) $layanan->id === $filter['layanan_id'])>{{ $layanan->nama }}</option>
                         @endforeach
                     </select>
                 </label>
 
                 <label class="ar-field">
                     <span class="ar-field__label">Tahun</span>
-                    <select name="tahun" class="ar-select" onchange="this.form.submit()">
+                    <select name="tahun" class="ar-select {{ $filter['tahun'] ? 'is-aktif' : '' }}" onchange="this.form.submit()">
                         <option value="">Semua tahun</option>
                         @foreach ($tahunList as $tahun)
-                            <option value="{{ $tahun }}" @selected($filter['tahun'] === $tahun)>{{ $tahun }}</option>
+                            <option value="{{ $tahun }}" @selected((int) $tahun === $filter['tahun'])>{{ $tahun }}</option>
                         @endforeach
                     </select>
                 </label>
-
-                <label class="ar-field">
-                    <span class="ar-field__label">Unit Kerja</span>
-                    <select name="unit" class="ar-select" onchange="this.form.submit()">
-                        <option value="">Semua unit</option>
-                        @foreach ($unitList as $unit)
-                            <option value="{{ $unit }}" @selected($filter['unit'] === $unit)>{{ $unit }}</option>
-                        @endforeach
-                    </select>
-                </label>
-            @endif
-
-            <label class="ar-field">
-                <span class="ar-field__label">Urutkan</span>
-                <select name="urut" class="ar-select" onchange="this.form.submit()">
-                    <option value="relevansi" @selected($filter['urut'] === 'relevansi')>Paling relevan</option>
-                    <option value="terbaru" @selected($filter['urut'] === 'terbaru')>Terbaru</option>
-                </select>
-            </label>
-
-            @if ($adaFilter)
-                <a href="{{ $urlResetFilter }}" class="ua-btn ua-btn--outline ar-filter-bar__reset">Reset</a>
-            @endif
-
-            <noscript>
-                <button type="submit" class="ua-btn ua-btn--primary">Terapkan</button>
-            </noscript>
+            </div>
         </div>
     </form>
 
-    <p class="dk-count">
-        {{ number_format($hasil->total(), 0, ',', '.') }} {{ $namaKategori }} ditemukan
-        @if ($kata !== '')
-            untuk kata kunci "{{ $kata }}"
-        @endif
-    </p>
+    <div class="ar-hasilbar">
+        <p class="dk-count">
+            {{ number_format($hasil->total(), 0, ',', '.') }} {{ $namaKategori }} ditemukan
+            @if ($kata !== '')
+                untuk kata kunci "{{ $kata }}"
+            @endif
+        </p>
+
+        <label class="ar-sort">
+            <span class="ar-sort__label">Urutkan</span>
+            <select name="urut" form="form-cari" class="ar-select ar-sort__select" onchange="this.form.submit()">
+                @if ($kata !== '')
+                    <option value="relevansi" @selected($filter['urut'] === 'relevansi')>Paling relevan</option>
+                @endif
+                <option value="terbaru" @selected($filter['urut'] === 'terbaru')>Terbaru</option>
+                <option value="terlama" @selected($filter['urut'] === 'terlama')>Terlama</option>
+            </select>
+        </label>
+    </div>
 
     @if ($hasil->isEmpty())
         <div class="ua-card ar-empty">
