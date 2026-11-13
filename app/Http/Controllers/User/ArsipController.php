@@ -183,7 +183,10 @@ class ArsipController extends Controller
             report($e);
         }
 
-        return Storage::disk('public')->download($baris->file_path, $this->namaBerkas($baris));
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->download($baris->file_path, $this->namaBerkas($baris));
     }
 
     private function arsipTersedia(): Builder

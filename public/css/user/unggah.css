@@ -82,6 +82,60 @@
     max-width: 1100px;
 }
 
+.ug-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.ug-modal[hidden] {
+    display: none;
+}
+
+.ug-modal__dialog {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    margin: auto;
+    border-radius: 1rem;
+    background: #fff;
+}
+
+.ug-modal__dialog .ug-card {
+    border: 0;
+    box-shadow: none;
+}
+
+.ug-modal__dialog .ug-alert {
+    margin: 16px 24px 0;
+}
+
+.ug-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    font-size: 28px;
+    line-height: 1;
+    color: #2a7f72;
+    cursor: pointer;
+}
+
+.ug-modal__close:hover {
+    background: #eef5f3;
+}
+
 .ug-card {
     padding: 24px;
     border-radius: 1rem;
