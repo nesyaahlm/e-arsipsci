@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\JenisDokumenController;
 use App\Http\Controllers\Admin\KelolaController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\LogArsipController;
+use App\Http\Controllers\Admin\SampelController as AdminSampelController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\LayananController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\DokumenSayaController;
 use App\Http\Controllers\User\UnggahDokumenController;
 use App\Http\Controllers\User\ArsipController;
+use App\Http\Controllers\User\SampelController as UserSampelController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
@@ -68,6 +70,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dokumen/{dokumen}/download', [DokumenController::class, 'download'])->name('dokumen.download');
     Route::get('/dokumen/{dokumen}/preview', [DokumenController::class, 'preview'])->name('dokumen.preview');
 
+    Route::get('/sampel', [AdminSampelController::class, 'index'])->name('admin.sampel.index');
+    Route::get('/sampel/create', [AdminSampelController::class, 'create'])->name('admin.sampel.create');
+    Route::post('/sampel', [AdminSampelController::class, 'store'])->name('admin.sampel.store');
+    Route::get('/sampel/{id}/edit', [AdminSampelController::class, 'edit'])->name('admin.sampel.edit');
+    Route::put('/sampel/{id}', [AdminSampelController::class, 'update'])->name('admin.sampel.update');
+    
     Route::get('/kelola-user', [KelolaController::class, 'index'])->name('users.index');
     Route::post('/kelola-user', [KelolaController::class, 'store'])->name('users.store');
     Route::put('/kelola-user/{user}', [KelolaController::class, 'update'])->name('users.update');
@@ -90,4 +98,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/arsip/{dokumen}', [ArsipController::class, 'show'])->whereNumber('dokumen')->name('user.arsip.show');
     Route::get('/arsip/{dokumen}/pratinjau', [ArsipController::class, 'pratinjau'])->whereNumber('dokumen')->name('user.arsip.pratinjau');
     Route::get('/arsip/{dokumen}/unduh', [ArsipController::class, 'unduh'])->whereNumber('dokumen')->name('user.arsip.unduh');
+
+    Route::get('/sampel-saya', [UserSampelController::class, 'index'])->name('user.sampel.index');
+    Route::get('/sampel-saya/tambah', [UserSampelController::class, 'create'])->name('user.sampel.create');
+    Route::post('/sampel-saya', [UserSampelController::class, 'store'])->name('user.sampel.store');
 });

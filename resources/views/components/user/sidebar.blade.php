@@ -3,7 +3,7 @@
         ['label' => 'Dashboard', 'icon' => 'dashboard', 'route' => 'user.dashboard', 'active' => 'user.dashboard'],
         ['label' => 'Cari Arsip', 'icon' => 'search', 'route' => 'user.arsip.index', 'active' => 'user.arsip.*'],
         ['label' => 'Dokumen Saya', 'icon' => 'file', 'route' => 'user.dokumen-saya.index', 'active' => 'user.dokumen-saya.*'],
-        // ['label' => 'Profile', 'icon' => 'user', 'route' => 'profile.edit', 'active' => 'profile.*'],
+        ['label' => 'Sampel Saya', 'icon' => 'box', 'route' => 'user.sampel.index', 'active' => 'user.sampel.*'],
     ];
 @endphp
 <aside class="ua-sidebar" id="ua-sidebar" aria-label="Navigasi pengguna">
