@@ -39,72 +39,72 @@ class ArsipController extends Controller
         'dokumen.lokasi_arsip_fisik' => 1,
     ];
 
+    private const KOLOM_CARI_SAMPEL = [
+        'sampel.nama_sampel' => 5,
+        'sampel.kode_sampel' => 4,
+        'sampel.analysis_for' => 2,
+        'sampel.deskripsi' => 2,
+        'layanan.nama' => 2,
+        'sampel.shipper' => 1,
+        'sampel.vessel' => 1,
+        'sampel.bill_of_lading' => 1,
+        'sampel.tempat_pengambilan' => 1,
+        'sampel.nama_ruang_arsip' => 1,
+        'sampel.nomor_ruang_arsip' => 1,
+    ];
+
     public function index(Request $request): View
     {
         $kata = Str::limit(trim((string) $request->query('q', '')), 150, '');
         $terms = array_slice(preg_split('/\s+/u', $kata, -1, PREG_SPLIT_NO_EMPTY) ?: [], 0, 6);
 
+        $kategori = in_array($request->query('kategori'), ['semua', 'dokumen', 'sampel'], true)
+            ? $request->query('kategori')
+            : 'semua';
+
+        $userId = $request->user()->id;
+
+        $tahunList = match ($kategori) {
+            'dokumen' => $this->tahunTersedia(),
+            'sampel' => $this->tahunSampel($userId),
+            default => $this->tahunTersedia()->merge($this->tahunSampel($userId))->unique()->sortDesc()->values(),
+        };
+
         $layananId = $request->integer('layanan_id') ?: null;
-        $jenisId = $request->integer('jenis_dokumen_id') ?: null;
         $tahun = $request->integer('tahun') ?: null;
-        $unit = Str::limit(trim((string) $request->query('unit', '')), 100, '') ?: null;
-        $urut = $request->query('urut') === 'terbaru' || $terms === [] ? 'terbaru' : 'relevansi';
 
-        $kueri = $this->arsipTersedia()
-            ->when($layananId, fn (Builder $q) => $q->where('dokumen.layanan_id', $layananId))
-            ->when($jenisId, fn (Builder $q) => $q->where('dokumen.jenis_dokumen_id', $jenisId))
-            ->when($tahun, fn (Builder $q) => $q->whereYear('dokumen.tanggal_dokumen', $tahun))
-            ->when($unit, fn (Builder $q) => $q->where('dokumen.unit', $unit));
-
-        foreach ($terms as $term) {
-            $like = '%'.$this->escapeLike($term).'%';
-
-            $kueri->where(function (Builder $q) use ($like) {
-                foreach (array_keys(self::KOLOM_CARI) as $kolom) {
-                    $q->orWhereRaw($kolom." LIKE ? ESCAPE '!'", [$like]);
-                }
-            });
+        if ($tahun !== null && ! $tahunList->contains($tahun)) {
+            $tahun = null;
         }
 
-        if ($urut === 'relevansi') {
-            $skor = [];
-            $binding = [];
+        $urut = in_array($request->query('urut'), ['relevansi', 'terbaru', 'terlama'], true)
+            ? $request->query('urut')
+            : 'relevansi';
 
-            foreach ($terms as $term) {
-                $like = '%'.$this->escapeLike($term).'%';
-
-                foreach (self::KOLOM_CARI as $kolom => $bobot) {
-                    $skor[] = 'CASE WHEN '.$kolom." LIKE ? ESCAPE '!' THEN ".$bobot.' ELSE 0 END';
-                    $binding[] = $like;
-                }
-            }
-
-            $kueri->orderByRaw('('.implode(' + ', $skor).') DESC', $binding);
+        if ($urut === 'relevansi' && $terms === []) {
+            $urut = 'terbaru';
         }
 
-        $hasil = $kueri
-            ->orderByDesc('dokumen.tanggal_dokumen')
-            ->orderByDesc('dokumen.id')
-            ->select($this->kolomDaftar())
-            ->paginate(10)
-            ->withQueryString()
-            ->through(fn ($baris) => $this->susunDaftar($baris));
+        if ($kategori === 'sampel') {
+            $hasil = $this->cariSampel($userId, $terms, $layananId, $tahun, $urut);
+        } elseif ($kategori === 'dokumen') {
+            $hasil = $this->cariDokumen($terms, $layananId, $tahun, $urut);
+        } else {
+            $hasil = $this->cariGabungan($userId, $terms, $layananId, $tahun, $urut);
+        }
 
         return view('user.arsip.index', [
             'hasil' => $hasil,
             'kata' => $kata,
+            'kategori' => $kategori,
             'filter' => [
                 'layanan_id' => $layananId,
-                'jenis_dokumen_id' => $jenisId,
                 'tahun' => $tahun,
-                'unit' => $unit,
                 'urut' => $urut,
             ],
             'layananList' => DB::table('layanan')->orderBy('nama')->get(['id', 'nama']),
-            'jenisList' => DB::table('jenis_dokumen')->orderBy('nama')->get(['id', 'nama']),
-            'tahunList' => $this->tahunTersedia(),
-            'unitList' => $this->unitTersedia(),
-            'adaFilter' => $layananId || $jenisId || $tahun || $unit,
+            'tahunList' => $tahunList,
+            'adaFilter' => (bool) ($layananId || $tahun),
         ]);
     }
 
@@ -187,6 +187,203 @@ class ArsipController extends Controller
         $disk = Storage::disk('public');
 
         return $disk->download($baris->file_path, $this->namaBerkas($baris));
+    }
+
+    private function cariDokumen(array $terms, ?int $layananId, ?int $tahun, string $urut)
+    {
+        $arah = $urut === 'terlama' ? 'asc' : 'desc';
+        $kueri = $this->kueriDokumen($terms, $layananId, $tahun);
+
+        if ($urut === 'relevansi') {
+            [$skor, $binding] = $this->ekspresiSkor(self::KOLOM_CARI, $terms);
+
+            $kueri->orderByRaw($skor.' DESC', $binding);
+        }
+
+        return $kueri
+            ->orderBy('dokumen.tanggal_dokumen', $arah)
+            ->orderBy('dokumen.id', $arah)
+            ->select($this->kolomDaftar())
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn ($baris) => $this->susunDaftar($baris));
+    }
+
+    private function cariSampel(int $userId, array $terms, ?int $layananId, ?int $tahun, string $urut)
+    {
+        $arah = $urut === 'terlama' ? 'asc' : 'desc';
+        $kueri = $this->kueriSampel($userId, $terms, $layananId, $tahun);
+
+        if ($urut === 'relevansi') {
+            [$skor, $binding] = $this->ekspresiSkor(self::KOLOM_CARI_SAMPEL, $terms);
+
+            $kueri->orderByRaw($skor.' DESC', $binding);
+        }
+
+        return $kueri
+            ->orderBy('sampel.created_at', $arah)
+            ->orderBy('sampel.id', $arah)
+            ->select($this->kolomSampel())
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn ($baris) => $this->susunSampel($baris));
+    }
+
+    private function cariGabungan(int $userId, array $terms, ?int $layananId, ?int $tahun, string $urut)
+    {
+        $arah = $urut === 'terlama' ? 'asc' : 'desc';
+        $skorDokumen = $urut === 'relevansi' ? $this->ekspresiSkor(self::KOLOM_CARI, $terms) : ['0', []];
+        $skorSampel = $urut === 'relevansi' ? $this->ekspresiSkor(self::KOLOM_CARI_SAMPEL, $terms) : ['0', []];
+
+        $dokumen = $this->kueriDokumen($terms, $layananId, $tahun)
+            ->selectRaw(
+                "'dokumen' as tipe, dokumen.id as arsip_id, dokumen.created_at as dibuat, ".$skorDokumen[0].' as skor',
+                $skorDokumen[1]
+            );
+
+        $sampel = $this->kueriSampel($userId, $terms, $layananId, $tahun)
+            ->selectRaw(
+                "'sampel' as tipe, sampel.id as arsip_id, sampel.created_at as dibuat, ".$skorSampel[0].' as skor',
+                $skorSampel[1]
+            );
+
+        $gabungan = DB::query()->fromSub($dokumen->unionAll($sampel), 'arsip');
+
+        if ($urut === 'relevansi') {
+            $gabungan->orderByDesc('skor');
+        }
+
+        $halaman = $gabungan
+            ->orderBy('dibuat', $arah)
+            ->orderBy('tipe')
+            ->orderBy('arsip_id', $arah)
+            ->paginate(10)
+            ->withQueryString();
+
+        $idDokumen = $halaman->getCollection()->where('tipe', 'dokumen')->pluck('arsip_id')->all();
+        $idSampel = $halaman->getCollection()->where('tipe', 'sampel')->pluck('arsip_id')->all();
+
+        $barisDokumen = $idDokumen === []
+            ? collect()
+            : $this->arsipTersedia()->whereIn('dokumen.id', $idDokumen)->get($this->kolomDaftar())->keyBy('id');
+
+        $barisSampel = $idSampel === []
+            ? collect()
+            : $this->sampelMilik($userId)->whereIn('sampel.id', $idSampel)->get($this->kolomSampel())->keyBy('id');
+
+        $halaman->through(function ($baris) use ($barisDokumen, $barisSampel) {
+            if ($baris->tipe === 'dokumen') {
+                $data = $barisDokumen->get($baris->arsip_id);
+
+                return $data ? $this->susunDaftar($data) : null;
+            }
+
+            $data = $barisSampel->get($baris->arsip_id);
+
+            return $data ? $this->susunSampel($data) : null;
+        });
+
+        $halaman->setCollection($halaman->getCollection()->filter()->values());
+
+        return $halaman;
+    }
+
+    private function kueriDokumen(array $terms, ?int $layananId, ?int $tahun): Builder
+    {
+        $kueri = $this->arsipTersedia()
+            ->when($layananId, fn (Builder $q) => $q->where('dokumen.layanan_id', $layananId))
+            ->when($tahun, fn (Builder $q) => $q
+                ->where('dokumen.tanggal_dokumen', '>=', $tahun.'-01-01')
+                ->where('dokumen.tanggal_dokumen', '<', ($tahun + 1).'-01-01'));
+
+        $this->terapkanKataKunci($kueri, array_keys(self::KOLOM_CARI), $terms);
+
+        return $kueri;
+    }
+
+    private function kueriSampel(int $userId, array $terms, ?int $layananId, ?int $tahun): Builder
+    {
+        $kueri = $this->sampelMilik($userId)
+            ->when($layananId, fn (Builder $q) => $q->where('sampel.layanan_id', $layananId))
+            ->when($tahun, fn (Builder $q) => $q
+                ->where('sampel.tanggal_pengambilan', '>=', $tahun.'-01-01')
+                ->where('sampel.tanggal_pengambilan', '<', ($tahun + 1).'-01-01'));
+
+        $this->terapkanKataKunci($kueri, array_keys(self::KOLOM_CARI_SAMPEL), $terms);
+
+        return $kueri;
+    }
+
+    private function sampelMilik(int $userId): Builder
+    {
+        return DB::table('sampel')
+            ->join('layanan', 'layanan.id', '=', 'sampel.layanan_id')
+            ->whereNull('sampel.deleted_at')
+            ->where('sampel.diunggah_oleh', $userId);
+    }
+
+    private function terapkanKataKunci(Builder $kueri, array $kolom, array $terms): void
+    {
+        foreach ($terms as $term) {
+            $like = '%'.$this->escapeLike($term).'%';
+
+            $kueri->where(function (Builder $q) use ($kolom, $like) {
+                foreach ($kolom as $nama) {
+                    $q->orWhereRaw($nama." LIKE ? ESCAPE '!'", [$like]);
+                }
+            });
+        }
+    }
+
+    private function ekspresiSkor(array $kolom, array $terms): array
+    {
+        $bagian = [];
+        $binding = [];
+
+        foreach ($terms as $term) {
+            $like = '%'.$this->escapeLike($term).'%';
+
+            foreach ($kolom as $nama => $bobot) {
+                $bagian[] = 'CASE WHEN '.$nama." LIKE ? ESCAPE '!' THEN ".$bobot.' ELSE 0 END';
+                $binding[] = $like;
+            }
+        }
+
+        if ($bagian === []) {
+            return ['0', []];
+        }
+
+        return ['('.implode(' + ', $bagian).')', $binding];
+    }
+
+    private function kolomSampel(): array
+    {
+        return [
+            'sampel.id',
+            'sampel.kode_sampel',
+            'sampel.nama_sampel',
+            'sampel.shipper',
+            'sampel.analysis_for',
+            'sampel.nama_ruang_arsip',
+            'sampel.nomor_ruang_arsip',
+            'sampel.created_at',
+            'layanan.nama as layanan',
+        ];
+    }
+
+    private function susunSampel(object $s): array
+    {
+        return [
+            'tipe' => 'sampel',
+            'id' => $s->id,
+            'kode' => $s->kode_sampel,
+            'nama' => $s->nama_sampel,
+            'layanan' => $s->layanan,
+            'shipper' => $s->shipper,
+            'tujuan' => $s->analysis_for,
+            'ruang' => $s->nama_ruang_arsip.' (No. '.$s->nomor_ruang_arsip.')',
+            'diunggah' => $this->waktuLokal($s->created_at)->translatedFormat('d M Y'),
+        ];
     }
 
     private function arsipTersedia(): Builder
@@ -277,6 +474,7 @@ class ArsipController extends Controller
         ];
 
         return [
+            'tipe' => 'dokumen',
             'id' => $d->id,
             'nomor' => $d->nomor,
             'judul' => $d->judul,
@@ -339,14 +537,15 @@ class ArsipController extends Controller
             ->values();
     }
 
-    private function unitTersedia(): Collection
+    private function tahunSampel(int $userId): Collection
     {
-        return $this->arsipTersedia()
-            ->whereNotNull('dokumen.unit')
-            ->where('dokumen.unit', '!=', '')
+        return $this->sampelMilik($userId)
             ->distinct()
-            ->orderBy('dokumen.unit')
-            ->pluck('dokumen.unit');
+            ->pluck('sampel.tanggal_pengambilan')
+            ->map(fn ($tanggal) => Carbon::parse($tanggal)->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
     }
 
     private function urlKembali(): string

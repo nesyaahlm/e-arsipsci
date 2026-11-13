@@ -144,6 +144,10 @@
     margin-bottom: 18px;
 }
 
+.ud-stats--arsip {
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+}
+
 .ud-stat {
     display: flex;
     align-items: center;
@@ -197,11 +201,37 @@
     opacity: 0.75;
 }
 
-.ud-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    align-items: start;
+.ud-stat--utama {
+    gap: 14px;
+    padding: 16px 20px;
+    border-color: var(--ua-teal-dark);
+    background: linear-gradient(120deg, #277a72 0%, #3e8f88 100%);
+}
+
+.ud-stat--utama .ud-stat__icon {
+    width: 46px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.ud-stat--utama .ud-stat__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.ud-stat--utama .ud-stat__label,
+.ud-stat--utama .ud-stat__value,
+.ud-stat--utama .ud-stat__hint {
+    color: #fff;
+}
+
+.ud-stat--utama .ud-stat__value {
+    font-size: 32px;
+}
+
+.ud-stat--utama .ud-stat__hint {
+    opacity: 0.9;
 }
 
 .ud-panel__title {
@@ -253,6 +283,11 @@
     height: 16px;
 }
 
+.ud-item--sampel .ud-item__icon {
+    background: var(--ua-yellow);
+    color: #6b5400;
+}
+
 .ud-item__body {
     flex: 1;
     display: flex;
@@ -269,8 +304,26 @@
 
 .ud-item__meta {
     font-size: 11.5px;
-    line-height: 1.35;
+    line-height: 1.5;
     color: var(--ua-active);
+}
+
+.ud-jenis {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 7px;
+    border-radius: 5px;
+    background: var(--ua-mint);
+    color: var(--ua-teal-dark);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.ud-item--sampel .ud-jenis {
+    background: var(--ua-yellow);
+    color: #6b5400;
 }
 
 .ud-item__badge {
@@ -294,9 +347,13 @@
     text-align: center;
 }
 
-@media (max-width: 991.98px) {
-    .ud-columns {
-        grid-template-columns: minmax(0, 1fr);
+@media (max-width: 767.98px) {
+    .ud-stats--arsip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ud-stats--arsip .ud-stat--utama {
+        grid-column: 1 / -1;
     }
 }
 
@@ -320,6 +377,10 @@
 
     .ud-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ud-stat--utama .ud-stat__value {
+        font-size: 28px;
     }
 
     .ud-item {

@@ -8,12 +8,65 @@ use App\Models\Layanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SampelController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return redirect()->route('user.sampel.create');
+        $kata = trim((string) $request->query('q', ''));
+
+        $sampel = Sampel::with('layanan:id,nama')
+            ->where('diunggah_oleh', Auth::id())
+            ->when($kata !== '', function ($query) use ($kata) {
+                $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $kata).'%';
+
+                $query->where(function ($cari) use ($like) {
+                    $cari->whereRaw("kode_sampel LIKE ? ESCAPE '!'", [$like])
+                        ->orWhereRaw("nama_sampel LIKE ? ESCAPE '!'", [$like])
+                        ->orWhereRaw("analysis_for LIKE ? ESCAPE '!'", [$like]);
+                });
+            })
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
+
+        $layananList = Layanan::orderBy('nama')->get();
+
+        return view('user.sampel.index', compact('sampel', 'kata', 'layananList'));
+    }
+
+    public function show(int $sampel)
+    {
+        $data = Sampel::with('layanan:id,nama')
+            ->where('diunggah_oleh', Auth::id())
+            ->findOrFail($sampel);
+
+        $fotoAda = filled($data->foto_path)
+            && Storage::disk('public')->exists($data->foto_path);
+
+        return view('user.sampel.show', [
+            'sampel' => $data,
+            'fotoAda' => $fotoAda,
+        ]);
+    }
+
+    public function foto(int $sampel)
+    {
+        $data = Sampel::where('diunggah_oleh', Auth::id())->findOrFail($sampel);
+
+        abort_unless(filled($data->foto_path) && Storage::disk('public')->exists($data->foto_path), 404);
+
+        $ekstensi = strtolower(pathinfo($data->foto_path, PATHINFO_EXTENSION));
+
+        abort_unless(in_array($ekstensi, ['jpg', 'jpeg', 'png'], true), 404);
+
+        return response()->file(Storage::disk('public')->path($data->foto_path), [
+            'Content-Type' => $ekstensi === 'png' ? 'image/png' : 'image/jpeg',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-cache, must-revalidate',
+        ]);
     }
 
     public function create()
@@ -88,6 +141,6 @@ class SampelController extends Controller
             'created_at' => now(),
         ]);
 
-        return redirect()->route('user.sampel.create')->with('success', 'Data sampel ' . $sampel->kode_sampel . ' berhasil dicatat!');
+        return redirect()->route('user.sampel.index')->with('success', 'Data sampel ' . $sampel->kode_sampel . ' berhasil dicatat!');
     }
 }
