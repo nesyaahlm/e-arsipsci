@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\JenisDokumenController;
 use App\Http\Controllers\Admin\KelolaController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\LogArsipController;
+use App\Http\Controllers\Admin\BagianController;
 use App\Http\Controllers\Admin\SampelController as AdminSampelController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
@@ -53,6 +54,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
+
+    Route::get('/bagian', [BagianController::class, 'index'])->name('bagian.index');
+    Route::post('/bagian', [BagianController::class, 'store'])->name('bagian.store');
+    Route::put('/bagian/{bagian}', [BagianController::class, 'update'])->name('bagian.update');
+    Route::delete('/bagian/{bagian}', [BagianController::class, 'destroy'])->name('bagian.destroy');
 
     Route::post('/jenis-dokumen', [JenisDokumenController::class, 'store'])->name('jenis.store');
     Route::put('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'update'])->name('jenis.update');
