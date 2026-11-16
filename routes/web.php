@@ -79,6 +79,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/sampel', [AdminSampelController::class, 'store'])->name('admin.sampel.store');
     Route::get('/sampel/{sampel}', [AdminSampelController::class, 'show'])->whereNumber('sampel')->name('admin.sampel.show');
     Route::get('/sampel/{id}/edit', [AdminSampelController::class, 'edit'])->name('admin.sampel.edit');
+    Route::get('/sampel/{id}/cetak-label', [AdminSampelController::class, 'cetakLabel'])->name('admin.sampel.cetak-label');
     Route::put('/sampel/{id}', [AdminSampelController::class, 'update'])->name('admin.sampel.update');
     Route::delete('/sampel/{sampel}', [AdminSampelController::class, 'destroy'])->whereNumber('sampel')->name('admin.sampel.destroy');
 
