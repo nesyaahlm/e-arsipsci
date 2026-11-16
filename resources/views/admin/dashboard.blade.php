@@ -23,20 +23,21 @@
         </form>
     </div>
 
+    {{-- Statistik diubah menjadi 3 kolom (col-lg-4) karena card Jenis Dokumen dihapus --}}
     <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <a href="{{ route('dokumen.index') }}" class="text-decoration-none">
                 <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     <div class="card-body p-3">
                         <div class="small text-primary fw-semibold mb-1">Dokumen Terarsip</div>
                         <div class="h4 fw-bold text-primary mb-1">{{ $totalDokumen }}</div>
-                        <div class="small text-muted" style="font-size: 0.78rem;">Semua Layanan</div>
+                        <div class="small text-muted" style="font-size: 0.78rem;">Semua Bagian</div>
                     </div>
                 </div>
             </a>
         </div>
 
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <a href="{{ route('dokumen.index') }}" class="text-decoration-none">
                 <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     <div class="card-body p-3">
@@ -48,54 +49,43 @@
             </a>
         </div>
 
-        <div class="col-12 col-sm-6 col-lg-3">
-            <a href="{{ route('layanan.index') }}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    <div class="card-body p-3">
-                        <div class="small text-primary fw-semibold mb-1">Jenis Dokumen</div>
-                        <div class="h4 fw-bold text-primary mb-1">{{ $totalJenis }}</div>
-                        <div class="small text-muted" style="font-size: 0.78rem;">Di {{ $totalLayanan }} Layanan</div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <a href="{{ route('admin.sampel.index') }}" class="text-decoration-none">
                 <div class="card h-100 shadow-sm rounded-4 card-hover" style="border: 1.5px solid #cfdedb; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     <div class="card-body p-3">
                         <div class="small text-primary fw-semibold mb-1">Sampel Terarsip</div>
                         <div class="h4 fw-bold text-primary mb-1">{{ $totalSampel }}</div>
-                        <div class="small text-muted" style="font-size: 0.78rem;">Semua Layanan</div>
+                        <div class="small text-muted" style="font-size: 0.78rem;">Semua Bagian</div>
                     </div>
                 </div>
             </a>
         </div>
     </div>
 
+    {{-- Grafik Dokumen per Bagian tetap dipertahankan --}}
     @php
-        $maks = max(1, $daftarLayanan->max('dokumen_count'));
+        $maks = max(1, $daftarBagian->max('dokumen_count'));
     @endphp
 
     <div class="card shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
         <div class="card-body p-4">
-            <h2 class="h5 fw-bold text-primary mb-4">Dokumen per layanan</h2>
+            <h2 class="h5 fw-bold text-primary mb-4">Dokumen per Bagian</h2>
 
-            @foreach ($daftarLayanan as $layanan)
+            @foreach ($daftarBagian as $bagian)
                 <div class="d-flex align-items-center gap-3 mb-3">
                     <div class="text-secondary fw-semibold" style="width: 120px; font-size: 0.95rem;">
-                        {{ $layanan->nama }}
+                        {{ $bagian->nama }}
                     </div>
 
                     <div class="progress flex-grow-1 rounded-pill" style="height: 12px; background-color: #e9ecef;">
                         <div class="progress-bar rounded-pill"
                              role="progressbar"
-                             style="width: {{ ($layanan->dokumen_count / $maks) * 100 }}%; background-color: #5aa89b;">
+                             style="width: {{ ($bagian->dokumen_count / $maks) * 100 }}%; background-color: #5aa89b;">
                         </div>
                     </div>
 
                     <div class="fw-bold text-secondary text-end" style="width: 35px; font-size: 0.95rem;">
-                        {{ $layanan->dokumen_count }}
+                        {{ $bagian->dokumen_count }}
                     </div>
                 </div>
             @endforeach

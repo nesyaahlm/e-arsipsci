@@ -2,7 +2,7 @@
     $infoArsip = [
         ['Kode Sampel', $sampel->kode_sampel, 'fw-bold text-primary font-monospace'],
         ['Nama Sampel', $sampel->nama_sampel, ''],
-        ['Layanan', $sampel->layanan->nama ?? '-', ''],
+        ['Bagian', $sampel->bagian->nama ?? '-', ''],
         ['Tgl Masuk Arsip', $sampel->tanggal_masuk_arsip?->format('d/m/Y') ?? '-', ''],
         ['Nomor Ruang', $sampel->nomor_ruang_arsip, ''],
         ['Nama Ruang', $sampel->nama_ruang_arsip, ''],

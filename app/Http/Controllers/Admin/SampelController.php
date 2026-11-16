@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Layanan;
+use App\Models\Bagian;
 use App\Models\Sampel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +17,7 @@ class SampelController extends Controller
     {
         $cari = trim((string) $request->input('cari'));
 
-        $sampel = Sampel::with(['layanan', 'pengunggah'])
+        $sampel = Sampel::with(['bagian', 'pengunggah'])
             ->when($cari !== '', function ($query) use ($cari) {
                 $query->where(function ($q) use ($cari) {
                     $kolom = [
@@ -39,15 +39,15 @@ class SampelController extends Controller
                         $q->orWhere($nama, 'like', "%{$cari}%");
                     }
 
-                    $q->orWhereHas('layanan', function ($l) use ($cari) {
-                        $l->where('nama', 'like', "%{$cari}%");
+                    $q->orWhereHas('bagian', function ($b) use ($cari) {
+                        $b->where('nama', 'like', "%{$cari}%");
                     })->orWhereHas('pengunggah', function ($u) use ($cari) {
                         $u->where('name', 'like', "%{$cari}%");
                     });
                 });
             })
-            ->when($request->filled('layanan'), function ($query) use ($request) {
-                $query->where('layanan_id', $request->input('layanan'));
+            ->when($request->filled('bagian_id'), function ($query) use ($request) {
+                $query->where('bagian_id', $request->input('bagian_id'));
             })
             ->orderByDesc('tanggal_masuk_arsip')
             ->orderByDesc('id')
@@ -56,13 +56,13 @@ class SampelController extends Controller
 
         return view('admin.sampel.index', [
             'sampel' => $sampel,
-            'daftarLayanan' => Layanan::orderBy('nama')->get(),
+            'daftarBagian' => Bagian::orderBy('nama')->get(),
         ]);
     }
 
     public function show(Sampel $sampel): View
     {
-        $sampel->load(['layanan', 'pengunggah']);
+        $sampel->load(['bagian', 'pengunggah']);
 
         DB::table('log_aktivitas')->insert([
             'user_id' => Auth::id(),
@@ -78,9 +78,9 @@ class SampelController extends Controller
 
     public function create(): View
     {
-        $layananList = Layanan::orderBy('nama')->get();
+        $bagianList = Bagian::orderBy('nama')->get();
 
-        return view('admin.sampel.create', compact('layananList'));
+        return view('admin.sampel.create', compact('bagianList'));
     }
 
     public function store(Request $request)
@@ -112,14 +112,14 @@ class SampelController extends Controller
     public function edit($id): View
     {
         $sampel = Sampel::findOrFail($id);
-        $layananList = Layanan::orderBy('nama')->get();
+        $bagianList = Bagian::orderBy('nama')->get();
 
-        return view('admin.sampel.edit', compact('sampel', 'layananList'));
+        return view('admin.sampel.edit', compact('sampel', 'bagianList'));
     }
 
     public function cetakLabel($id): View
     {
-        $sampel = Sampel::with(['layanan', 'pengunggah'])->findOrFail($id);
+        $sampel = Sampel::with(['bagian', 'pengunggah'])->findOrFail($id);
 
         DB::table('log_aktivitas')->insert([
             'user_id' => Auth::id(),
@@ -195,7 +195,7 @@ class SampelController extends Controller
             'tanggal_pengambilan' => ['required', 'date'],
             'tempat_pengambilan' => ['required', 'string', 'max:255'],
             'analysis_for' => ['required', 'string', 'max:255'],
-            'layanan_id' => ['required', 'exists:layanan,id'],
+            'bagian_id' => ['required', 'exists:bagian,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
             'nama_ruang_arsip' => ['required', 'string', 'max:100'],
             'tanggal_masuk_arsip' => ['required', 'date'],
@@ -213,8 +213,8 @@ class SampelController extends Controller
             'tanggal_pengambilan.required' => 'Tanggal pengambilan sampel wajib diisi.',
             'tempat_pengambilan.required' => 'Tempat pengambilan sampel wajib diisi.',
             'analysis_for.required' => 'Tujuan analisis wajib diisi.',
-            'layanan_id.required' => 'Layanan wajib dipilih.',
-            'layanan_id.exists' => 'Layanan yang dipilih tidak valid.',
+            'bagian_id.required' => 'Bagian wajib dipilih.',
+            'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',

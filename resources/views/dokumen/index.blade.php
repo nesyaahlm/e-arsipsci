@@ -12,7 +12,7 @@
             <span class="fw-semibold">Unggah Dokumen</span>
         </button>
     </div>
-    
+
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show rounded-3 small mb-4 shadow-sm border-0 d-flex align-items-center justify-content-between" style="background-color: #e8f5e9; color: #1e4620;" role="alert">
             <div class="d-flex align-items-center gap-2">
@@ -27,7 +27,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    
+
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show rounded-3 small mb-4 shadow-sm border-0 d-flex align-items-center justify-content-between" style="background-color: #fde8e8; color: #9b1c1c;" role="alert">
             <div class="d-flex align-items-center gap-2">
@@ -43,7 +43,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    
+
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show rounded-3 small mb-4 shadow-sm border-0" style="background-color: #fde8e8; color: #9b1c1c;" role="alert">
             <div class="d-flex align-items-center gap-2 mb-2">
@@ -62,11 +62,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    
+
     <div class="card shadow-sm rounded-4 mb-4" style="border: 1.5px solid #cfdedb;">
         <div class="card-body p-3">
             <form method="GET" action="{{ route('dokumen.index') }}" class="row g-2 align-items-center">
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-md-7">
                     <label class="form-label small text-muted fw-semibold mb-1">Cari</label>
                     <div class="position-relative">
                         <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted">
@@ -78,27 +78,17 @@
                         <input type="text" name="cari" value="{{ request('cari') }}" class="form-control ps-5 rounded-3" placeholder="Nomor atau judul dokumen">
                     </div>
                 </div>
-    
-                <div class="col-12 col-md-3">
-                    <label class="form-label small text-muted fw-semibold mb-1">Layanan</label>
-                    <select name="layanan_id" class="form-select rounded-3" onchange="this.form.submit()">
-                        <option value="">Semua Layanan</option>
-                        @foreach($layananList as $lay)
-                            <option value="{{ $lay->id }}" {{ request('layanan_id') == $lay->id ? 'selected' : '' }}>{{ $lay->nama }}</option>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label small text-muted fw-semibold mb-1">Bagian</label>
+                    <select name="bagian_id" class="form-select rounded-3" onchange="this.form.submit()">
+                        <option value="">Semua Bagian</option>
+                        @foreach($bagianList as $bag)
+                            <option value="{{ $bag->id }}" {{ request('bagian_id') == $bag->id ? 'selected' : '' }}>{{ $bag->nama }}</option>
                         @endforeach
                     </select>
                 </div>
-    
-                <div class="col-12 col-md-3">
-                    <label class="form-label small text-muted fw-semibold mb-1">Jenis Dokumen</label>
-                    <select name="jenis_dokumen_id" class="form-select rounded-3" onchange="this.form.submit()">
-                        <option value="">Semua Jenis</option>
-                        @foreach($jenisList as $jns)
-                            <option value="{{ $jns->id }}" {{ request('jenis_dokumen_id') == $jns->id ? 'selected' : '' }}>{{ $jns->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-    
+
                 <div class="col-12 col-md-1 d-flex align-items-end">
                     <div class="w-100">
                         <label class="form-label small text-white d-none d-md-block mb-1">&nbsp;</label>
@@ -113,7 +103,7 @@
             </form>
         </div>
     </div>
-    
+
     <div class="row g-4 align-items-start">
         <div id="kolomTabel" class="col-12 transition-all">
             <div class="card shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
@@ -123,7 +113,7 @@
                             <tr class="small fw-semibold">
                                 <th class="ps-4 py-3" style="min-width: 170px;">Nomor</th>
                                 <th class="py-3" style="min-width: 240px; white-space: normal;">Judul Dokumen</th>
-                                <th class="py-3" style="min-width: 160px;">Layanan / Jenis</th>
+                                <th class="py-3" style="min-width: 160px;">Bagian</th>
                                 <th class="py-3" style="min-width: 140px;">Tanggal / Retensi</th>
                                 <th class="py-3" style="min-width: 180px;">Lokasi Fisik</th>
                                 <th class="text-center pe-4 py-3" style="min-width: 140px;">Aksi</th>
@@ -138,7 +128,7 @@
                                     <td class="ps-4 fw-semibold text-primary font-monospace" style="font-size: 0.88rem;">
                                         {{ $item->nomor ?? '-' }}
                                     </td>
-    
+
                                     <td style="min-width: 240px; white-space: normal;">
                                         <a href="javascript:void(0)"
                                            class="fw-semibold text-decoration-none text-dark d-block btn-buka-preview"
@@ -154,19 +144,24 @@
                                             <span class="badge bg-light text-secondary border mt-1" style="font-size: 0.72rem;">Unit: {{ $item->unit }}</span>
                                         @endif
                                     </td>
-    
+
                                     <td>
-                                        <div class="fw-semibold text-dark" style="font-size: 0.88rem;">{{ $item->layanan->nama ?? '-' }}</div>
-                                        <small class="text-muted">{{ $item->jenisDokumen->nama ?? '-' }}</small>
+                                        @if($item->bagian)
+                                            <div class="fw-semibold text-dark" style="font-size: 0.88rem;">{{ $item->bagian->nama }}</div>
+                                            <small class="text-muted">Kode: {{ $item->bagian->kode }}</small>
+                                        @else
+                                            <div class="fw-semibold text-dark" style="font-size: 0.88rem;">{{ $item->layanan->nama ?? '-' }}</div>
+                                            <small class="text-muted">{{ $item->jenisDokumen->nama ?? '-' }}</small>
+                                        @endif
                                     </td>
-    
+
                                     <td>
                                         <div class="small text-dark">{{ $item->tanggal_dokumen ? $item->tanggal_dokumen->format('d/m/Y') : '-' }}</div>
                                         @if($item->retensi_sampai)
                                             <small class="text-muted">Retensi: {{ $item->retensi_sampai->format('d/m/Y') }}</small>
                                         @endif
                                     </td>
-    
+
                                     <td>
                                         @if($item->lokasi_arsip_fisik)
                                             <span class="badge bg-light text-dark border fw-medium" style="font-size: 0.78rem;">
@@ -176,7 +171,7 @@
                                             <span class="text-muted small">-</span>
                                         @endif
                                     </td>
-    
+
                                     <td class="text-center pe-4">
                                         <div class="d-inline-flex gap-1">
                                             <button type="button"
@@ -193,7 +188,7 @@
                                                     <circle cx="12" cy="12" r="3"></circle>
                                                 </svg>
                                             </button>
-    
+
                                             <a href="{{ route('dokumen.download', $item) }}" class="btn btn-sm btn-outline-secondary border-0" title="Unduh Berkas">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -201,7 +196,7 @@
                                                     <line x1="12" y1="15" x2="12" y2="3"></line>
                                                 </svg>
                                             </a>
-    
+
                                             <button type="button" class="btn btn-sm btn-outline-secondary border-0 btn-edit"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalUbah"
@@ -218,7 +213,7 @@
                                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                                 </svg>
                                             </button>
-    
+
                                             <button type="button" class="btn btn-sm btn-outline-danger border-0 btn-delete"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#modalHapus"
@@ -243,7 +238,7 @@
                         </tbody>
                     </table>
                 </div>
-    
+
                 @if($dokumen->hasPages())
                     <div class="card-footer bg-white border-0 py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
                         <div class="small text-muted">
@@ -256,7 +251,7 @@
                 @endif
             </div>
         </div>
-    
+
         <div id="panelDetail" class="col-12 col-lg-5 d-none">
             <div class="card shadow-sm rounded-4 position-sticky" style="top: 1rem; border: 1.5px solid #a3cfbb; background-color: #f7fcfa;">
                 <div class="card-body p-3">
@@ -269,10 +264,10 @@
                             Tutup
                         </a>
                     </div>
-    
+
                     <div class="mb-3 position-relative" style="height: 520px; background-color: #e9ecef; border-radius: 0.5rem; overflow: hidden; border: 1px solid #d1d5db;">
                         <iframe id="framePreview" src="" class="w-100 h-100 border-0" style="background-color: #fff; display: none;"></iframe>
-    
+
                         <div id="noticeNonPreview" class="w-100 h-100 flex-column align-items-center justify-content-center p-4 text-center bg-white" style="display: none;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2a7f72" stroke-width="1.5" class="mb-3">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -287,7 +282,7 @@
                             </a>
                         </div>
                     </div>
-    
+
                     <div class="d-flex gap-2">
                         <a id="btnDetailDownload" href="#" class="btn btn-primary rounded-3 px-3 py-2 flex-grow-1 text-center fw-semibold">
                             Unduh
@@ -303,7 +298,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="modal fade" id="modalUnggah" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -311,7 +306,7 @@
                     <h5 class="modal-title fw-bold text-primary">Unggah Dokumen Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-    
+
                 <form id="formUnggah" action="{{ route('dokumen.store') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
                     @csrf
                     <div class="modal-body p-4">
@@ -321,71 +316,64 @@
                                 <line x1="12" y1="16" x2="12" y2="12"></line>
                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
-                            <span><strong>Nomor Dokumen</strong> dan <strong>Masa Retensi</strong> akan dihasilkan secara otomatis oleh sistem berdasarkan jenis dokumen dan tanggal dokumen yang dipilih.</span>
+                            <span><strong>Nomor Dokumen</strong> dan <strong>Masa Retensi</strong> akan dihasilkan secara otomatis oleh sistem berdasarkan bagian dan tanggal dokumen yang dipilih.</span>
                         </div>
-    
+
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label small fw-semibold text-secondary">Judul Dokumen <span class="text-danger">*</span></label>
                                 <input type="text" name="judul" value="{{ old('judul') }}" class="form-control rounded-3" placeholder="Contoh: Laporan Hasil Uji Batubara Lot 2610-C" required>
                             </div>
-    
+
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold text-secondary">Layanan <span class="text-danger">*</span></label>
-                                <select name="layanan_id" id="modalLayanan" class="form-select rounded-3" required>
-                                    <option value="" disabled selected>Pilih Layanan</option>
-                                    @foreach($layananList as $lay)
-                                        <option value="{{ $lay->id }}" {{ old('layanan_id') == $lay->id ? 'selected' : '' }}>{{ $lay->nama }}</option>
+                                <label class="form-label small fw-semibold text-secondary">Bagian <span class="text-danger">*</span></label>
+                                <select name="bagian_id" id="modalBagian" class="form-select rounded-3" required>
+                                    <option value="" disabled selected>Pilih Bagian</option>
+                                    @foreach($bagianList as $bag)
+                                        <option value="{{ $bag->id }}" {{ old('bagian_id') == $bag->id ? 'selected' : '' }}>{{ $bag->nama }} ({{ $bag->kode }})</option>
                                     @endforeach
                                 </select>
                             </div>
-    
-                            <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold text-secondary">Jenis Dokumen <span class="text-danger">*</span></label>
-                                <select name="jenis_dokumen_id" id="modalJenis" class="form-select rounded-3" required>
-                                    <option value="" disabled selected>Pilih Layanan Terlebih Dahulu</option>
-                                </select>
-                            </div>
-    
+
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-secondary">Tanggal Dokumen <span class="text-danger">*</span></label>
                                 <input type="date" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', date('Y-m-d')) }}" class="form-control rounded-3" required>
                             </div>
-    
+
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-secondary">Unit Kerja</label>
                                 <input type="text" name="unit" value="{{ old('unit') }}" class="form-control rounded-3" placeholder="Contoh: Cilacap">
                             </div>
-    
+
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-secondary">Berkas File <span class="text-danger">*</span></label>
                                 <input type="file" name="file_dokumen" id="inputBerkasUnggah" class="form-control rounded-3" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" required>
                                 <div id="errorBerkasUnggah" class="text-danger small mt-1 fw-semibold" style="display: none;"></div>
                                 <small id="hintBerkasUnggah" class="text-muted" style="font-size: 0.72rem;">Format: PDF, DOCX, XLSX (Maks. 20MB)</small>
                             </div>
-    
-                            <div class="col-12 col-md-6">
+
+                            <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold text-secondary">Nomor Rak</label>
                                 <input type="text" name="nomor_rak" value="{{ old('nomor_rak') }}" class="form-control rounded-3" placeholder="Contoh: 01">
                             </div>
-    
-                            <div class="col-12 col-md-6">
+
+                            <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold text-secondary">No. Tingkat</label>
                                 <input type="text" name="no_tingkat" value="{{ old('no_tingkat') }}" class="form-control rounded-3" placeholder="Contoh: 2">
                             </div>
-    
-                            <div class="col-12 col-md-6">
+
+                            <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold text-secondary">No. Box File</label>
                                 <input type="text" name="no_box" value="{{ old('no_box') }}" class="form-control rounded-3" placeholder="Contoh: 04">
                             </div>
-    
+
                             <div class="col-12">
                                 <label class="form-label small fw-semibold text-secondary">Deskripsi / Isi Dokumen</label>
                                 <textarea name="deskripsi" class="form-control rounded-3" rows="2" placeholder="Contoh: - Kontrak Pengadaan">{{ old('deskripsi') }}</textarea>
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="modal-footer border-0 pt-0 pb-4 px-4">
                         <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" id="btnSubmitUnggah" class="btn btn-primary rounded-3 px-4">Unggah & Simpan</button>
@@ -394,7 +382,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="modal fade" id="modalUbah" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -405,7 +393,7 @@
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-    
+
                 <form id="formUbah" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
@@ -414,12 +402,12 @@
                             <label class="form-label small fw-semibold text-secondary">Judul Dokumen <span class="text-danger">*</span></label>
                             <input type="text" name="judul" id="editJudul" class="form-control rounded-3" required>
                         </div>
-    
+
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Unit Kerja</label>
                             <input type="text" name="unit" id="editUnit" class="form-control rounded-3" placeholder="Contoh: Cilacap">
                         </div>
-    
+
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary mb-1">Lokasi Arsip Fisik</label>
                             <div class="row g-2">
@@ -437,10 +425,10 @@
                                 </div>
                             </div>
                         </div>
-    
+
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary mb-1">Berkas Dokumen</label>
-    
+
                             <div id="boxFileSaatIni" class="p-3 mb-2 bg-light border rounded-3 align-items-center justify-content-between" style="display: none;">
                                 <div class="d-flex align-items-center gap-2 text-truncate me-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2a7f72" stroke-width="2" class="flex-shrink-0">
@@ -454,19 +442,19 @@
                                 </div>
                                 <span class="badge bg-white text-secondary border px-2 py-1" style="font-size: 0.72rem;">Tersimpan</span>
                             </div>
-    
+
                             <label class="form-label text-muted mb-1" style="font-size: 0.75rem;">Ganti Berkas Dokumen (Opsional)</label>
                             <input type="file" id="editFileInput" name="file_dokumen" class="form-control rounded-3" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg">
                             <div id="errorBerkasUbah" class="text-danger small mt-1 fw-semibold" style="display: none;"></div>
                             <small id="hintBerkasUbah" class="text-muted" style="font-size: 0.72rem;">Format: PDF, DOCX, XLSX (Maks. 20MB). Kosongkan jika tidak ingin mengganti berkas.</small>
                         </div>
-    
+
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Deskripsi / Isi Dokumen</label>
                             <textarea name="deskripsi" id="editDeskripsi" class="form-control rounded-3" rows="2" placeholder="Contoh: - Kontrak Pengadaan"></textarea>
                         </div>
                     </div>
-    
+
                     <div class="modal-footer border-0 pt-0 pb-4 px-4">
                         <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary rounded-3 px-4">Simpan Perubahan</button>
@@ -475,7 +463,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="modal fade" id="modalHapus" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -487,7 +475,7 @@
                     </div>
                     <h5 class="fw-bold mb-2">Hapus Dokumen?</h5>
                     <p class="text-muted small mb-3">Dokumen <strong id="hapusNomor" class="text-dark"></strong> akan dipindahkan ke arsip sampah.</p>
-    
+
                     <form id="formHapus" method="POST">
                         @csrf
                         @method('DELETE')
@@ -500,7 +488,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="popupPeringatanUkuran" class="position-fixed top-0 start-0 w-100 h-100 d-none justify-content-center align-items-center" style="background-color: rgba(0, 0, 0, 0.55); z-index: 9999;">
         <div class="card border-0 shadow-lg rounded-4 p-4 text-center mx-3" style="max-width: 420px; width: 100%; background: #ffffff;">
             <div class="d-inline-flex align-items-center justify-content-center mx-auto mb-3 rounded-circle" style="width: 60px; height: 60px; background-color: #fee2e2; color: #dc2626;">
@@ -524,38 +512,9 @@
             </button>
         </div>
     </div>
-    
+
     @push('scripts')
     <script>
-        const masterLayanan = @json($layananList);
-    
-        const modalLayanan = document.getElementById('modalLayanan');
-        const modalJenis = document.getElementById('modalJenis');
-    
-        if (modalLayanan && modalJenis) {
-            modalLayanan.addEventListener('change', function () {
-                const layananId = parseInt(this.value);
-                const selectedLayanan = masterLayanan.find(l => l.id === layananId);
-    
-                modalJenis.innerHTML = '<option value="" disabled selected>Pilih Jenis Dokumen</option>';
-    
-                if (selectedLayanan && selectedLayanan.jenis_dokumen && selectedLayanan.jenis_dokumen.length > 0) {
-                    selectedLayanan.jenis_dokumen.forEach(jenis => {
-                        const opt = document.createElement('option');
-                        opt.value = jenis.id;
-                        opt.textContent = `${jenis.nama} (${jenis.kode})`;
-                        modalJenis.appendChild(opt);
-                    });
-                } else {
-                    const opt = document.createElement('option');
-                    opt.value = '';
-                    opt.disabled = true;
-                    opt.textContent = 'Tidak ada jenis dokumen untuk layanan ini';
-                    modalJenis.appendChild(opt);
-                }
-            });
-        }
-    
         const kolomTabel = document.getElementById('kolomTabel');
         const panelDetail = document.getElementById('panelDetail');
         const btnTutupDetail = document.getElementById('btnTutupDetail');
@@ -568,7 +527,7 @@
         const btnDetailDownload = document.getElementById('btnDetailDownload');
         const btnDetailUbah = document.getElementById('btnDetailUbah');
         const btnDetailHapus = document.getElementById('btnDetailHapus');
-    
+
         document.querySelectorAll('.btn-buka-preview').forEach(elem => {
             elem.addEventListener('click', function () {
                 const id = this.getAttribute('data-id');
@@ -577,15 +536,15 @@
                 const ekstensi = (this.getAttribute('data-ekstensi') || '').toLowerCase();
                 const downloadUrl = this.getAttribute('data-download');
                 const previewUrl = this.getAttribute('data-preview');
-    
+
                 kolomTabel.classList.remove('col-12');
                 kolomTabel.classList.add('col-12', 'col-lg-7');
                 panelDetail.classList.remove('d-none');
-    
+
                 previewNomor.textContent = nomor || '-';
                 previewJudul.textContent = judul;
                 btnDetailDownload.href = downloadUrl;
-    
+
                 if (ekstensi === 'pdf' || ['png', 'jpg', 'jpeg'].includes(ekstensi)) {
                     framePreview.style.display = 'block';
                     noticeNonPreview.style.display = 'none';
@@ -597,23 +556,23 @@
                     noticeJudulEkstensi.textContent = 'Berkas .' + ekstensi.toUpperCase();
                     btnNoticeDownload.href = downloadUrl;
                 }
-    
+
                 btnDetailUbah.onclick = function () {
                     const triggerBtn = document.querySelector(`.btn-edit[data-id="${id}"]`);
                     if (triggerBtn) triggerBtn.click();
                 };
-    
+
                 btnDetailHapus.onclick = function () {
                     const triggerBtn = document.querySelector(`.btn-delete[data-id="${id}"]`);
                     if (triggerBtn) triggerBtn.click();
                 };
-    
+
                 document.querySelectorAll('.baris-dokumen').forEach(row => row.classList.remove('table-success'));
                 const barisAktif = document.getElementById(`baris-${id}`);
                 if (barisAktif) barisAktif.classList.add('table-success');
             });
         });
-    
+
         btnTutupDetail.addEventListener('click', function () {
             framePreview.src = '';
             framePreview.style.display = 'none';
@@ -621,10 +580,10 @@
             panelDetail.classList.add('d-none');
             kolomTabel.classList.remove('col-lg-7');
             kolomTabel.classList.add('col-12');
-    
+
             document.querySelectorAll('.baris-dokumen').forEach(row => row.classList.remove('table-success'));
         });
-    
+
         document.querySelectorAll('.btn-edit').forEach(button => {
             button.addEventListener('click', function () {
                 const id = this.getAttribute('data-id');
@@ -634,38 +593,38 @@
                 const lokasi = this.getAttribute('data-lokasi') || '';
                 const deskripsi = this.getAttribute('data-deskripsi');
                 const file = this.getAttribute('data-file');
-    
+
                 document.getElementById('formUbah').action = `/dokumen/${id}`;
                 const editNomorDokumen = document.getElementById('editNomorDokumen');
                 if (editNomorDokumen) editNomorDokumen.textContent = nomor || '';
-    
+
                 document.getElementById('editJudul').value = judul || '';
                 document.getElementById('editUnit').value = unit || '';
                 document.getElementById('editDeskripsi').value = deskripsi || '';
-    
+
                 const matchRak = lokasi.match(/Rak\s*([^/]+)/i);
                 const matchTingkat = lokasi.match(/Tingkat\s*([^/]+)/i);
                 const matchBox = lokasi.match(/Box\s*([^/]+)/i);
-    
+
                 document.getElementById('editNomorRak').value = matchRak ? matchRak[1].trim() : (lokasi ? lokasi : '');
                 document.getElementById('editNoTingkat').value = matchTingkat ? matchTingkat[1].trim() : '';
                 document.getElementById('editNoBox').value = matchBox ? matchBox[1].trim() : '';
-    
+
                 const editFileInput = document.getElementById('editFileInput');
                 if (editFileInput) {
                     editFileInput.value = '';
                     editFileInput.classList.remove('is-invalid');
                 }
-    
+
                 const errorBerkasUbah = document.getElementById('errorBerkasUbah');
                 if (errorBerkasUbah) errorBerkasUbah.style.display = 'none';
-    
+
                 const hintBerkasUbah = document.getElementById('hintBerkasUbah');
                 if (hintBerkasUbah) hintBerkasUbah.style.display = 'block';
-    
+
                 const boxFileSaatIni = document.getElementById('boxFileSaatIni');
                 const editNamaFile = document.getElementById('editNamaFile');
-    
+
                 if (file) {
                     editNamaFile.textContent = file;
                     boxFileSaatIni.style.display = 'flex';
@@ -674,54 +633,50 @@
                 }
             });
         });
-    
+
         document.querySelectorAll('.btn-delete').forEach(button => {
             button.addEventListener('click', function () {
                 const id = this.getAttribute('data-id');
                 const nomor = this.getAttribute('data-nomor');
-    
+
                 document.getElementById('formHapus').action = `/dokumen/${id}`;
                 document.getElementById('hapusNomor').textContent = nomor || 'ini';
             });
         });
-    
+
         const formHapus = document.getElementById('formHapus');
         const btnSubmitHapus = document.getElementById('btnSubmitHapus');
         const modalHapus = document.getElementById('modalHapus');
-    
+
         if (formHapus && btnSubmitHapus) {
             formHapus.addEventListener('submit', function () {
                 btnSubmitHapus.disabled = true;
                 btnSubmitHapus.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Menghapus...';
             });
         }
-    
+
         if (modalHapus && btnSubmitHapus) {
             modalHapus.addEventListener('hidden.bs.modal', function () {
                 btnSubmitHapus.disabled = false;
                 btnSubmitHapus.innerHTML = 'Hapus';
             });
         }
-    
+
         const formUnggah = document.getElementById('formUnggah');
         const btnSubmitUnggah = document.getElementById('btnSubmitUnggah');
         const modalUnggah = document.getElementById('modalUnggah');
-    
+
         if (formUnggah && btnSubmitUnggah) {
             formUnggah.addEventListener('submit', function () {
                 btnSubmitUnggah.disabled = true;
                 btnSubmitUnggah.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Mengunggah...';
             });
         }
-    
+
         if (modalUnggah) {
             modalUnggah.addEventListener('hidden.bs.modal', function () {
                 if (formUnggah) {
                     formUnggah.reset();
-                    const modalJenis = document.getElementById('modalJenis');
-                    if (modalJenis) {
-                        modalJenis.innerHTML = '<option value="" disabled selected>Pilih Layanan Terlebih Dahulu</option>';
-                    }
                     const inputTanggal = formUnggah.querySelector('input[name="tanggal_dokumen"]');
                     if (inputTanggal) {
                         inputTanggal.value = new Date().toISOString().split('T')[0];
@@ -730,7 +685,7 @@
                         btnSubmitUnggah.disabled = false;
                         btnSubmitUnggah.innerHTML = 'Unggah & Simpan';
                     }
-    
+
                     const errorBerkasUnggah = document.getElementById('errorBerkasUnggah');
                     const hintBerkasUnggah = document.getElementById('hintBerkasUnggah');
                     const inputBerkasUnggah = document.getElementById('inputBerkasUnggah');
@@ -740,18 +695,18 @@
                 }
             });
         }
-    
+
         const popupPeringatanUkuran = document.getElementById('popupPeringatanUkuran');
         const btnTutupPopupUkuran = document.getElementById('btnTutupPopupUkuran');
         const namaBerkasPopup = document.getElementById('namaBerkasPopup');
         const ukuranBerkasPopup = document.getElementById('ukuranBerkasPopup');
-    
+
         if (btnTutupPopupUkuran && popupPeringatanUkuran) {
             btnTutupPopupUkuran.addEventListener('click', function () {
                 popupPeringatanUkuran.classList.remove('d-flex');
                 popupPeringatanUkuran.classList.add('d-none');
             });
-    
+
             popupPeringatanUkuran.addEventListener('click', function (e) {
                 if (e.target === popupPeringatanUkuran) {
                     popupPeringatanUkuran.classList.remove('d-flex');
@@ -759,7 +714,7 @@
                 }
             });
         }
-    
+
         function cekUkuranBerkas(inputEl, errorEl, hintEl) {
             if (!inputEl) return;
             inputEl.addEventListener('change', function () {
@@ -767,7 +722,7 @@
                     const file = this.files[0];
                     const maxBytes = 20 * 1024 * 1024;
                     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    
+
                     if (file.size > maxBytes) {
                         this.value = '';
                         this.classList.add('is-invalid');
@@ -776,7 +731,7 @@
                             errorEl.style.display = 'block';
                         }
                         if (hintEl) hintEl.style.display = 'none';
-    
+
                         if (popupPeringatanUkuran && namaBerkasPopup && ukuranBerkasPopup) {
                             namaBerkasPopup.textContent = `"${file.name}"`;
                             ukuranBerkasPopup.textContent = `${sizeMB} MB`;
@@ -794,13 +749,13 @@
                 }
             });
         }
-    
+
         cekUkuranBerkas(
             document.getElementById('inputBerkasUnggah'),
             document.getElementById('errorBerkasUnggah'),
             document.getElementById('hintBerkasUnggah')
         );
-    
+
         cekUkuranBerkas(
             document.getElementById('editFileInput'),
             document.getElementById('errorBerkasUbah'),
@@ -808,4 +763,4 @@
         );
     </script>
     @endpush
-    </x-admin.layout>
+</x-admin.layout>

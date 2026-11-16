@@ -37,6 +37,10 @@ class Dokumen extends Model
     {
         return $this->belongsTo(Layanan::class, 'layanan_id');
     }
+    public function bagian()
+    {
+        return $this->belongsTo(Bagian::class, 'bagian_id');
+    }
 
     public function jenisDokumen(): BelongsTo
     {
