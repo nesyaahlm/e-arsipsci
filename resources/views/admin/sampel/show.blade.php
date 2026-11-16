@@ -27,6 +27,7 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="{{ route('admin.sampel.cetak-label', $sampel->id) }}" target="_blank" class="btn btn-primary btn-sm fw-semibold px-3">Cetak Label</a>
             <a href="{{ route('admin.sampel.edit', $sampel->id) }}" class="btn btn-primary btn-sm fw-semibold px-3">Edit</a>
             <a href="{{ route('admin.sampel.index') }}" class="btn btn-outline-primary btn-sm fw-semibold px-3">Kembali</a>
         </div>

@@ -117,6 +117,22 @@ class SampelController extends Controller
         return view('admin.sampel.edit', compact('sampel', 'layananList'));
     }
 
+    public function cetakLabel($id): View
+    {
+        $sampel = Sampel::with(['layanan', 'pengunggah'])->findOrFail($id);
+
+        DB::table('log_aktivitas')->insert([
+            'user_id' => Auth::id(),
+            'aktivitas' => 'mencetak_label_sampel',
+            'dokumen_id' => null,
+            'sampel_id' => $sampel->id,
+            'keterangan' => 'Mencetak label sampel ' . $sampel->nama_sampel,
+            'created_at' => now(),
+        ]);
+
+        return view('admin.sampel.cetak-label', compact('sampel'));
+    }
+
     public function update(Request $request, $id)
     {
         $sampel = Sampel::findOrFail($id);
