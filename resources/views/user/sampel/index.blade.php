@@ -103,7 +103,7 @@
                     'metode' => 'POST',
                     'sampel' => null,
                     'kembali' => route('user.sampel.index'),
-                    'layananList' => $layananList,
+                    'bagianList' => $bagianList,
                 ])
             </div>
         </div>
@@ -153,7 +153,7 @@
                     <thead>
                         <tr>
                             <th>Sampel</th>
-                            <th>Layanan</th>
+                            <th>bagian</th>
                             <th>Shipper</th>
                             <th>Tujuan Analisis</th>
                             <th>Ruang Arsip</th>
@@ -167,7 +167,7 @@
                                     <a href="{{ route('user.sampel.show', $item->id) }}">{{ $item->nama_sampel }}</a>
                                     <small>{{ $item->kode_sampel }}</small>
                                 </td>
-                                <td data-label="Layanan">{{ $item->layanan?->nama ?? '-' }}</td>
+                                <td data-label="bagian">{{ $item->bagian?->nama ?? '-' }}</td>
                                 <td data-label="Shipper">{{ filled($item->shipper) ? $item->shipper : '-' }}</td>
                                 <td data-label="Tujuan Analisis">{{ $item->analysis_for }}</td>
                                 <td data-label="Ruang Arsip">{{ $item->nama_ruang_arsip }} (No. {{ $item->nomor_ruang_arsip }})</td>
