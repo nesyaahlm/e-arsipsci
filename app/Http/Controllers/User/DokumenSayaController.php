@@ -141,8 +141,9 @@ class DokumenSayaController extends Controller
     private function kueri(int $userId): Builder
     {
         return DB::table('dokumen')
-            ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
-            ->join('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+            ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
+            ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+            ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.diunggah_oleh', $userId)
             ->select([
@@ -162,8 +163,8 @@ class DokumenSayaController extends Controller
                 'dokumen.retensi_sampai',
                 'dokumen.file_path',
                 'dokumen.created_at',
-                'layanan.nama as portofolio',
-                'jenis_dokumen.nama as jenis',
+                DB::raw('COALESCE(bagian.nama, layanan.nama) as portofolio'),
+                DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
             ]);
     }
 

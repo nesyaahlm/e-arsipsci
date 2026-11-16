@@ -389,8 +389,9 @@ class ArsipController extends Controller
     private function arsipTersedia(): Builder
     {
         return DB::table('dokumen')
-            ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
-            ->join('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+            ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
+            ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+            ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.status', 'disetujui');
     }
@@ -409,8 +410,8 @@ class ArsipController extends Controller
             'dokumen.no_box_file',
             'dokumen.lokasi_arsip_fisik',
             'dokumen.created_at',
-            'layanan.nama as layanan',
-            'jenis_dokumen.nama as jenis',
+            DB::raw('COALESCE(bagian.nama, layanan.nama) as layanan'),
+            DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
         ];
     }
 

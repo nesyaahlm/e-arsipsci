@@ -23,7 +23,7 @@
 
                 <form method="POST" action="{{ route('user.unggah.store') }}" enctype="multipart/form-data" id="form-unggah" autocomplete="off">
                     @csrf
-                    <fieldset class="ug-fieldset" @disabled($layanan === null)>
+                    <fieldset class="ug-fieldset">
                         <div class="modal-body p-4">
                             @if (session('error'))
                                 <div class="alert alert-danger alert-dismissible fade show rounded-3 small mb-3 shadow-sm border-0 d-flex align-items-center justify-content-between" style="background-color: #fde8e8; color: #9b1c1c;" role="alert">
@@ -60,11 +60,6 @@
                                 </div>
                             @endif
 
-                            @if ($layanan === null)
-                                <div class="alert alert-warning rounded-3 small mb-3 border-0" role="alert">
-                                    Akun Anda belum terhubung ke layanan, jadi belum bisa mengunggah dokumen. Hubungi admin untuk mengaturnya.
-                                </div>
-                            @endif
 
                             <div class="alert alert-light border rounded-3 p-3 small mb-3 text-secondary d-flex gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2a7f72" stroke-width="2" class="flex-shrink-0 mt-1">
@@ -73,8 +68,8 @@
                                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                 </svg>
                                 <span>
-                                    <strong>Nomor Dokumen</strong> dan <strong>Masa Retensi</strong> akan dihasilkan secara otomatis oleh sistem berdasarkan jenis dokumen dan tanggal dokumen yang dipilih.
-                                    <span class="d-block mt-1">Label box arsip: Portofolio mengikuti layanan akun Anda dan Isi diambil dari judul. Nomor Rak, No. Tingkat, dan No. Box File yang Anda isi langsung dicatat.</span>
+                                    <strong>Nomor Dokumen</strong> dan <strong>Masa Retensi</strong> akan dihasilkan secara otomatis oleh sistem berdasarkan bagian dan tanggal dokumen yang dipilih.
+                                    <span class="d-block mt-1">Label box arsip: Isi diambil dari judul. Nomor Rak, No. Tingkat, No. Box File, dan Tahun yang Anda isi langsung dicatat.</span>
                                 </span>
                             </div>
 
@@ -88,22 +83,14 @@
                                 </div>
 
                                 <div class="col-12 col-md-6">
-                                    <label for="layanan_id" class="form-label small fw-semibold text-secondary">Layanan <span class="text-danger">*</span></label>
-                                    <select id="layanan_id" class="form-select rounded-3" disabled>
-                                        <option>{{ $layanan?->nama ?? 'Belum terhubung ke layanan' }}</option>
-                                    </select>
-                                    <small class="text-muted" style="font-size: 0.72rem;">Layanan mengikuti akun Anda.</small>
-                                </div>
-
-                                <div class="col-12 col-md-6">
-                                    <label for="jenis_dokumen_id" class="form-label small fw-semibold text-secondary">Jenis Dokumen <span class="text-danger">*</span></label>
-                                    <select id="jenis_dokumen_id" name="jenis_dokumen_id" class="form-select rounded-3 @error('jenis_dokumen_id') is-invalid @enderror" required>
-                                        <option value="" disabled @selected(old('jenis_dokumen_id') === null)>Pilih Jenis Dokumen</option>
-                                        @foreach ($jenisList as $jenis)
-                                            <option value="{{ $jenis->id }}" @selected((string) old('jenis_dokumen_id') === (string) $jenis->id)>{{ $jenis->nama }} ({{ $jenis->kode }})</option>
+                                    <label for="bagian_id" class="form-label small fw-semibold text-secondary">Bagian <span class="text-danger">*</span></label>
+                                    <select id="bagian_id" name="bagian_id" class="form-select rounded-3 @error('bagian_id') is-invalid @enderror" required>
+                                        <option value="" disabled @selected(old('bagian_id') === null)>Pilih Bagian</option>
+                                        @foreach ($bagianList as $bag)
+                                            <option value="{{ $bag->id }}" @selected((string) old('bagian_id') === (string) $bag->id)>{{ $bag->nama }} ({{ $bag->kode }})</option>
                                         @endforeach
                                     </select>
-                                    @error('jenis_dokumen_id')
+                                    @error('bagian_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -131,16 +118,7 @@
                                     <small class="text-muted" style="font-size: 0.72rem;" data-file-hint>Format: PDF, DOCX, XLSX (Maks. 20MB)</small>
                                 </div>
 
-                                <div class="col-12 col-md-6">
-                                    <label for="tahun_arsip" class="form-label small fw-semibold text-secondary">Tahun</label>
-                                    <input type="text" id="tahun_arsip" name="tahun_arsip" value="{{ old('tahun_arsip') }}" maxlength="50" inputmode="numeric" class="form-control rounded-3 @error('tahun_arsip') is-invalid @enderror" placeholder="Contoh: 2026 dan 2027">
-                                    @error('tahun_arsip')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="text-muted" style="font-size: 0.72rem;">Kosongkan untuk memakai tahun dari tanggal dokumen.</small>
-                                </div>
-
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6 col-lg-3">
                                     <label for="nomor_rak" class="form-label small fw-semibold text-secondary">Nomor Rak</label>
                                     <input type="text" id="nomor_rak" name="nomor_rak" value="{{ old('nomor_rak') }}" maxlength="30" class="form-control rounded-3 @error('nomor_rak') is-invalid @enderror" placeholder="Contoh: 01">
                                     @error('nomor_rak')
@@ -148,7 +126,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6 col-lg-3">
                                     <label for="no_tingkat" class="form-label small fw-semibold text-secondary">No. Tingkat</label>
                                     <input type="text" id="no_tingkat" name="no_tingkat" value="{{ old('no_tingkat') }}" maxlength="30" class="form-control rounded-3 @error('no_tingkat') is-invalid @enderror" placeholder="Contoh: 2">
                                     @error('no_tingkat')
@@ -156,12 +134,21 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-6 col-lg-3">
                                     <label for="no_box" class="form-label small fw-semibold text-secondary">No. Box File</label>
                                     <input type="text" id="no_box" name="no_box" value="{{ old('no_box') }}" maxlength="30" class="form-control rounded-3 @error('no_box') is-invalid @enderror" placeholder="Contoh: 04">
                                     @error('no_box')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                </div>
+
+                                <div class="col-12 col-md-6 col-lg-3">
+                                    <label for="tahun_arsip" class="form-label small fw-semibold text-secondary">Tahun</label>
+                                    <input type="text" id="tahun_arsip" name="tahun_arsip" value="{{ old('tahun_arsip') }}" maxlength="50" inputmode="numeric" class="form-control rounded-3 @error('tahun_arsip') is-invalid @enderror" placeholder="Contoh: 2026 dan 2027">
+                                    @error('tahun_arsip')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted" style="font-size: 0.72rem;">Kosong = tahun tanggal dokumen.</small>
                                 </div>
 
                                 <div class="col-12">
