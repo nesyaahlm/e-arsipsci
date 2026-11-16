@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sampel;
+use App\Models\Bagian;
 use App\Models\Layanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class SampelController extends Controller
     {
         $kata = trim((string) $request->query('q', ''));
 
-        $sampel = Sampel::with('layanan:id,nama')
+        $sampel = Sampel::with('bagian:id,nama')
             ->where('diunggah_oleh', Auth::id())
             ->when($kata !== '', function ($query) use ($kata) {
                 $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $kata).'%';
@@ -33,13 +34,14 @@ class SampelController extends Controller
             ->withQueryString();
 
         $layananList = Layanan::orderBy('nama')->get();
+        $bagianList = Bagian::orderBy('nama')->get();
 
-        return view('user.sampel.index', compact('sampel', 'kata', 'layananList'));
+        return view('user.sampel.index', compact('sampel', 'kata', 'layananList', 'bagianList'));
     }
 
     public function show(int $sampel)
     {
-        $data = Sampel::with('layanan:id,nama')
+        $data = Sampel::with('bagian:id,nama')
             ->where('diunggah_oleh', Auth::id())
             ->findOrFail($sampel);
 
@@ -72,7 +74,8 @@ class SampelController extends Controller
     public function create()
     {
         $layananList = Layanan::orderBy('nama')->get();
-        return view('user.sampel.create', compact('layananList'));
+        $bagianList = Bagian::orderBy('nama')->get();
+        return view('user.sampel.create', compact('layananList', 'bagianList'));
     }
 
     public function store(Request $request)
@@ -86,7 +89,7 @@ class SampelController extends Controller
             'tanggal_pengambilan' => ['required', 'date'],
             'tempat_pengambilan' => ['required', 'string', 'max:255'],
             'analysis_for' => ['required', 'string', 'max:255'],
-            'layanan_id' => ['required', 'exists:layanan,id'],
+            'bagian_id' => ['required', 'exists:bagian,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
             'nama_ruang_arsip' => ['required', 'string', 'max:100'],
             'tanggal_masuk_arsip' => ['required', 'date'],
@@ -99,8 +102,8 @@ class SampelController extends Controller
             'tanggal_pengambilan.required' => 'Tanggal pengambilan sampel wajib diisi.',
             'tempat_pengambilan.required' => 'Tempat pengambilan sampel wajib diisi.',
             'analysis_for.required' => 'Tujuan analisis wajib diisi.',
-            'layanan_id.required' => 'Layanan wajib dipilih.',
-            'layanan_id.exists' => 'Layanan yang dipilih tidak valid.',
+            'bagian_id.required' => 'Bagian wajib dipilih.',
+            'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',
@@ -123,7 +126,7 @@ class SampelController extends Controller
             'tanggal_pengambilan' => $validated['tanggal_pengambilan'],
             'tempat_pengambilan' => $validated['tempat_pengambilan'],
             'analysis_for' => $validated['analysis_for'],
-            'layanan_id' => $validated['layanan_id'],
+            'bagian_id' => $validated['bagian_id'],
             'nomor_ruang_arsip' => $validated['nomor_ruang_arsip'],
             'nama_ruang_arsip' => $validated['nama_ruang_arsip'],
             'tanggal_masuk_arsip' => $validated['tanggal_masuk_arsip'],

@@ -26,8 +26,8 @@
                         <dd>{{ $sampel->nama_sampel }}</dd>
                     </div>
                     <div class="dk-info__item">
-                        <dt>Layanan</dt>
-                        <dd>{{ $sampel->layanan?->nama ?? '-' }}</dd>
+                        <dt>Bagian</dt>
+                        <dd>{{ $sampel->bagian?->nama ?? '-' }}</dd>
                     </div>
                     <div class="dk-info__item">
                         <dt>Tujuan Analisis</dt>
