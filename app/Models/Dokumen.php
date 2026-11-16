@@ -3,20 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Dokumen extends Model
 {
-    use SoftDeletes; 
+    use SoftDeletes;
 
     protected $table = 'dokumen';
 
     protected $fillable = [
         'nomor',
         'judul',
-        'layanan_id',
-        'jenis_dokumen_id',
+        'bagian_id',
         'unit',
         'tanggal_dokumen',
         'deskripsi',
@@ -33,18 +32,9 @@ class Dokumen extends Model
         'retensi_sampai' => 'date',
     ];
 
-    public function layanan(): BelongsTo
-    {
-        return $this->belongsTo(Layanan::class, 'layanan_id');
-    }
-    public function bagian()
+    public function bagian(): BelongsTo
     {
         return $this->belongsTo(Bagian::class, 'bagian_id');
-    }
-
-    public function jenisDokumen(): BelongsTo
-    {
-        return $this->belongsTo(JenisDokumen::class, 'jenis_dokumen_id');
     }
 
     public function pengunggah(): BelongsTo
