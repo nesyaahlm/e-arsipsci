@@ -17,6 +17,12 @@
             <h2 class="dk-section-title">Label Box Arsip</h2>
             <x-user.label-box :arsip="$dokumen" />
 
+            @if ($dokumen['lokasi_terisi'])
+                <div class="dk-actions">
+                    <a href="{{ route('user.dokumen-saya.label-box', $dokumen['id']) }}" class="ua-btn ua-btn--primary">Download Label Box</a>
+                </div>
+            @endif
+
             @if (! $dokumen['lokasi_terisi'] && filled($dokumen['lokasi_lama']))
                 <p class="dk-note">Catatan lokasi sebelumnya: {{ $dokumen['lokasi_lama'] }}</p>
             @endif

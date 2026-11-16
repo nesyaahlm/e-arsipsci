@@ -29,12 +29,22 @@
         @endif
     </form>
 
-    <p class="dk-count">
-        {{ $dokumen->total() }} dokumen
-        @if ($kata !== '')
-            untuk kata kunci "{{ $kata }}"
+    <div class="dk-bar">
+        <p class="dk-count">
+            {{ $dokumen->total() }} dokumen
+            @if ($kata !== '')
+                untuk kata kunci "{{ $kata }}"
+            @endif
+        </p>
+
+        @if ($jumlahLabel > 0)
+            <a href="{{ route('user.dokumen-saya.label-box-semua', array_filter(['q' => $kata])) }}" class="dk-bar__btn" title="Unduh label semua dokumen yang punya lokasi box dalam satu file PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Download Semua Label</span>
+                <span class="dk-bar__badge">{{ min($jumlahLabel, 100) }}</span>
+            </a>
         @endif
-    </p>
+    </div>
 
     @if ($dokumen->isEmpty())
         <p class="dk-none">
@@ -66,13 +76,16 @@
                                 <td data-label="Jenis">{{ $arsip['jenis'] }}</td>
                                 <td data-label="Lokasi Box">
                                     @if ($arsip['lokasi_terisi'])
-                                        <div class="dk-slots">
-                                            @foreach (['Kode Rak' => 'kode_rak', 'No. Rak' => 'nomor_rak', 'Tingkat' => 'no_tingkat', 'Box' => 'no_box_file'] as $nama => $kunci)
-                                                <span class="dk-slot">
-                                                    <span class="dk-slot__name">{{ $nama }}</span>
-                                                    <strong class="dk-slot__value">{{ filled($arsip[$kunci]) ? $arsip[$kunci] : '-' }}</strong>
-                                                </span>
-                                            @endforeach
+                                        <div class="dk-lokasi">
+                                            <div class="dk-slots">
+                                                @foreach (['No. Rak' => 'nomor_rak', 'Tingkat' => 'no_tingkat', 'Box' => 'no_box_file'] as $nama => $kunci)
+                                                    <span class="dk-slot">
+                                                        <span class="dk-slot__name">{{ $nama }}</span>
+                                                        <strong class="dk-slot__value">{{ filled($arsip[$kunci]) ? $arsip[$kunci] : '-' }}</strong>
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                            <a href="{{ route('user.dokumen-saya.label-box', $arsip['id']) }}" class="dk-label-btn">Download Label Box</a>
                                         </div>
                                     @elseif (filled($arsip['lokasi_lama']))
                                         {{ $arsip['lokasi_lama'] }}
@@ -90,4 +103,4 @@
 
         <x-user.pagination :paginator="$dokumen" />
     @endif
-</x-layouts.user>
+</x-layouts.user>x

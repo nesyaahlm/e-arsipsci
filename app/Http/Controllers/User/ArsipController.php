@@ -467,7 +467,6 @@ class ArsipController extends Controller
         $lokasi = $this->petaLokasi($d);
 
         $slot = [
-            'Kode Rak' => $lokasi['kode_rak'],
             'No. Rak' => $lokasi['nomor_rak'],
             'Tingkat' => $lokasi['no_tingkat'],
             'Box' => $lokasi['no_box_file'],
@@ -507,7 +506,7 @@ class ArsipController extends Controller
             'nomor_rak' => $lokasi['nomor_rak'],
             'no_tingkat' => $lokasi['no_tingkat'],
             'no_box_file' => $lokasi['no_box_file'],
-            'lokasi_terisi' => collect($lokasi)->contains(fn ($nilai) => filled($nilai)),
+            'lokasi_terisi' => collect($lokasi)->except('kode_rak')->contains(fn ($nilai) => filled($nilai)),
             'lokasi_lama' => $d->lokasi_arsip_fisik,
             'unit_kerja' => $d->unit,
             'portofolio' => $d->layanan,

@@ -112,6 +112,17 @@
 
                         <div class="ug-row">
                             <div class="ug-field">
+                                <label for="tahun_arsip" class="ug-label">Tahun</label>
+                                <input type="text" id="tahun_arsip" name="tahun_arsip" value="{{ old('tahun_arsip') }}" maxlength="50" inputmode="numeric" autocomplete="off" placeholder="Contoh: 2026 dan 2027" class="ug-control @error('tahun_arsip') is-invalid @enderror">
+                                @error('tahun_arsip')
+                                    <p class="ug-error">{{ $message }}</p>
+                                @enderror
+                                <small class="ug-hint">Kosongkan untuk memakai tahun dari tanggal dokumen. Lebih dari satu tahun dipisah "dan" atau koma.</small>
+                            </div>
+                        </div>
+
+                        <div class="ug-row">
+                            <div class="ug-field">
                                 <label for="file_dokumen" class="ug-label">Berkas File <span class="ug-req">*</span></label>
                                 <input type="file" id="file_dokumen" name="file_dokumen" class="ug-control ug-control--file @error('file_dokumen') is-invalid @enderror" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required>
                                 <div class="ug-error ug-error--strong" data-file-error @if (! $errors->has('file_dokumen')) hidden @endif>{{ $errors->first('file_dokumen') }}</div>
@@ -157,7 +168,7 @@
 
                         <div class="ug-note">
                             <strong>Label box arsip</strong>
-                            <p>Portofolio mengikuti layanan akun Anda, Tahun diambil dari tanggal dokumen, dan Isi diambil dari judul. Kode Rak dapat ditetapkan admin; Nomor Rak, No. Tingkat, dan No. Box File yang Anda isi langsung dicatat.</p>
+                            <p>Portofolio mengikuti layanan akun Anda, Tahun dapat Anda isi sendiri (jika kosong diambil dari tanggal dokumen), dan Isi diambil dari judul. Nomor Rak, No. Tingkat, dan No. Box File yang Anda isi langsung dicatat.</p>
                         </div>
 
                         <div class="ug-actions">

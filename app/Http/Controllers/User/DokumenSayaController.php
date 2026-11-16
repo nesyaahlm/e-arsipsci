@@ -4,34 +4,38 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class DokumenSayaController extends Controller
 {
+    private const BATAS_LABEL = 100;
+
     public function index(Request $request): View
     {
         $kata = trim((string) $request->query('q', ''));
+        $userId = $request->user()->id;
 
-        $dokumen = $this->kueri($request->user()->id)
-            ->when($kata !== '', function (Builder $query) use ($kata) {
-                $query->where(function (Builder $cari) use ($kata) {
-                    $cari->where('dokumen.judul', 'like', '%'.$kata.'%')
-                        ->orWhere('dokumen.nomor', 'like', '%'.$kata.'%');
-                });
-            })
+        $dokumen = $this->kueriCari($userId, $kata)
             ->orderByDesc('dokumen.created_at')
             ->orderByDesc('dokumen.id')
             ->paginate(10)
             ->withQueryString()
             ->through(fn ($baris) => $this->susun($baris));
 
+        $jumlahLabel = $this->denganLokasi($this->kueriCari($userId, $kata))->count();
+
         return view('user.dokumen-saya.index', [
             'dokumen' => $dokumen,
             'kata' => $kata,
+            'jumlahLabel' => $jumlahLabel,
             ...app(UnggahDokumenController::class)->dataForm($request->user()),
         ]);
     }
@@ -49,6 +53,91 @@ class DokumenSayaController extends Controller
         ]);
     }
 
+    public function labelBox(Request $request, int $dokumen): Response
+    {
+        $baris = $this->kueri($request->user()->id)
+            ->where('dokumen.id', $dokumen)
+            ->first();
+
+        abort_if($baris === null, 404);
+
+        $data = $this->susun($baris);
+
+        abort_unless($data['lokasi_terisi'], 404);
+
+        $nama = trim((string) preg_replace('/[^A-Za-z0-9]+/', '-', (string) $data['nomor']), '-');
+        $nama = 'Label-Box-'.($nama !== '' ? $nama : $data['id']).'.pdf';
+
+        return $this->cetakLabel([$data], $nama);
+    }
+
+    public function labelBoxSemua(Request $request): Response|RedirectResponse
+    {
+        $kata = trim((string) $request->query('q', ''));
+
+        $daftar = $this->denganLokasi($this->kueriCari($request->user()->id, $kata))
+            ->orderByDesc('dokumen.created_at')
+            ->orderByDesc('dokumen.id')
+            ->limit(self::BATAS_LABEL)
+            ->get()
+            ->map(fn ($baris) => $this->susun($baris))
+            ->filter(fn ($data) => $data['lokasi_terisi'])
+            ->values()
+            ->all();
+
+        if ($daftar === []) {
+            return redirect()->route('user.dokumen-saya.index')
+                ->with('error', 'Belum ada dokumen yang memiliki lokasi box untuk dibuatkan label.');
+        }
+
+        $nama = 'Label-Box-Semua-'.now('Asia/Jakarta')->format('Ymd-His').'.pdf';
+
+        return $this->cetakLabel($daftar, $nama);
+    }
+
+    private function cetakLabel(array $daftar, string $nama): Response
+    {
+        @set_time_limit(120);
+
+        $html = view('user.dokumen-saya.label-pdf', ['daftar' => $daftar])->render();
+
+        $opsi = new Options;
+        $opsi->set('isRemoteEnabled', false);
+        $opsi->set('defaultFont', 'DejaVu Sans');
+
+        $pdf = new Dompdf($opsi);
+        $pdf->loadHtml($html, 'UTF-8');
+        $pdf->setPaper('A5', 'landscape');
+        $pdf->render();
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$nama.'"',
+        ]);
+    }
+
+    private function kueriCari(int $userId, string $kata): Builder
+    {
+        return $this->kueri($userId)
+            ->when($kata !== '', function (Builder $query) use ($kata) {
+                $query->where(function (Builder $cari) use ($kata) {
+                    $cari->where('dokumen.judul', 'like', '%'.$kata.'%')
+                        ->orWhere('dokumen.nomor', 'like', '%'.$kata.'%');
+                });
+            });
+    }
+
+    private function denganLokasi(Builder $kueri): Builder
+    {
+        return $kueri->where(function (Builder $lokasi) {
+            foreach (['dokumen.nomor_rak', 'dokumen.no_tingkat', 'dokumen.no_box_file'] as $kolom) {
+                $lokasi->orWhere(function (Builder $isi) use ($kolom) {
+                    $isi->whereNotNull($kolom)->where($kolom, '!=', '');
+                });
+            }
+        });
+    }
+
     private function kueri(int $userId): Builder
     {
         return DB::table('dokumen')
@@ -63,7 +152,7 @@ class DokumenSayaController extends Controller
                 'dokumen.deskripsi',
                 'dokumen.unit',
                 'dokumen.tanggal_dokumen',
-                'dokumen.kode_rak',
+                'dokumen.tahun_arsip',
                 'dokumen.nomor_rak',
                 'dokumen.no_tingkat',
                 'dokumen.no_box_file',
@@ -89,16 +178,15 @@ class DokumenSayaController extends Controller
             'judul' => $d->judul,
             'deskripsi' => $d->deskripsi,
             'jenis' => $d->jenis,
-            'kode_rak' => $d->kode_rak,
             'nomor_rak' => $d->nomor_rak,
             'no_tingkat' => $d->no_tingkat,
             'no_box_file' => $d->no_box_file,
-            'lokasi_terisi' => collect([$d->kode_rak, $d->nomor_rak, $d->no_tingkat, $d->no_box_file])
+            'lokasi_terisi' => collect([$d->nomor_rak, $d->no_tingkat, $d->no_box_file])
                 ->contains(fn ($nilai) => filled($nilai)),
             'lokasi_lama' => $d->lokasi_arsip_fisik,
             'unit_kerja' => $d->unit,
             'portofolio' => $d->portofolio,
-            'tahun' => $tanggal->year,
+            'tahun' => filled($d->tahun_arsip) ? $d->tahun_arsip : (string) $tanggal->year,
             'tanggal' => $tanggal->translatedFormat('d F Y'),
             'berkas' => $d->file_nama_asli,
             'ukuran' => $this->ukuran((int) $d->file_ukuran),

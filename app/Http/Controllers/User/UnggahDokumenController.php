@@ -44,6 +44,11 @@ class UnggahDokumenController extends Controller
                 Rule::exists('jenis_dokumen_layanan', 'jenis_dokumen_id')->where('layanan_id', $layanan->id),
             ],
             'tanggal_dokumen' => ['required', 'date'],
+            'tahun_arsip' => ['nullable', 'string', 'max:50', function ($atribut, $nilai, $gagal) {
+                if (! preg_match('/^(?:19|20)\d{2}(?:\s*(?:,|&|dan)\s*(?:19|20)\d{2})*$/i', trim((string) $nilai))) {
+                    $gagal('Format tahun tidak valid. Contoh: 2026 atau 2026 dan 2027.');
+                }
+            }],
             'unit' => ['nullable', 'string', 'max:100'],
             'nomor_rak' => ['nullable', 'string', 'max:30'],
             'no_tingkat' => ['nullable', 'string', 'max:30'],
@@ -99,6 +104,7 @@ class UnggahDokumenController extends Controller
         $nomorRak = $this->bersih($data['nomor_rak'] ?? null);
         $noTingkat = $this->bersih($data['no_tingkat'] ?? null);
         $noBox = $this->bersih($data['no_box'] ?? null);
+        $tahunArsip = $this->rapikanTahun($data['tahun_arsip'] ?? null);
 
         $lokasi = array_filter([
             $nomorRak !== null ? 'Rak '.$nomorRak : null,
@@ -108,7 +114,7 @@ class UnggahDokumenController extends Controller
 
         for ($percobaan = 1; ; $percobaan++) {
             try {
-                return DB::transaction(function () use ($userId, $layananId, $jenis, $data, $path, $namaAsli, $ukuran, $tanggal, $prefix, $retensi, $sekarang, $nomorRak, $noTingkat, $noBox, $lokasi) {
+                return DB::transaction(function () use ($userId, $layananId, $jenis, $data, $path, $namaAsli, $ukuran, $tanggal, $prefix, $retensi, $sekarang, $nomorRak, $noTingkat, $noBox, $lokasi, $tahunArsip) {
                     $terakhir = DB::table('dokumen')
                         ->where('nomor', 'like', $prefix.'%')
                         ->orderByDesc('nomor')
@@ -125,6 +131,7 @@ class UnggahDokumenController extends Controller
                         'jenis_dokumen_id' => $jenis->id,
                         'unit' => $this->bersih($data['unit'] ?? null),
                         'tanggal_dokumen' => $tanggal->toDateString(),
+                        'tahun_arsip' => $tahunArsip,
                         'deskripsi' => $this->bersih($data['deskripsi'] ?? null),
                         'file_path' => $path,
                         'file_nama_asli' => $namaAsli,
@@ -156,6 +163,25 @@ class UnggahDokumenController extends Controller
                 }
             }
         }
+    }
+
+    private function rapikanTahun(?string $nilai): ?string
+    {
+        if (! filled($nilai)) {
+            return null;
+        }
+
+        preg_match_all('/(?:19|20)\d{2}/', $nilai, $cocok);
+
+        $tahun = collect($cocok[0])->unique()->sort()->values();
+
+        if ($tahun->count() <= 1) {
+            return $tahun->first();
+        }
+
+        $akhir = $tahun->pop();
+
+        return $tahun->implode(', ').' dan '.$akhir;
     }
 
     private function bersih(?string $nilai): ?string
