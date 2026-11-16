@@ -18,6 +18,6 @@
         'metode' => 'PUT',
         'sampel' => $sampel,
         'kembali' => route('admin.sampel.index'),
-        'layananList' => $layananList,
+        'bagianList' => $bagianList,
     ])
 </x-admin.layout>

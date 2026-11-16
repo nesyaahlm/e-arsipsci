@@ -79,16 +79,16 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Layanan <span class="text-danger">*</span></label>
-                    <select name="layanan_id" class="form-select form-select-sm rounded-3 @error('layanan_id') is-invalid @enderror" required>
-                        <option value="" disabled {{ old('layanan_id', $sampel->layanan_id ?? '') == '' ? 'selected' : '' }}>Pilih Layanan</option>
-                        @foreach ($layananList as $layanan)
-                            <option value="{{ $layanan->id }}" {{ old('layanan_id', $sampel->layanan_id ?? '') == $layanan->id ? 'selected' : '' }}>
-                                {{ $layanan->nama }}
+                    <label class="form-label small fw-semibold text-secondary mb-1">Bagian <span class="text-danger">*</span></label>
+                    <select name="bagian_id" class="form-select form-select-sm rounded-3 @error('bagian_id') is-invalid @enderror" required>
+                        <option value="" disabled {{ old('bagian_id', $sampel->bagian_id ?? '') == '' ? 'selected' : '' }}>Pilih Bagian</option>
+                        @foreach ($bagianList as $bagian)
+                            <option value="{{ $bagian->id }}" {{ old('bagian_id', $sampel->bagian_id ?? '') == $bagian->id ? 'selected' : '' }}>
+                                {{ $bagian->nama }}
                             </option>
                         @endforeach
                     </select>
-                    @error('layanan_id')
+                    @error('bagian_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
