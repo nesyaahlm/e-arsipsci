@@ -137,7 +137,7 @@
 
 .dk-slots {
     display: inline-grid;
-    grid-template-columns: repeat(4, auto);
+    grid-auto-flow: column;
     border: 1px solid var(--ua-teal-dark);
     border-radius: 8px;
     overflow: hidden;
@@ -184,7 +184,7 @@
 
 .dk-label__top {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1px;
     background: var(--ua-teal-dark);
 }
@@ -494,7 +494,7 @@
 
 @media (max-width: 479.98px) {
     .dk-label__top {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .dk-label__row,
@@ -517,3 +517,93 @@
         text-align: center;
     }
 }
+
+.dk-lokasi {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.dk-label-btn {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid var(--ua-teal-dark);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ua-teal-dark);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dk-label-btn:hover {
+    background: var(--ua-mint);
+}
+
+.dk-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dk-bar .dk-count {
+    margin: 0;
+}
+
+.dk-bar__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ua-mint);
+    color: var(--ua-teal-dark);
+    font-family: var(--ua-font);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dk-bar__btn:hover {
+    background: var(--ua-teal-dark);
+    color: #fff;
+}
+
+.dk-bar__btn svg {
+    flex-shrink: 0;
+}
+
+.dk-bar__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ua-teal-dark);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.dk-bar__btn:hover .dk-bar__badge {
+    background: #fff;
+    color: var(--ua-teal-dark);
+}
+
+@media (max-width: 479.98px) {
+    .dk-bar__btn {
+        width: 100%;
+        justify-content: center;
+    }
+}   
