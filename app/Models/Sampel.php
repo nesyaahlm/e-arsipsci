@@ -3,13 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sampel extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'sampel';
 
     protected $fillable = [
@@ -21,7 +18,7 @@ class Sampel extends Model
         'tanggal_pengambilan',
         'tempat_pengambilan',
         'analysis_for',
-        'layanan_id',
+        'bagian_id',
         'nomor_ruang_arsip',
         'nama_ruang_arsip',
         'tanggal_masuk_arsip',
@@ -35,9 +32,9 @@ class Sampel extends Model
         'tanggal_masuk_arsip' => 'date',
     ];
 
-    public function layanan(): BelongsTo
+    public function bagian(): BelongsTo
     {
-        return $this->belongsTo(Layanan::class, 'layanan_id');
+        return $this->belongsTo(Bagian::class, 'bagian_id');
     }
 
     public function pengunggah(): BelongsTo

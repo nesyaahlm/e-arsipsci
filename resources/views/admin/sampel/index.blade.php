@@ -35,12 +35,12 @@
                 </div>
 
                 <div class="col-12 col-md-4">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Layanan</label>
-                    <select name="layanan" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Semua Layanan</option>
-                        @foreach ($daftarLayanan as $layanan)
-                            <option value="{{ $layanan->id }}" @selected(request('layanan') == $layanan->id)>
-                                {{ $layanan->nama }}
+                    <label class="form-label small fw-semibold text-secondary mb-1">Bagian</label>
+                    <select name="bagian_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Semua Bagian</option>
+                        @foreach ($daftarBagian as $bagian)
+                            <option value="{{ $bagian->id }}" @selected(request('bagian_id') == $bagian->id)>
+                                {{ $bagian->nama }}
                             </option>
                         @endforeach
                     </select>
@@ -61,7 +61,7 @@
                     <tr>
                         <th class="py-2 ps-3 text-center fw-bold">Kode Sampel</th>
                         <th class="py-2 text-center fw-bold">Nama Sampel</th>
-                        <th class="py-2 text-center fw-bold">Layanan</th>
+                        <th class="py-2 text-center fw-bold">Bagian</th>
                         <th class="py-2 text-center fw-bold">Tgl Masuk</th>
                         <th class="py-2 text-center fw-bold">Ruang Arsip</th>
                         <th class="py-2 text-center fw-bold">Diunggah Oleh</th>
@@ -71,14 +71,21 @@
                 <tbody>
                     @forelse ($sampel as $item)
                         <tr>
+                            {{-- Kode Sampel dikembalikan rata kiri --}}
                             <td class="ps-3 py-2 fw-bold text-dark font-monospace text-nowrap" style="font-size: 0.78rem;">{{ $item->kode_sampel }}</td>
+                            
                             <td class="py-2">
                                 <a href="{{ route('admin.sampel.show', $item) }}"
                                    class="fw-semibold text-success link-success link-underline link-underline-opacity-75"
                                    title="Lihat detail">{{ $item->nama_sampel }}</a>
                             </td>
-                            <td class="py-2">{{ $item->layanan->nama ?? '-' }}</td>
+
+                            {{-- Bagian tetap rata tengah --}}
+                            <td class="py-2 text-center">{{ $item->bagian->nama ?? '-' }}</td>
+
+                            {{-- Tgl Masuk tetap rata tengah --}}
                             <td class="py-2 text-center text-nowrap">{{ $item->tanggal_masuk_arsip?->format('d/m/Y') }}</td>
+
                             <td class="py-2">
                                 <span class="d-inline-block text-nowrap rounded border px-2 py-1"
                                       style="background-color: #f4f8f7; font-size: 0.75rem;">
@@ -88,6 +95,17 @@
                             <td class="py-2">{{ $item->pengunggah->name ?? '-' }}</td>
                             <td class="py-2 text-center pe-3">
                                 <div class="d-flex justify-content-center gap-1">
+                                    <a href="{{ route('admin.sampel.cetak-label', $item->id) }}"
+                                       target="_blank"
+                                       class="btn btn-outline-success d-flex align-items-center justify-content-center p-0"
+                                       style="width: 30px; height: 30px;" title="Cetak Label">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                            <rect x="6" y="14" width="12" height="8"></rect>
+                                        </svg>
+                                    </a>
+
                                     <a href="{{ route('admin.sampel.edit', $item->id) }}"
                                        class="btn btn-outline-primary d-flex align-items-center justify-content-center p-0"
                                        style="width: 30px; height: 30px;" title="Edit">
@@ -121,6 +139,7 @@
                         </tr>
                     @endforelse
                 </tbody>
+
             </table>
         </div>
     </div>

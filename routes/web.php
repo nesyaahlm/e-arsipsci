@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\JenisDokumenController;
 use App\Http\Controllers\Admin\KelolaController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\LogArsipController;
+use App\Http\Controllers\Admin\BagianController;
 use App\Http\Controllers\Admin\SampelController as AdminSampelController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
@@ -54,6 +55,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/layanan/{layanan}', [LayananController::class, 'update'])->name('layanan.update');
     Route::delete('/layanan/{layanan}', [LayananController::class, 'destroy'])->name('layanan.destroy');
 
+    Route::get('/bagian', [BagianController::class, 'index'])->name('bagian.index');
+    Route::post('/bagian', [BagianController::class, 'store'])->name('bagian.store');
+    Route::put('/bagian/{bagian}', [BagianController::class, 'update'])->name('bagian.update');
+    Route::delete('/bagian/{bagian}', [BagianController::class, 'destroy'])->name('bagian.destroy');
+
     Route::post('/jenis-dokumen', [JenisDokumenController::class, 'store'])->name('jenis.store');
     Route::put('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'update'])->name('jenis.update');
     Route::delete('/jenis-dokumen/{jenis}', [JenisDokumenController::class, 'destroy'])->name('jenis.destroy');
@@ -73,6 +79,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/sampel', [AdminSampelController::class, 'store'])->name('admin.sampel.store');
     Route::get('/sampel/{sampel}', [AdminSampelController::class, 'show'])->whereNumber('sampel')->name('admin.sampel.show');
     Route::get('/sampel/{id}/edit', [AdminSampelController::class, 'edit'])->name('admin.sampel.edit');
+    Route::get('/sampel/{id}/cetak-label', [AdminSampelController::class, 'cetakLabel'])->name('admin.sampel.cetak-label');
     Route::put('/sampel/{id}', [AdminSampelController::class, 'update'])->name('admin.sampel.update');
     Route::delete('/sampel/{sampel}', [AdminSampelController::class, 'destroy'])->whereNumber('sampel')->name('admin.sampel.destroy');
 

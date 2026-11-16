@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bagian;
 use App\Models\Dokumen;
-use App\Models\JenisDokumen;
-use App\Models\Layanan;
 use App\Models\LogAktivitas;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,7 +14,7 @@ class DokumenController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Dokumen::with(['layanan', 'jenisDokumen', 'pengunggah'])->latest();
+        $query = Dokumen::with(['bagian', 'layanan', 'jenisDokumen', 'pengunggah'])->latest();
 
         if ($request->filled('cari')) {
             $cari = $request->cari;
@@ -25,28 +24,22 @@ class DokumenController extends Controller
             });
         }
 
-        if ($request->filled('layanan_id')) {
-            $query->where('layanan_id', $request->layanan_id);
-        }
-
-        if ($request->filled('jenis_dokumen_id')) {
-            $query->where('jenis_dokumen_id', $request->jenis_dokumen_id);
+        if ($request->filled('bagian_id')) {
+            $query->where('bagian_id', $request->bagian_id);
         }
 
         $dokumen = $query->paginate(10)->withQueryString();
 
-        $layananList = Layanan::with('jenisDokumen')->orderBy('nama')->get();
-        $jenisList = JenisDokumen::orderBy('nama')->get();
+        $bagianList = Bagian::orderBy('nama')->get();
 
-        return view('dokumen.index', compact('dokumen', 'layananList', 'jenisList'));
+        return view('dokumen.index', compact('dokumen', 'bagianList'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
-            'layanan_id' => ['required', 'exists:layanan,id'],
-            'jenis_dokumen_id' => ['required', 'exists:jenis_dokumen,id'],
+            'bagian_id' => ['required', 'exists:bagian,id'],
             'tanggal_dokumen' => ['required', 'date'],
             'unit' => ['nullable', 'string', 'max:100'],
             'nomor_rak' => ['nullable', 'string', 'max:50'],
@@ -56,8 +49,8 @@ class DokumenController extends Controller
             'file_dokumen' => ['required', 'file', 'mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg', 'max:20480'],
         ], [
             'judul.required' => 'Judul dokumen wajib diisi.',
-            'layanan_id.required' => 'Layanan wajib dipilih.',
-            'jenis_dokumen_id.required' => 'Jenis dokumen wajib dipilih.',
+            'bagian_id.required' => 'Bagian wajib dipilih.',
+            'bagian_id.exists' => 'Bagian yang dipilih tidak ditemukan.',
             'tanggal_dokumen.required' => 'Tanggal dokumen wajib diisi.',
             'file_dokumen.required' => 'Berkas file dokumen wajib diunggah.',
             'file_dokumen.mimes' => 'Format berkas harus berupa PDF, DOC, DOCX, XLS, XLSX, PNG, atau JPG.',
@@ -65,11 +58,11 @@ class DokumenController extends Controller
         ]);
 
         try {
-            $jenisDokumen = JenisDokumen::findOrFail($request->jenis_dokumen_id);
-            $tanggalDokumen = Carbon::parse($request->tanggal_dokumen);
+            $bagian = Bagian::findOrFail($validated['bagian_id']);
+            $tanggalDokumen = Carbon::parse($validated['tanggal_dokumen']);
             $tahun = $tanggalDokumen->year;
 
-            $prefix = "{$jenisDokumen->kode}/CLC/{$tahun}/";
+            $prefix = "{$bagian->kode}/CLC/{$tahun}/";
             $dokumenTerakhir = Dokumen::withTrashed()
                 ->where('nomor', 'like', "{$prefix}%")
                 ->orderBy('id', 'desc')
@@ -82,11 +75,11 @@ class DokumenController extends Controller
                 $nomorUrut = intval($urutanTerakhir) + 1;
             }
 
-            $nomorOtomatis = sprintf("%s%04d", $prefix, $nomorUrut);
+            $nomorOtomatis = sprintf('%s%04d', $prefix, $nomorUrut);
 
             $retensiSampai = null;
-            if ($jenisDokumen->retensi_tahun) {
-                $retensiSampai = $tanggalDokumen->copy()->addYears($jenisDokumen->retensi_tahun);
+            if ($bagian->retensi_tahun) {
+                $retensiSampai = $tanggalDokumen->copy()->addYears($bagian->retensi_tahun);
             }
 
             $file = $request->file('file_dokumen');
@@ -94,23 +87,12 @@ class DokumenController extends Controller
             $ukuran = $file->getSize();
             $path = $file->store('dokumen', 'public');
 
-            $lokasiParts = [];
-            if ($request->filled('nomor_rak')) {
-                $lokasiParts[] = 'Rak ' . trim($request->nomor_rak);
-            }
-            if ($request->filled('no_tingkat')) {
-                $lokasiParts[] = 'Tingkat ' . trim($request->no_tingkat);
-            }
-            if ($request->filled('no_box')) {
-                $lokasiParts[] = 'Box ' . trim($request->no_box);
-            }
-            $lokasiArsipFisik = !empty($lokasiParts) ? implode(' / ', $lokasiParts) : null;
+            $lokasiArsipFisik = $this->susunLokasi($request);
 
             $dokumen = Dokumen::create([
                 'nomor' => $nomorOtomatis,
                 'judul' => $validated['judul'],
-                'layanan_id' => $validated['layanan_id'],
-                'jenis_dokumen_id' => $validated['jenis_dokumen_id'],
+                'bagian_id' => $bagian->id,
                 'unit' => $validated['unit'] ?? null,
                 'tanggal_dokumen' => $validated['tanggal_dokumen'],
                 'retensi_sampai' => $retensiSampai,
@@ -146,22 +128,10 @@ class DokumenController extends Controller
             'file_dokumen.max' => 'Ukuran berkas file dokumen melebihi batas maksimal 20 MB.',
         ]);
 
-        $lokasiParts = [];
-        if ($request->filled('nomor_rak')) {
-            $lokasiParts[] = 'Rak ' . trim($request->nomor_rak);
-        }
-        if ($request->filled('no_tingkat')) {
-            $lokasiParts[] = 'Tingkat ' . trim($request->no_tingkat);
-        }
-        if ($request->filled('no_box')) {
-            $lokasiParts[] = 'Box ' . trim($request->no_box);
-        }
-        $lokasiArsipFisik = !empty($lokasiParts) ? implode(' / ', $lokasiParts) : null;
-
         $updateData = [
             'judul' => $validated['judul'],
             'unit' => $validated['unit'] ?? null,
-            'lokasi_arsip_fisik' => $lokasiArsipFisik,
+            'lokasi_arsip_fisik' => $this->susunLokasi($request),
             'deskripsi' => $validated['deskripsi'] ?? null,
         ];
 
@@ -221,7 +191,24 @@ class DokumenController extends Controller
 
         return response()->file($filePath, [
             'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . $dokumen->file_nama_asli . '"'
+            'Content-Disposition' => 'inline; filename="' . $dokumen->file_nama_asli . '"',
         ]);
+    }
+
+    private function susunLokasi(Request $request): ?string
+    {
+        $bagian = [];
+
+        if ($request->filled('nomor_rak')) {
+            $bagian[] = 'Rak ' . trim($request->nomor_rak);
+        }
+        if ($request->filled('no_tingkat')) {
+            $bagian[] = 'Tingkat ' . trim($request->no_tingkat);
+        }
+        if ($request->filled('no_box')) {
+            $bagian[] = 'Box ' . trim($request->no_box);
+        }
+
+        return $bagian ? implode(' / ', $bagian) : null;
     }
 }

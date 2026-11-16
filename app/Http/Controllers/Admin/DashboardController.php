@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dokumen;
 use App\Models\Sampel;
 use App\Models\JenisDokumen;
-use App\Models\Layanan;
+use App\Models\Bagian; // <-- Ganti Layanan dengan Bagian
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -20,9 +20,8 @@ class DashboardController extends Controller
             'totalSampel' => Sampel::count(),
             'retensiDekat' => Dokumen::whereBetween('retensi_sampai', [$hariIni, $hariIni->copy()->addDays(60)])->count(),
             'totalJenis' => JenisDokumen::count(),
-            'totalLayanan' => Layanan::count(),
-            'daftarLayanan' => Layanan::withCount('dokumen')->orderBy('id')->get(),
-            
+            'totalBagian' => Bagian::count(), 
+            'daftarBagian' => Bagian::withCount('dokumen')->orderBy('id')->get(), 
         ]);
     }
 }

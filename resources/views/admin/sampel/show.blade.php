@@ -2,7 +2,7 @@
     $infoArsip = [
         ['Kode Sampel', $sampel->kode_sampel, 'fw-bold text-primary font-monospace'],
         ['Nama Sampel', $sampel->nama_sampel, ''],
-        ['Layanan', $sampel->layanan->nama ?? '-', ''],
+        ['Bagian', $sampel->bagian->nama ?? '-', ''],
         ['Tgl Masuk Arsip', $sampel->tanggal_masuk_arsip?->format('d/m/Y') ?? '-', ''],
         ['Nomor Ruang', $sampel->nomor_ruang_arsip, ''],
         ['Nama Ruang', $sampel->nama_ruang_arsip, ''],
@@ -27,6 +27,7 @@
         </div>
 
         <div class="d-flex gap-2">
+            <a href="{{ route('admin.sampel.cetak-label', $sampel->id) }}" target="_blank" class="btn btn-primary btn-sm fw-semibold px-3">Cetak Label</a>
             <a href="{{ route('admin.sampel.edit', $sampel->id) }}" class="btn btn-primary btn-sm fw-semibold px-3">Edit</a>
             <a href="{{ route('admin.sampel.index') }}" class="btn btn-outline-primary btn-sm fw-semibold px-3">Kembali</a>
         </div>
