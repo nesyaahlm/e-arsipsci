@@ -26,7 +26,8 @@
                         <dd>{{ $sampel->nama_sampel }}</dd>
                     </div>
                     <div class="dk-info__item">
-                        <dt>bagian</dt>
+
+                        <dt>Bagian</dt>
                         <dd>{{ $sampel->bagian?->nama ?? '-' }}</dd>
                     </div>
                     <div class="dk-info__item">

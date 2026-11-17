@@ -389,8 +389,13 @@ class ArsipController extends Controller
     private function arsipTersedia(): Builder
     {
         return DB::table('dokumen')
+
             ->join('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->join('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+// =======
+//             ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
+//             ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+//             ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.status', 'disetujui');
     }
@@ -410,7 +415,10 @@ class ArsipController extends Controller
             'dokumen.lokasi_arsip_fisik',
             'dokumen.created_at',
             'bagian.nama as bagian',
-            'jenis_dokumen.nama as jenis',
+            // 'jenis_dokumen.nama as jenis',
+
+            DB::raw('COALESCE(bagian.nama, bagian.nama) as bagian'),
+            // DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
         ];
     }
 
@@ -467,7 +475,6 @@ class ArsipController extends Controller
         $lokasi = $this->petaLokasi($d);
 
         $slot = [
-            'Kode Rak' => $lokasi['kode_rak'],
             'No. Rak' => $lokasi['nomor_rak'],
             'Tingkat' => $lokasi['no_tingkat'],
             'Box' => $lokasi['no_box_file'],
@@ -507,7 +514,7 @@ class ArsipController extends Controller
             'nomor_rak' => $lokasi['nomor_rak'],
             'no_tingkat' => $lokasi['no_tingkat'],
             'no_box_file' => $lokasi['no_box_file'],
-            'lokasi_terisi' => collect($lokasi)->contains(fn ($nilai) => filled($nilai)),
+            'lokasi_terisi' => collect($lokasi)->except('kode_rak')->contains(fn ($nilai) => filled($nilai)),
             'lokasi_lama' => $d->lokasi_arsip_fisik,
             'unit_kerja' => $d->unit,
             'portofolio' => $d->bagian,

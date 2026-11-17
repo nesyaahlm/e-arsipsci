@@ -18,6 +18,7 @@ class Dokumen extends Model
         'bagian_id',
         'unit',
         'tanggal_dokumen',
+        'tahun_arsip',
         'deskripsi',
         'file_path',
         'file_nama_asli',

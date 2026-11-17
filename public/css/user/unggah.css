@@ -540,3 +540,56 @@ textarea.ug-control {
         flex: 1 1 100%;
     }
 }
+/* Form dokumen User meniru tampilan form Admin (Bootstrap). Dibatasi ke .ug-admin-look agar halaman User lain tidak terpengaruh. */
+.ug-modal__dialog--lg {
+    --bs-modal-padding: 1rem;
+    --bs-modal-color: #212529;
+    --bs-modal-bg: #fff;
+    --bs-modal-border-color: rgba(0, 0, 0, 0.175);
+    --bs-modal-border-width: 1px;
+    --bs-modal-border-radius: 1rem;
+    --bs-modal-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --bs-modal-inner-border-radius: calc(1rem - 1px);
+    --bs-modal-header-padding-x: 1rem;
+    --bs-modal-header-padding-y: 1rem;
+    --bs-modal-header-padding: 1rem 1rem;
+    --bs-modal-header-border-color: #dee2e6;
+    --bs-modal-header-border-width: 1px;
+    --bs-modal-title-line-height: 1.5;
+    --bs-modal-footer-gap: 0.5rem;
+    --bs-modal-footer-bg: transparent;
+    --bs-modal-footer-border-color: #dee2e6;
+    --bs-modal-footer-border-width: 1px;
+    max-width: 800px;
+    background: #fff;
+}
+
+.ug-admin-look {
+    --bs-primary: #2a7f72;
+    --bs-primary-rgb: 42, 127, 114;
+    --bs-link-color: #2a7f72;
+    --bs-link-color-rgb: 42, 127, 114;
+    --bs-focus-ring-color: rgba(42, 127, 114, 0.25);
+}
+
+.ug-admin-look .btn-primary {
+    --bs-btn-bg: #2a7f72;
+    --bs-btn-border-color: #2a7f72;
+    --bs-btn-hover-bg: #236b60;
+    --bs-btn-hover-border-color: #236b60;
+    --bs-btn-active-bg: #1f5f56;
+    --bs-btn-active-border-color: #1f5f56;
+    --bs-btn-disabled-bg: #2a7f72;
+    --bs-btn-disabled-border-color: #2a7f72;
+    --bs-btn-focus-shadow-rgb: 42, 127, 114;
+}
+
+.ug-admin-look .form-control:focus,
+.ug-admin-look .form-select:focus {
+    border-color: #7fbfb4;
+    box-shadow: 0 0 0 0.25rem rgba(42, 127, 114, 0.2);
+}
+
+.ug-admin-look .ug-spinner {
+    margin-right: 8px;
+}

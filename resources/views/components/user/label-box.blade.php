@@ -1,7 +1,6 @@
 @props(['arsip', 'compact' => false])
 @php
     $lokasi = [
-        'Kode Rak' => $arsip['kode_rak'],
         'Nomor Rak' => $arsip['nomor_rak'],
         'No. Tingkat' => $arsip['no_tingkat'],
         'No. Box File' => $arsip['no_box_file'],

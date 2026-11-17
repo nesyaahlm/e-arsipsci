@@ -96,7 +96,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
+    Route::get('/dokumen-saya/label-box-semua', [DokumenSayaController::class, 'labelBoxSemua'])->name('user.dokumen-saya.label-box-semua');
     Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
+    Route::get('/dokumen-saya/{dokumen}/label-box', [DokumenSayaController::class, 'labelBox'])->whereNumber('dokumen')->name('user.dokumen-saya.label-box');
     Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
     Route::post('/unggah', [UnggahDokumenController::class, 'store'])->name('user.unggah.store');
     Route::get('/arsip', [ArsipController::class, 'index'])->name('user.arsip.index');

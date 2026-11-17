@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sampel;
-use App\Models\bagian;
+use App\Models\Bagian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +32,8 @@ class SampelController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $bagianList = bagian::orderBy('nama')->get();
+
+        $bagianList = Bagian::orderBy('nama')->get();
 
         return view('user.sampel.index', compact('sampel', 'kata', 'bagianList'));
     }
@@ -71,8 +72,9 @@ class SampelController extends Controller
 
     public function create()
     {
-        $bagianList = bagian::orderBy('nama')->get();
+        $bagianList = Bagian::orderBy('nama')->get();
         return view('user.sampel.create', compact('bagianList'));
+
     }
 
     public function store(Request $request)
@@ -99,8 +101,9 @@ class SampelController extends Controller
             'tanggal_pengambilan.required' => 'Tanggal pengambilan sampel wajib diisi.',
             'tempat_pengambilan.required' => 'Tempat pengambilan sampel wajib diisi.',
             'analysis_for.required' => 'Tujuan analisis wajib diisi.',
-            'bagian_id.required' => 'bagian wajib dipilih.',
-            'bagian_id.exists' => 'bagian yang dipilih tidak valid.',
+
+            'bagian_id.required' => 'Bagian wajib dipilih.',
+            'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',
