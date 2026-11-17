@@ -15,6 +15,7 @@ class User extends Authenticatable
     use Notifiable;
 
     protected $fillable = [
+        'cabang_id',
         'name',
         'email',
         'password',
@@ -36,9 +37,19 @@ class User extends Authenticatable
         ];
     }
 
+    public function cabang(): BelongsTo
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id');
+    }
+
     public function layanan(): BelongsTo
     {
         return $this->belongsTo(Layanan::class, 'layanan_id');
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin';
     }
 
     public function isAdmin(): bool

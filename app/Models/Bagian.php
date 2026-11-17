@@ -22,4 +22,9 @@ class Bagian extends Model
     {
         return $this->hasMany(Dokumen::class, 'bagian_id');
     }
+
+    public function kodeSurat(): HasMany
+    {
+        return $this->hasMany(KodeSurat::class, 'bagian_id');
+    }
 }
