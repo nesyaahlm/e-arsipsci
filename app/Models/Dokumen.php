@@ -44,6 +44,11 @@ class Dokumen extends Model
         return $this->belongsTo(Bagian::class, 'bagian_id');
     }
 
+    public function kodeSurat(): BelongsTo
+    {
+        return $this->belongsTo(KodeSurat::class, 'kode_surat_id');
+    }
+
     public function cabang(): BelongsTo
     {
         return $this->belongsTo(Cabang::class, 'cabang_id');
