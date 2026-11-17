@@ -32,17 +32,18 @@ class UserSeeder extends Seeder
             ['Hendra Wijaya', 'hendra.w@sucofindo.co.id', 'user', 'Inspeksi', 'aktif'],
         ];
 
-        foreach ($data as [$name, $email, $role, $namaLayanan, $status]) {
-            DB::table('users')->insert([
-                'name' => $name,
-                'email' => $email,
-                'password' => $password,
-                'role' => $role,
-                'layanan_id' => $namaLayanan ? $layanan[$namaLayanan] : null,
-                'status' => $status,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            foreach ($data as [$name, $email, $role, $namaLayanan, $status]) {
+            DB::table('users')->updateOrInsert(
+                ['email' => $email],
+                [
+                    'name' => $name,
+                    'password' => $password,
+                    'role' => $role,
+                    'layanan_id' => $namaLayanan ? $layanan[$namaLayanan] : null,
+                    'status' => $status,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-    }
 }
