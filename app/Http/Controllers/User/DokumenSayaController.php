@@ -50,6 +50,7 @@ class DokumenSayaController extends Controller
 
         return view('user.dokumen-saya.show', [
             'dokumen' => $this->susun($baris),
+            'kembali' => $this->urlKembali(),
         ]);
     }
 
@@ -87,10 +88,48 @@ class DokumenSayaController extends Controller
 
         if ($daftar === []) {
             return redirect()->route('user.dokumen-saya.index')
-                ->with('error', 'Belum ada dokumen yang memiliki lokasi box untuk dibuatkan label.');
+                ->with('label_error', 'Belum ada dokumen yang memiliki lokasi box untuk dibuatkan label.');
         }
 
         $nama = 'Label-Box-Semua-'.now('Asia/Jakarta')->format('Ymd-His').'.pdf';
+
+        return $this->cetakLabel($daftar, $nama);
+    }
+
+    public function labelBoxTerpilih(Request $request): Response|RedirectResponse
+    {
+        $ids = collect($request->input('ids', []))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return redirect()->route('user.dokumen-saya.index')
+                ->with('label_error', 'Pilih minimal satu dokumen untuk diunduh labelnya.');
+        }
+
+        if ($ids->count() > self::BATAS_LABEL) {
+            return redirect()->route('user.dokumen-saya.index')
+                ->with('label_error', 'Maksimal '.self::BATAS_LABEL.' label dalam sekali unduh.');
+        }
+
+        $daftar = $this->denganLokasi($this->kueri($request->user()->id))
+            ->whereIn('dokumen.id', $ids->all())
+            ->orderByDesc('dokumen.created_at')
+            ->orderByDesc('dokumen.id')
+            ->get()
+            ->map(fn ($baris) => $this->susun($baris))
+            ->filter(fn ($data) => $data['lokasi_terisi'])
+            ->values()
+            ->all();
+
+        if ($daftar === []) {
+            return redirect()->route('user.dokumen-saya.index')
+                ->with('label_error', 'Dokumen yang dipilih belum memiliki lokasi box untuk dibuatkan label.');
+        }
+
+        $nama = 'Label-Box-Terpilih-'.now('Asia/Jakarta')->format('Ymd-His').'.pdf';
 
         return $this->cetakLabel($daftar, $nama);
     }
@@ -142,7 +181,6 @@ class DokumenSayaController extends Controller
     {
         return DB::table('dokumen')
             ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
-            ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
             ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.diunggah_oleh', $userId)
@@ -164,7 +202,6 @@ class DokumenSayaController extends Controller
                 'dokumen.file_path',
                 'dokumen.created_at',
                 DB::raw('COALESCE(bagian.nama, layanan.nama) as portofolio'),
-                DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
             ]);
     }
 
@@ -178,7 +215,6 @@ class DokumenSayaController extends Controller
             'nomor' => $d->nomor,
             'judul' => $d->judul,
             'deskripsi' => $d->deskripsi,
-            'jenis' => $d->jenis,
             'nomor_rak' => $d->nomor_rak,
             'no_tingkat' => $d->no_tingkat,
             'no_box_file' => $d->no_box_file,
@@ -189,7 +225,9 @@ class DokumenSayaController extends Controller
             'portofolio' => $d->portofolio,
             'tahun' => filled($d->tahun_arsip) ? $d->tahun_arsip : (string) $tanggal->year,
             'tanggal' => $tanggal->translatedFormat('d F Y'),
-            'berkas' => $d->file_nama_asli,
+            'berkas' => filled($d->file_nama_asli) ? $d->file_nama_asli : basename((string) $d->file_path),
+            'tipe' => strtoupper(pathinfo((string) $d->file_path, PATHINFO_EXTENSION)) ?: '-',
+            'pratinjau_gambar' => strtolower(pathinfo((string) $d->file_path, PATHINFO_EXTENSION)) !== 'pdf',
             'ukuran' => $this->ukuran((int) $d->file_ukuran),
             'diunggah' => $diunggah->translatedFormat('d F Y'),
             'diunggah_singkat' => $diunggah->translatedFormat('d M Y'),
@@ -200,6 +238,22 @@ class DokumenSayaController extends Controller
             'bisa_pratinjau' => in_array(strtolower(pathinfo($d->file_path, PATHINFO_EXTENSION)), ['pdf', 'png', 'jpg', 'jpeg'], true)
                 && Storage::disk('public')->exists($d->file_path),
         ];
+    }
+
+    private function urlKembali(): string
+    {
+        // Kembali ke Cari Arsip (lengkap dengan filternya) bila user datang dari sana.
+        $arsip = route('user.arsip.index');
+        $sebelumnya = url()->previous();
+
+        if (
+            parse_url($sebelumnya, PHP_URL_PATH) === parse_url($arsip, PHP_URL_PATH)
+            && parse_url($sebelumnya, PHP_URL_HOST) === parse_url($arsip, PHP_URL_HOST)
+        ) {
+            return $sebelumnya;
+        }
+
+        return route('user.dokumen-saya.index');
     }
 
     private function ukuran(int $byte): string

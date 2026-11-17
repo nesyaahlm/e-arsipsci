@@ -25,6 +25,7 @@ class Dokumen extends Model
         'file_nama_asli',
         'file_ukuran',
         'lokasi_arsip_fisik',
+        'status',
         'diunggah_oleh',
         'retensi_sampai',
         'status_arsip',

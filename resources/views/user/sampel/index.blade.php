@@ -75,6 +75,68 @@
 
 @push('scripts')
     <script src="{{ asset('js/user/unggah.js') }}" defer></script>
+    <script>
+        (function () {
+            var form = document.querySelector('[data-label-form]');
+
+            if (!form) {
+                return;
+            }
+
+            var master = form.querySelector('[data-label-semua-halaman]');
+            var items = Array.prototype.slice.call(form.querySelectorAll('[data-label-item]'));
+            var button = document.querySelector('[data-label-terpilih]');
+            var badge = document.querySelector('[data-label-jumlah]');
+            var tombolMusnah = document.querySelector('[data-pemusnahan-terpilih]');
+            var jumlahMusnah = document.querySelector('[data-pemusnahan-jumlah]');
+
+            function sync() {
+                var picked = items.filter(function (box) { return box.checked; }).length;
+
+                items.forEach(function (box) {
+                    var row = box.closest('tr');
+                    if (row) {
+                        row.classList.toggle('is-picked', box.checked);
+                    }
+                });
+
+                if (master) {
+                    master.checked = picked > 0 && picked === items.length;
+                    master.indeterminate = picked > 0 && picked < items.length;
+                }
+
+                if (button) {
+                    button.disabled = picked === 0;
+                }
+
+                if (badge) {
+                    badge.textContent = picked;
+                }
+
+                if (tombolMusnah) {
+                    tombolMusnah.disabled = picked === 0;
+                }
+
+                if (jumlahMusnah) {
+                    jumlahMusnah.textContent = picked;
+                }
+            }
+
+            if (master) {
+                master.addEventListener('change', function () {
+                    items.forEach(function (box) { box.checked = master.checked; });
+                    sync();
+                });
+            }
+
+            items.forEach(function (box) {
+                box.addEventListener('change', sync);
+            });
+
+            window.addEventListener('pageshow', sync);
+            sync();
+        })();
+    </script>
 @endpush
 
 <x-layouts.user title="Sampel Saya">
@@ -89,6 +151,13 @@
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show alert-otomatis" role="alert">
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+        </div>
+    @endif
+
+    @if (session('error') || $errors->has('ids') || $errors->has('ids.*'))
+        <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
+            {{ session('error') ?? $errors->first('ids') ?? $errors->first('ids.*') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
@@ -120,12 +189,34 @@
         @endif
     </form>
 
-    <p class="dk-count">
-        {{ number_format($sampel->total(), 0, ',', '.') }} sampel
-        @if ($kata !== '')
-            untuk kata kunci "{{ $kata }}"
-        @endif
-    </p>
+    <div class="dk-bar">
+        <p class="dk-count">
+            {{ number_format($sampel->total(), 0, ',', '.') }} sampel
+            @if ($kata !== '')
+                untuk kata kunci "{{ $kata }}"
+            @endif
+        </p>
+
+        <div class="dk-bar__group">
+            @if ($jumlahLabel > 0)
+                <button type="submit" form="form-label-terpilih" class="dk-bar__btn dk-bar__btn--outline" data-label-terpilih disabled title="Unduh label hanya untuk sampel yang dicentang">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Unduh Terpilih</span>
+                    <span class="dk-bar__badge" data-label-jumlah>0</span>
+                </button>
+                <a href="{{ route('user.sampel.label-semua', array_filter(['q' => $kata])) }}" class="dk-bar__btn" title="Unduh label semua sampel{{ $kata !== '' ? ' hasil pencarian' : '' }} dalam satu file PDF">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Download Semua Label</span>
+                    <span class="dk-bar__badge">{{ min($jumlahLabel, 100) }}</span>
+                </a>
+            @endif
+
+            <button type="submit" form="form-label-terpilih" formaction="{{ route('pemusnahan.ajukan') }}" class="dk-bar__btn dk-bar__btn--outline" data-pemusnahan-terpilih disabled title="Masukkan sampel yang dicentang ke daftar pemusnahan">
+                <span>Pemusnahan</span>
+                <span class="dk-bar__badge" data-pemusnahan-jumlah>0</span>
+            </button>
+        </div>
+    </div>
 
     @if ($sampel->isEmpty())
         <div class="ua-card ar-empty">
@@ -147,39 +238,74 @@
             @endif
         </div>
     @else
+        <form method="POST" action="{{ route('user.sampel.label-terpilih') }}" id="form-label-terpilih" data-label-form>
+            @csrf
+            <input type="hidden" name="tipe" value="sampel">
         <div class="ua-card dk-tablecard">
             <div class="ua-table-wrap">
                 <table class="dk-table">
                     <thead>
                         <tr>
+                            <th class="dk-check">
+                                <input type="checkbox" class="dk-checkbox" data-label-semua-halaman aria-label="Pilih semua sampel di halaman ini" title="Pilih semua di halaman ini">
+                            </th>
                             <th>Sampel</th>
-
                             <th>Bagian</th>
+                            <th>Status</th>
                             <th>Shipper</th>
                             <th>Tujuan Analisis</th>
                             <th>Ruang Arsip</th>
                             <th>Tgl Unggah</th>
+                            <th>Label</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($sampel as $item)
+                            @php
+                                $warnaStatus = [
+                                    'aktif' => 'bg-success-subtle text-success',
+                                    'inaktif' => 'bg-secondary-subtle text-secondary',
+                                    'pemusnahan' => 'bg-danger-subtle text-danger',
+                                ][$item->status] ?? 'bg-light text-dark';
+                            @endphp
                             <tr>
+                                <td class="dk-check" data-label="Pilih">
+                                    <input type="checkbox" class="dk-checkbox" name="ids[]" value="{{ $item->id }}" data-label-item aria-label="Pilih sampel {{ $item->kode_sampel }}">
+                                </td>
                                 <td class="dk-table__judul">
                                     <a href="{{ route('user.sampel.show', $item->id) }}">{{ $item->nama_sampel }}</a>
                                     <small>{{ $item->kode_sampel }}</small>
                                 </td>
-
                                 <td data-label="Bagian">{{ $item->bagian?->nama ?? '-' }}</td>
+                                <td data-label="Status">
+                                    <span class="badge {{ $warnaStatus }}">{{ ucfirst($item->status) }}</span>
+                                </td>
                                 <td data-label="Shipper">{{ filled($item->shipper) ? $item->shipper : '-' }}</td>
-                                <td data-label="Tujuan Analisis">{{ $item->analysis_for }}</td>
-                                <td data-label="Ruang Arsip">{{ $item->nama_ruang_arsip }} (No. {{ $item->nomor_ruang_arsip }})</td>
-                                <td data-label="Tgl Unggah">{{ $item->created_at->copy()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y') }}</td>
+                                <td data-label="Tujuan Analisis">{{ filled($item->analysis_for) ? $item->analysis_for : '-' }}</td>
+                                <td data-label="Ruang Arsip">
+                                    @if ($item->nama_ruang_arsip === '-' && $item->nomor_ruang_arsip === '-')
+                                        <span class="d-block">-</span>
+                                    @else
+                                        <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
+                                        @if (filled($item->nomor_ruang_arsip))
+                                            <small class="d-block" style="color: var(--ua-active);">No. {{ $item->nomor_ruang_arsip }}</small>
+                                        @endif
+                                    @endif
+                                </td>
+                                <td data-label="Tgl Unggah" class="text-nowrap">{{ $item->created_at->copy()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y') }}</td>
+                                <td data-label="Label">
+                                    <a href="{{ route('user.sampel.label', $item->id) }}" class="dk-label-btn" title="Download label sampel ini">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        <span>Unduh</span>
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
+        </form>
 
         <x-user.pagination :paginator="$sampel" />
     @endif

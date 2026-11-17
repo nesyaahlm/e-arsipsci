@@ -20,6 +20,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PemusnahanController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,18 @@ use App\Http\Controllers\User\DokumenSayaController;
 use App\Http\Controllers\User\UnggahDokumenController;
 use App\Http\Controllers\User\ArsipController;
 use App\Http\Controllers\User\SampelController as UserSampelController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    
+    Route::get('/pemusnahan', [PemusnahanController::class, 'index'])->name('pemusnahan.index');
+    Route::post('/pemusnahan/ajukan', [PemusnahanController::class, 'ajukan'])->name('pemusnahan.ajukan');
+    Route::post('/pemusnahan', [PemusnahanController::class, 'musnahkan'])->name('pemusnahan.musnahkan');
+    Route::delete('/pemusnahan/antrean/{item}', [PemusnahanController::class, 'batalkan'])->whereNumber('item')->name('pemusnahan.batalkan');
+    Route::delete('/pemusnahan/riwayat/{id}', [PemusnahanController::class, 'destroyRiwayat'])->name('pemusnahan.destroy-riwayat');
+    Route::delete('/pemusnahan/riwayat/massal', [PemusnahanController::class, 'destroyRiwayatMassal'])->name('pemusnahan.destroy-riwayat-massal');
+});
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -142,6 +155,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
     Route::get('/dokumen-saya/label-box-semua', [DokumenSayaController::class, 'labelBoxSemua'])->name('user.dokumen-saya.label-box-semua');
+    Route::post('/dokumen-saya/label-box-terpilih', [DokumenSayaController::class, 'labelBoxTerpilih'])->name('user.dokumen-saya.label-box-terpilih');
     Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
     Route::get('/dokumen-saya/{dokumen}/label-box', [DokumenSayaController::class, 'labelBox'])->whereNumber('dokumen')->name('user.dokumen-saya.label-box');
     Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
@@ -155,6 +169,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/sampel-saya/tambah', [UserSampelController::class, 'create'])->name('user.sampel.create');
     Route::post('/sampel-saya', [UserSampelController::class, 'store'])->name('user.sampel.store');
 
+    Route::get('/sampel-saya/label-semua', [UserSampelController::class, 'labelSemua'])->name('user.sampel.label-semua');
+    Route::post('/sampel-saya/label-terpilih', [UserSampelController::class, 'labelTerpilih'])->name('user.sampel.label-terpilih');
+
     Route::get('/sampel-saya/{sampel}', [UserSampelController::class, 'show'])->whereNumber('sampel')->name('user.sampel.show');
     Route::get('/sampel-saya/{sampel}/foto', [UserSampelController::class, 'foto'])->whereNumber('sampel')->name('user.sampel.foto');
+    Route::get('/sampel-saya/{sampel}/label', [UserSampelController::class, 'labelPdf'])->whereNumber('sampel')->name('user.sampel.label');
+
 });

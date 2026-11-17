@@ -5,9 +5,19 @@
             <p class="text-secondary mb-0 small">Cari, ubah, dan kelola seluruh sampel arsip.</p>
         </div>
 
-        <a href="{{ route('admin.sampel.create') }}" class="btn btn-primary btn-sm fw-semibold px-3 py-2">
-            + Unggah Sampel
-        </a>
+        <div class="d-flex gap-2">
+            <form id="form-ajukan" method="POST" action="{{ route('pemusnahan.ajukan') }}">
+                @csrf
+                <input type="hidden" name="tipe" value="sampel">
+                <button type="submit" id="btn-ajukan" class="btn btn-outline-danger btn-sm fw-semibold px-3 py-2" disabled>
+                    Pemusnahan (<span id="jumlah-pilih">0</span>)
+                </button>
+            </form>
+
+            <a href="{{ route('admin.sampel.create') }}" class="btn btn-primary btn-sm fw-semibold px-3 py-2">
+                + Unggah Sampel
+            </a>
+        </div>
     </div>
 
     @if (session('success'))
@@ -24,17 +34,24 @@
         </div>
     @endif
 
+    @if ($errors->has('ids') || $errors->has('tipe'))
+        <div class="alert alert-danger alert-dismissible fade show alert-otomatis rounded-3 small py-2 shadow-sm border-0" role="alert">
+            {{ $errors->first('ids') ?: $errors->first('tipe') }}
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Tutup"></button>
+        </div>
+    @endif
+
     <form action="{{ route('admin.sampel.index') }}" method="GET"
           class="card shadow-sm rounded-4 mb-3" style="border: 1.5px solid #cfdedb;">
         <div class="card-body p-3">
             <div class="row g-2 align-items-end">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-secondary mb-1">Cari</label>
                     <input type="text" name="cari" value="{{ request('cari') }}"
                            class="form-control form-control-sm" placeholder="Cari kode, nama, shipper, vessel, ruang, pengunggah, dll.">
                 </div>
 
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold text-secondary mb-1">Bagian</label>
                     <select name="bagian_id" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">Semua Bagian</option>
@@ -43,6 +60,16 @@
                                 {{ $bagian->nama }}
                             </option>
                         @endforeach
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Status</label>
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
+                        <option value="inaktif" @selected(request('status') === 'inaktif')>Inaktif</option>
+                        <option value="pemusnahan" @selected(request('status') === 'pemusnahan')>Pemusnahan</option>
                     </select>
                 </div>
 
@@ -59,9 +86,13 @@
             <table class="table table-sm align-middle mb-0 small">
                 <thead style="--bs-table-bg: #e3f1ee; --bs-table-color: #1f5f55; font-size: 0.8rem;">
                     <tr>
-                        <th class="py-2 ps-3 text-center fw-bold">Kode Sampel</th>
+                        <th class="py-2 ps-3 text-center" style="width: 44px;">
+                            <input type="checkbox" id="cek-semua" class="form-check-input" title="Pilih semua untuk pemusnahan">
+                        </th>
+                        <th class="py-2 text-center fw-bold">Kode Sampel</th>
                         <th class="py-2 text-center fw-bold">Nama Sampel</th>
                         <th class="py-2 text-center fw-bold">Bagian</th>
+                        <th class="py-2 text-center fw-bold">Status</th>
                         <th class="py-2 text-center fw-bold">Tgl Masuk</th>
                         <th class="py-2 text-center fw-bold">Ruang Arsip</th>
                         <th class="py-2 text-center fw-bold">Diunggah Oleh</th>
@@ -70,27 +101,43 @@
                 </thead>
                 <tbody>
                     @forelse ($sampel as $item)
+                        @php
+                            $warnaStatus = [
+                                'aktif' => 'bg-success-subtle text-success',
+                                'inaktif' => 'bg-secondary-subtle text-secondary',
+                                'pemusnahan' => 'bg-danger-subtle text-danger',
+                            ][$item->status] ?? 'bg-light text-dark';
+                        @endphp
                         <tr>
-                            {{-- Kode Sampel dikembalikan rata kiri --}}
-                            <td class="ps-3 py-2 fw-bold text-dark font-monospace text-nowrap" style="font-size: 0.78rem;">{{ $item->kode_sampel }}</td>
-                            
+                            <td class="ps-3 py-2 text-center">
+                                <input type="checkbox" class="form-check-input cek-item" name="ids[]" value="{{ $item->id }}" form="form-ajukan" @disabled($item->status === 'pemusnahan')>
+                            </td>
+
+                            <td class="py-2 fw-bold text-dark font-monospace text-nowrap" style="font-size: 0.78rem;">{{ $item->kode_sampel }}</td>
+
                             <td class="py-2">
                                 <a href="{{ route('admin.sampel.show', $item) }}"
                                    class="fw-semibold text-success link-success link-underline link-underline-opacity-75"
                                    title="Lihat detail">{{ $item->nama_sampel }}</a>
                             </td>
 
-                            {{-- Bagian tetap rata tengah --}}
                             <td class="py-2 text-center">{{ $item->bagian->nama ?? '-' }}</td>
 
-                            {{-- Tgl Masuk tetap rata tengah --}}
+                            <td class="py-2 text-center">
+                                <span class="badge {{ $warnaStatus }}">{{ ucfirst($item->status) }}</span>
+                            </td>
+
                             <td class="py-2 text-center text-nowrap">{{ $item->tanggal_masuk_arsip?->format('d/m/Y') }}</td>
 
                             <td class="py-2">
-                                <span class="d-inline-block text-nowrap rounded border px-2 py-1"
-                                      style="background-color: #f4f8f7; font-size: 0.75rem;">
-                                    {{ $item->nomor_ruang_arsip }} / {{ $item->nama_ruang_arsip }}
-                                </span>
+                                @if ($item->nomor_ruang_arsip === '-' && $item->nama_ruang_arsip === '-')
+                                    <span class="d-block text-center text-muted">-</span>
+                                @else
+                                    <span class="d-inline-block text-nowrap rounded border px-2 py-1"
+                                          style="background-color: #f4f8f7; font-size: 0.75rem;">
+                                        {{ $item->nomor_ruang_arsip }} / {{ $item->nama_ruang_arsip }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="py-2">{{ $item->pengunggah->name ?? '-' }}</td>
                             <td class="py-2 text-center pe-3">
@@ -135,7 +182,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Belum ada sampel.</td>
+                            <td colspan="9" class="text-center text-muted py-4">Belum ada sampel.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -151,6 +198,7 @@
     @endif
 
     @push('scripts')
+        <script src="{{ asset('js/admin/pemusnahan-pilih.js') }}"></script>
         <script>
             document.querySelectorAll('.alert-otomatis').forEach(function (el) {
                 setTimeout(function () {
