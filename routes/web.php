@@ -82,6 +82,10 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('supe
     Route::put('/admin-cabang/{adminCabang}', [AdminCabangController::class, 'update'])->name('admin-cabang.update');
     Route::delete('/admin-cabang/{adminCabang}', [AdminCabangController::class, 'destroy'])->name('admin-cabang.destroy');
 
+    Route::post('/admin-cabang/cabang', [AdminCabangController::class, 'storeCabang'])->name('admin-cabang.cabang.store');
+    Route::put('/admin-cabang/cabang/{cabang}', [AdminCabangController::class, 'updateCabang'])->name('admin-cabang.cabang.update');
+    Route::delete('/admin-cabang/cabang/{cabang}', [AdminCabangController::class, 'destroyCabang'])->name('admin-cabang.cabang.destroy');
+
     Route::get('/log-aktivitas', [SuperadminLogAktivitasController::class, 'index'])->name('log-aktivitas.index');
     Route::post('/log-aktivitas/arsipkan', [SuperadminLogAktivitasController::class, 'arsipkan'])->name('log-aktivitas.arsipkan');
     Route::delete('/log-aktivitas/hapus-arsip', [SuperadminLogAktivitasController::class, 'hapusArsip'])->name('log-aktivitas.hapus-arsip');
