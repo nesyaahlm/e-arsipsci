@@ -15,7 +15,16 @@
         </div>
     @endif
 
-    <div class="d-flex justify-content-end mb-3">
+    {{-- Form Pencarian & Tombol Tambah --}}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <form action="{{ route('bagian.index') }}" method="GET" class="d-flex gap-2 flex-grow-1" style="max-width: 400px;">
+            <input type="text" name="cari" value="{{ $cari ?? '' }}" class="form-control form-control-sm" placeholder="Cari kode, nama, atau retensi...">
+            <button type="submit" class="btn btn-sm btn-primary">Cari</button>
+            @if(request('cari'))
+                <a href="{{ route('bagian.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+            @endif
+        </form>
+
         <button type="button" id="btn-tambah-bagian" class="btn btn-sm btn-tambah-layanan">+ Tambah Bagian</button>
     </div>
 
@@ -67,6 +76,7 @@
             <table class="table table-hover align-middle mb-0 tabel-jenis">
                 <thead>
                     <tr>
+                        <th class="text-center" style="width: 60px;">No</th>
                         <th class="text-center">Kode Bagian</th>
                         <th class="text-center">Nama Bagian</th>
                         <th class="text-center">Retensi</th>
@@ -74,8 +84,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($daftarBagian as $bagian)
+                    @forelse ($daftarBagian as $index => $bagian)
                         <tr>
+                            <td class="text-center">{{ $daftarBagian->firstItem() + $index }}</td>
                             <td class="fw-bold text-center">{{ $bagian->kode }}</td>
                             <td class="text-start">{{ $bagian->nama }}</td>
                             <td class="text-center">{{ $bagian->retensi_tahun ? $bagian->retensi_tahun.' tahun' : '-' }}</td>
@@ -100,13 +111,20 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-secondary py-4">Belum ada bagian.</td>
+                            <td colspan="5" class="text-center text-secondary py-4">Belum ada data bagian yang ditemukan.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
+
+    {{-- Pagination (Dipindah ke pojok kanan) --}}
+    @if ($daftarBagian->hasPages())
+        <div class="mt-3 d-flex justify-content-end">
+            {{ $daftarBagian->links('pagination::bootstrap-5') }}
+        </div>
+    @endif
 
     @push('scripts')
     <script>
@@ -163,12 +181,16 @@
             tombolTambah.disabled = false;
         }
 
-        tombolTambah.addEventListener('click', function () {
-            modeTambah();
-            bukaForm();
-        });
+        if(tombolTambah) {
+            tombolTambah.addEventListener('click', function () {
+                modeTambah();
+                bukaForm();
+            });
+        }
 
-        tombolKembali.addEventListener('click', tutupForm);
+        if(tombolKembali) {
+            tombolKembali.addEventListener('click', tutupForm);
+        }
 
         document.querySelectorAll('.btn-edit-bagian').forEach(function (tombol) {
             tombol.addEventListener('click', function () {

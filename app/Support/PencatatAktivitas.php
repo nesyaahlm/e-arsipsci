@@ -3,7 +3,7 @@
 namespace App\Support;
 
 use App\Models\JenisDokumen;
-use App\Models\Layanan;
+use App\Models\Bagian;
 use App\Models\LogAktivitas;
 use App\Models\User;
 use Illuminate\Auth\Events\Login;
@@ -41,15 +41,16 @@ class PencatatAktivitas
 
         User::deleted(fn (User $u) => self::catat('mengelola_user', null, 'Menghapus ' . $u->name));
 
-        Layanan::created(fn (Layanan $l) => self::catat('mengelola_layanan', null, 'Menambahkan ' . $l->nama));
+        // Pencatatan log untuk Bagian (menggantikan Layanan)
+        Bagian::created(fn (Bagian $b) => self::catat('mengelola_bagian', null, 'Menambahkan Bagian ' . $b->nama));
 
-        Layanan::updated(function (Layanan $l) {
-            if (self::adaPerubahan($l)) {
-                self::catat('mengelola_layanan', null, 'Mengubah ' . $l->nama);
+        Bagian::updated(function (Bagian $b) {
+            if (self::adaPerubahan($b)) {
+                self::catat('mengelola_bagian', null, 'Mengubah Bagian ' . $b->nama);
             }
         });
 
-        Layanan::deleted(fn (Layanan $l) => self::catat('mengelola_layanan', null, 'Menghapus ' . $l->nama));
+        Bagian::deleted(fn (Bagian $b) => self::catat('mengelola_bagian', null, 'Menghapus Bagian ' . $b->nama));
 
         JenisDokumen::created(fn (JenisDokumen $j) => self::catat('mengelola_jenis_dokumen', null, 'Menambahkan ' . $j->nama));
 

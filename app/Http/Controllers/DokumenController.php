@@ -14,7 +14,7 @@ class DokumenController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Dokumen::with(['bagian', 'layanan', 'jenisDokumen', 'pengunggah'])->latest();
+        $query = Dokumen::with(['bagian', 'pengunggah'])->latest();
 
         if ($request->filled('cari')) {
             $cari = $request->cari;
