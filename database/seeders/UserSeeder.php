@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
         $layanan = DB::table('layanan')->pluck('id', 'nama');
 
         $data = [
+            ['Superadmin Kantor Pusat', 'superadmin@sucofindo.co.id', 'superadmin', null, 'aktif'],
             ['Bagas Prakoso', 'bagas.p@sucofindo.co.id', 'admin', null, 'aktif'],
             ['Aqeela Calista', 'aqeela@gmail.com', 'admin', 'Konsultasi', 'aktif'],
             ['Fatah Syah', 'fatah@gmail.com', 'admin', 'Pengujian', 'aktif'],
@@ -31,17 +32,18 @@ class UserSeeder extends Seeder
             ['Hendra Wijaya', 'hendra.w@sucofindo.co.id', 'user', 'Inspeksi', 'aktif'],
         ];
 
-        foreach ($data as [$name, $email, $role, $namaLayanan, $status]) {
-            DB::table('users')->insert([
-                'name' => $name,
-                'email' => $email,
-                'password' => $password,
-                'role' => $role,
-                'layanan_id' => $namaLayanan ? $layanan[$namaLayanan] : null,
-                'status' => $status,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            foreach ($data as [$name, $email, $role, $namaLayanan, $status]) {
+            DB::table('users')->updateOrInsert(
+                ['email' => $email],
+                [
+                    'name' => $name,
+                    'password' => $password,
+                    'role' => $role,
+                    'layanan_id' => $namaLayanan ? $layanan[$namaLayanan] : null,
+                    'status' => $status,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-    }
 }
