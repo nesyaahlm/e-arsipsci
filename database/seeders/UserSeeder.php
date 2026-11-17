@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
         $layanan = DB::table('layanan')->pluck('id', 'nama');
 
         $data = [
+            ['Superadmin Kantor Pusat', 'superadmin@sucofindo.co.id', 'superadmin', null, 'aktif'],
             ['Bagas Prakoso', 'bagas.p@sucofindo.co.id', 'admin', null, 'aktif'],
             ['Aqeela Calista', 'aqeela@gmail.com', 'admin', 'Konsultasi', 'aktif'],
             ['Fatah Syah', 'fatah@gmail.com', 'admin', 'Pengujian', 'aktif'],
