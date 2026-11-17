@@ -314,7 +314,7 @@
             <p class="kf-catatan">Data yang dihapus tidak dapat dikembalikan.</p>
             <div class="kf-aksi">
                 <button type="button" class="kf-batal" id="kf-batal">Batal</button>
-                <button type="button" class="kf-ya" id="kf-ya">Ya, Keluarka</button>
+                <button type="button" class="kf-ya" id="kf-ya">Ya, Keluarkan</button>
             </div>
         </div>
     </div>
