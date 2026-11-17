@@ -6,6 +6,7 @@
 
     @push('scripts')
         <script src="{{ asset('js/user/unggah.js') }}" defer></script>
+        <script src="{{ asset('js/admin/pemusnahan-pilih.js') }}" defer></script>
         <script>
             (function () {
                 var form = document.querySelector('[data-label-form]');
@@ -54,7 +55,6 @@
                     box.addEventListener('change', sync);
                 });
 
-                // Pilihan dibawa balik oleh peramban saat tombol "kembali" ditekan.
                 window.addEventListener('pageshow', sync);
                 sync();
             })();
@@ -71,9 +71,21 @@
 
     @include('user.unggah._form')
 
+    <form id="form-ajukan" method="POST" action="{{ route('pemusnahan.ajukan') }}" class="d-none">
+        @csrf
+        <input type="hidden" name="tipe" value="dokumen">
+    </form>
+
     @if (session('label_error'))
         <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
             {{ session('label_error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+        </div>
+    @endif
+
+    @if ($errors->has('ids') || $errors->has('tipe'))
+        <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
+            {{ $errors->first('ids') ?: $errors->first('tipe') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
@@ -97,8 +109,8 @@
             @endif
         </p>
 
-        @if ($jumlahLabel > 0)
-            <div class="dk-bar__group">
+        <div class="dk-bar__group">
+            @if ($jumlahLabel > 0)
                 <button type="submit" form="form-label-terpilih" class="dk-bar__btn dk-bar__btn--outline" data-label-terpilih disabled title="Unduh label hanya untuk dokumen yang dicentang">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Unduh Terpilih</span>
@@ -109,8 +121,13 @@
                     <span>Download Semua Label</span>
                     <span class="dk-bar__badge">{{ min($jumlahLabel, 100) }}</span>
                 </a>
-            </div>
-        @endif
+            @endif
+
+            <button type="submit" form="form-ajukan" id="btn-ajukan" class="dk-bar__btn dk-bar__btn--outline" disabled title="Masukkan dokumen yang dicentang pada kolom Musnah ke daftar pemusnahan">
+                <span>Pemusnahan</span>
+                <span class="dk-bar__badge" id="jumlah-pilih">0</span>
+            </button>
+        </div>
     </div>
 
     @if ($dokumen->isEmpty())
@@ -134,13 +151,28 @@
                             </th>
                             <th>Judul</th>
                             <th>Bagian</th>
+                            <th>Status</th>
                             <th>Lokasi Box</th>
                             <th>Label</th>
                             <th>Tgl Unggah</th>
+                            <th class="dk-check">
+                                <label class="d-flex flex-column align-items-center gap-1 mb-0">
+                                    <span>Musnah</span>
+                                    <input type="checkbox" id="cek-semua" class="dk-checkbox" aria-label="Pilih semua dokumen untuk pemusnahan" title="Pilih semua untuk pemusnahan">
+                                </label>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($dokumen as $arsip)
+                            @php
+                                $statusArsip = $arsip['status'] ?? 'aktif';
+                                $warnaStatus = [
+                                    'aktif' => 'bg-success-subtle text-success',
+                                    'inaktif' => 'bg-secondary-subtle text-secondary',
+                                    'pemusnahan' => 'bg-danger-subtle text-danger',
+                                ][$statusArsip] ?? 'bg-light text-dark';
+                            @endphp
                             <tr>
                                 <td class="dk-check" data-label="Pilih">
                                     @if ($arsip['lokasi_terisi'])
@@ -154,6 +186,9 @@
                                     <small>{{ $arsip['nomor'] }}</small>
                                 </td>
                                 <td data-label="Bagian">{{ filled($arsip['portofolio']) ? $arsip['portofolio'] : '-' }}</td>
+                                <td data-label="Status">
+                                    <span class="badge {{ $warnaStatus }}">{{ ucfirst($statusArsip) }}</span>
+                                </td>
                                 <td data-label="Lokasi Box">
                                     @if ($arsip['lokasi_terisi'])
                                         <div class="dk-slots">
@@ -181,6 +216,9 @@
                                     @endif
                                 </td>
                                 <td data-label="Tgl Unggah">{{ $arsip['diunggah_singkat'] }}</td>
+                                <td class="dk-check" data-label="Musnah">
+                                    <input type="checkbox" class="dk-checkbox cek-item" name="ids[]" value="{{ $arsip['id'] }}" form="form-ajukan" aria-label="Pilih dokumen {{ $arsip['nomor'] }} untuk pemusnahan" @disabled($statusArsip === 'pemusnahan')>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

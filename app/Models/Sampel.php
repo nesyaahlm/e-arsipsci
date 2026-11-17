@@ -22,6 +22,7 @@ class Sampel extends Model
         'nomor_ruang_arsip',
         'nama_ruang_arsip',
         'tanggal_masuk_arsip',
+        'status',
         'foto_path',
         'deskripsi',
         'diunggah_oleh',

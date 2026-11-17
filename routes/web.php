@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PemusnahanController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,13 @@ use App\Http\Controllers\User\SampelController as UserSampelController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    
+    Route::get('/pemusnahan', [PemusnahanController::class, 'index'])->name('pemusnahan.index');
+    Route::post('/pemusnahan/ajukan', [PemusnahanController::class, 'ajukan'])->name('pemusnahan.ajukan');
+    Route::post('/pemusnahan', [PemusnahanController::class, 'musnahkan'])->name('pemusnahan.musnahkan');
+    Route::delete('/pemusnahan/antrean/{item}', [PemusnahanController::class, 'batalkan'])->whereNumber('item')->name('pemusnahan.batalkan');
+    Route::delete('/pemusnahan/riwayat/{id}', [PemusnahanController::class, 'destroyRiwayat'])->name('pemusnahan.destroy-riwayat');
+    Route::delete('/pemusnahan/riwayat/massal', [PemusnahanController::class, 'destroyRiwayatMassal'])->name('pemusnahan.destroy-riwayat-massal');
 });
 
 Route::get('/', function () {

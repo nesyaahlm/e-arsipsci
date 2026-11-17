@@ -4,13 +4,23 @@
             <h1 class="h3 fw-bold text-primary mb-1">Dokumen</h1>
             <p class="text-muted mb-0">Cari, ubah, dan kelola seluruh dokumen arsip.</p>
         </div>
-        <button type="button" class="btn btn-primary rounded-3 px-3 py-2 d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUnggah">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            <span class="fw-semibold">Unggah Dokumen</span>
-        </button>
+        <div class="d-flex gap-2">
+            <form id="form-ajukan" method="POST" action="{{ route('pemusnahan.ajukan') }}">
+                @csrf
+                <input type="hidden" name="tipe" value="dokumen">
+                <button type="submit" id="btn-ajukan" class="btn btn-outline-danger rounded-3 px-3 py-2 fw-semibold" disabled>
+                    Pemusnahan (<span id="jumlah-pilih">0</span>)
+                </button>
+            </form>
+
+            <button type="button" class="btn btn-primary rounded-3 px-3 py-2 d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUnggah">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span class="fw-semibold">Unggah Dokumen</span>
+            </button>
+        </div>
     </div>
 
     @if(session('success'))
@@ -66,7 +76,7 @@
     <div class="card shadow-sm rounded-4 mb-4" style="border: 1.5px solid #cfdedb;">
         <div class="card-body p-3">
             <form method="GET" action="{{ route('dokumen.index') }}" class="row g-2 align-items-center">
-                <div class="col-12 col-md-7">
+                <div class="col-12 col-md-5">
                     <label class="form-label small text-muted fw-semibold mb-1">Cari</label>
                     <div class="position-relative">
                         <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted">
@@ -79,13 +89,23 @@
                     </div>
                 </div>
 
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <label class="form-label small text-muted fw-semibold mb-1">Bagian</label>
                     <select name="bagian_id" class="form-select rounded-3" onchange="this.form.submit()">
                         <option value="">Semua Bagian</option>
                         @foreach($bagianList as $bag)
                             <option value="{{ $bag->id }}" {{ request('bagian_id') == $bag->id ? 'selected' : '' }}>{{ $bag->nama }}</option>
                         @endforeach
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3">
+                    <label class="form-label small text-muted fw-semibold mb-1">Status</label>
+                    <select name="status" class="form-select rounded-3" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="inaktif" {{ request('status') === 'inaktif' ? 'selected' : '' }}>Inaktif</option>
+                        <option value="pemusnahan" {{ request('status') === 'pemusnahan' ? 'selected' : '' }}>Pemusnahan</option>
                     </select>
                 </div>
 
@@ -108,12 +128,16 @@
         <div id="kolomTabel" class="col-12 transition-all">
             <div class="card shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-nowrap" style="min-width: 880px;">
+                    <table class="table table-hover align-middle mb-0 text-nowrap" style="min-width: 1000px;">
                         <thead style="--bs-table-bg: #e3f1ee; --bs-table-color: #1f5f55; --bs-table-border-color: #a3cfbb;">
                             <tr class="small fw-semibold">
-                                <th class="ps-4 py-3" style="min-width: 170px;">Nomor</th>
+                                <th class="ps-4 py-3" style="width: 44px;">
+                                    <input type="checkbox" id="cek-semua" class="form-check-input" title="Pilih semua untuk pemusnahan">
+                                </th>
+                                <th class="py-3" style="min-width: 170px;">Nomor</th>
                                 <th class="py-3" style="min-width: 240px; white-space: normal;">Judul Dokumen</th>
                                 <th class="py-3" style="min-width: 160px;">Bagian</th>
+                                <th class="py-3 text-center" style="min-width: 110px;">Status</th>
                                 <th class="py-3" style="min-width: 140px;">Tanggal / Retensi</th>
                                 <th class="py-3" style="min-width: 180px;">Lokasi Fisik</th>
                                 <th class="text-center pe-4 py-3" style="min-width: 140px;">Aksi</th>
@@ -123,9 +147,18 @@
                             @forelse($dokumen as $item)
                                 @php
                                     $ekstensi = strtolower(pathinfo($item->file_path, PATHINFO_EXTENSION));
+                                    $warnaStatus = [
+                                        'aktif' => 'bg-success-subtle text-success',
+                                        'inaktif' => 'bg-secondary-subtle text-secondary',
+                                        'pemusnahan' => 'bg-danger-subtle text-danger',
+                                    ][$item->status] ?? 'bg-light text-dark';
                                 @endphp
                                 <tr class="baris-dokumen" id="baris-{{ $item->id }}">
-                                    <td class="ps-4 fw-semibold text-primary font-monospace" style="font-size: 0.88rem;">
+                                    <td class="ps-4">
+                                        <input type="checkbox" class="form-check-input cek-item" name="ids[]" value="{{ $item->id }}" form="form-ajukan" @disabled($item->status === 'pemusnahan')>
+                                    </td>
+
+                                    <td class="fw-semibold text-primary font-monospace" style="font-size: 0.88rem;">
                                         {{ $item->nomor ?? '-' }}
                                     </td>
 
@@ -153,6 +186,10 @@
                                             <div class="fw-semibold text-dark" style="font-size: 0.88rem;">{{ $item->layanan->nama ?? '-' }}</div>
                                             <small class="text-muted">{{ $item->jenisDokumen->nama ?? '-' }}</small>
                                         @endif
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge {{ $warnaStatus }}">{{ ucfirst($item->status) }}</span>
                                     </td>
 
                                     <td>
@@ -230,7 +267,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
+                                    <td colspan="8" class="text-center py-5 text-muted">
                                         <p class="mb-0">Belum ada dokumen yang terdaftar.</p>
                                     </td>
                                 </tr>
@@ -514,6 +551,7 @@
     </div>
 
     @push('scripts')
+    <script src="{{ asset('js/admin/pemusnahan-pilih.js') }}"></script>
     <script>
         const kolomTabel = document.getElementById('kolomTabel');
         const panelDetail = document.getElementById('panelDetail');
