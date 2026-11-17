@@ -1,4 +1,8 @@
 <x-dynamic-component :component="$layout" title="Pemusnahan">
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/konfirmasi.css') }}">
+    @endpush
+
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h1 class="h3 fw-bold text-primary mb-1">Pemusnahan</h1>
@@ -310,7 +314,7 @@
             <p class="kf-catatan">Data yang dihapus tidak dapat dikembalikan.</p>
             <div class="kf-aksi">
                 <button type="button" class="kf-batal" id="kf-batal">Batal</button>
-                <button type="button" class="kf-ya" id="kf-ya">Ya, Hapus</button>
+                <button type="button" class="kf-ya" id="kf-ya">Ya, Keluarka</button>
             </div>
         </div>
     </div>

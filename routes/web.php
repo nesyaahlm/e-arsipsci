@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/pemusnahan/riwayat/massal', [PemusnahanController::class, 'destroyRiwayatMassal'])->name('pemusnahan.destroy-riwayat-massal');
 });
 
-Route::get('/', function () {git 
+Route::get('/', function () {
     if (Auth::check()) {
         return match (Auth::user()->role) {
             'superadmin' => redirect()->route('superadmin.dashboard'),
