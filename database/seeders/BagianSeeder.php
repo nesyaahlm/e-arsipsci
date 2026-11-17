@@ -12,11 +12,14 @@ class BagianSeeder extends Seeder
         $now = now();
 
         $data = [
-            ['LAB', 'Laboratorium', 10],
-            ['INS', 'Inspeksi', 10],
-            ['SRT', 'Sertifikasi', 10],
-            ['ADM', 'Administrasi', 5],
-            ['KEU', 'Keuangan', 5],
+            ['KEU', 'Keuangan dan Akuntansi', 10],
+            ['SDM', 'Sumber Daya Manusia dan Umum', 5],
+            ['LAB', 'Pengujian dan Laboratorium Lingkungan', 10],
+            ['INS', 'Inspeksi Teknik dan Komoditas', 10],
+            ['SRT', 'Sertifikasi dan Sistem Manajemen', 10],
+            ['KMS', 'Pemasaran dan Komersil', 5],
+            ['QHS', 'Quality, Health, Safety & Environment', 7],
+            ['TI', 'Teknologi Informasi dan Digitalisasi', 5],
         ];
 
         foreach ($data as [$kode, $nama, $retensi]) {

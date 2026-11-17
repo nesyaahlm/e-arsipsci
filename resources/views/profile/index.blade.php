@@ -6,7 +6,11 @@
         </div>
         <div>
             @php
-                $dashboardRoute = (auth()->user()->role === 'admin') ? route('admin.dashboard') : route('user.dashboard');
+                $dashboardRoute = match (auth()->user()->role) {
+                    'superadmin' => route('superadmin.dashboard'),
+                    'admin' => route('admin.dashboard'),
+                    default => route('user.dashboard'),
+                };
             @endphp
             <a href="{{ $dashboardRoute }}" class="btn btn-sm btn-outline-secondary px-3 shadow-sm">Kembali</a>
         </div>
