@@ -23,6 +23,10 @@ class RoleMiddleware
         $user = Auth::user();
 
         if (!in_array($user->role, $roles)) {
+            if ($user->role === 'superadmin') {
+                return redirect()->route('superadmin.dashboard');
+            }
+
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }

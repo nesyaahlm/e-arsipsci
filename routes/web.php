@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\Superadmin\DashboardController as SuperadminDashboardController;
+use App\Http\Controllers\Superadmin\KodeSuratController;
+use App\Http\Controllers\Superadmin\BagianController as SuperadminBagianController;
+use App\Http\Controllers\Superadmin\DokumenNasionalController;
+use App\Http\Controllers\Superadmin\SampelNasionalController;
+use App\Http\Controllers\Superadmin\AdminCabangController;
+use App\Http\Controllers\Superadmin\LogAktivitasController as SuperadminLogAktivitasController;
+
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JenisDokumenController;
 use App\Http\Controllers\Admin\KelolaController;
@@ -7,6 +15,7 @@ use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\LogArsipController;
 use App\Http\Controllers\Admin\BagianController;
 use App\Http\Controllers\Admin\SampelController as AdminSampelController;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DokumenController;
 use App\Http\Controllers\LayananController;
@@ -34,9 +43,11 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return Auth::user()->role === 'admin'
-            ? redirect()->route('admin.dashboard')
-            : redirect()->route('user.dashboard');
+        return match (Auth::user()->role) {
+            'superadmin' => redirect()->route('superadmin.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            default => redirect()->route('user.dashboard'),
+        };
     }
     return redirect()->route('login');
 });
@@ -54,6 +65,44 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+});
+
+Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::get('/dashboard', [SuperadminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/kode-surat', [KodeSuratController::class, 'index'])->name('kode-surat.index');
+    Route::post('/kode-surat', [KodeSuratController::class, 'store'])->name('kode-surat.store');
+    Route::put('/kode-surat/{kodeSurat}', [KodeSuratController::class, 'update'])->name('kode-surat.update');
+    Route::delete('/kode-surat/{kodeSurat}', [KodeSuratController::class, 'destroy'])->name('kode-surat.destroy');
+
+    Route::get('/bagian', [SuperadminBagianController::class, 'index'])->name('bagian.index');
+    Route::post('/bagian', [SuperadminBagianController::class, 'store'])->name('bagian.store');
+    Route::put('/bagian/{bagian}', [SuperadminBagianController::class, 'update'])->name('bagian.update');
+    Route::delete('/bagian/{bagian}', [SuperadminBagianController::class, 'destroy'])->name('bagian.destroy');
+
+    Route::get('/dokumen', [DokumenNasionalController::class, 'index'])->name('dokumen.index');
+    Route::get('/dokumen/{dokumen}/unduh', [DokumenNasionalController::class, 'unduh'])->name('dokumen.unduh');
+    Route::get('/dokumen/{dokumen}/preview', [DokumenNasionalController::class, 'preview'])->name('dokumen.preview');
+
+    Route::get('/sampel', [SampelNasionalController::class, 'index'])->name('sampel.index');
+    Route::get('/sampel/{sampel}/foto', [SampelNasionalController::class, 'foto'])->name('sampel.foto');
+
+    Route::get('/admin-cabang', [AdminCabangController::class, 'index'])->name('admin-cabang.index');
+    Route::post('/admin-cabang', [AdminCabangController::class, 'store'])->name('admin-cabang.store');
+    Route::put('/admin-cabang/{adminCabang}', [AdminCabangController::class, 'update'])->name('admin-cabang.update');
+    Route::delete('/admin-cabang/{adminCabang}', [AdminCabangController::class, 'destroy'])->name('admin-cabang.destroy');
+
+    Route::post('/admin-cabang/cabang', [AdminCabangController::class, 'storeCabang'])->name('admin-cabang.cabang.store');
+    Route::put('/admin-cabang/cabang/{cabang}', [AdminCabangController::class, 'updateCabang'])->name('admin-cabang.cabang.update');
+    Route::delete('/admin-cabang/cabang/{cabang}', [AdminCabangController::class, 'destroyCabang'])->name('admin-cabang.cabang.destroy');
+
+    Route::get('/log-aktivitas', [SuperadminLogAktivitasController::class, 'index'])->name('log-aktivitas.index');
+    Route::post('/log-aktivitas/arsipkan', [SuperadminLogAktivitasController::class, 'arsipkan'])->name('log-aktivitas.arsipkan');
+    Route::delete('/log-aktivitas/hapus-arsip', [SuperadminLogAktivitasController::class, 'hapusArsip'])->name('log-aktivitas.hapus-arsip');
+});
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -101,6 +150,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/log-aktivitas/arsip/terpilih', [LogArsipController::class, 'hapusTerpilih'])->name('log.arsip.hapus-terpilih');
     Route::delete('/log-aktivitas/arsip', [LogArsipController::class, 'hapusSemua'])->name('log.arsip.hapus-semua');
 });
+
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');

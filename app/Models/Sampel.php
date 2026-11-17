@@ -10,6 +10,7 @@ class Sampel extends Model
     protected $table = 'sampel';
 
     protected $fillable = [
+        'cabang_id',
         'kode_sampel',
         'nama_sampel',
         'shipper',
@@ -26,16 +27,26 @@ class Sampel extends Model
         'foto_path',
         'deskripsi',
         'diunggah_oleh',
+        'status_arsip',
+        'nomor_buku',
+        'tanggal_hapus_buku',
+        'keterangan_hapus_buku',
     ];
 
     protected $casts = [
         'tanggal_pengambilan' => 'date',
         'tanggal_masuk_arsip' => 'date',
+        'tanggal_hapus_buku' => 'date',
     ];
 
     public function bagian(): BelongsTo
     {
         return $this->belongsTo(Bagian::class, 'bagian_id');
+    }
+
+    public function cabang(): BelongsTo
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id');
     }
 
     public function pengunggah(): BelongsTo

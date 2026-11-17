@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Bagian;
 use App\Models\Dokumen;
+use App\Models\Cabang;
+use App\Models\KodeSurat;
 use App\Models\LogAktivitas;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,8 +33,9 @@ class DokumenController extends Controller
         $dokumen = $query->paginate(10)->withQueryString();
 
         $bagianList = Bagian::orderBy('nama')->get();
+        $kodeSuratList = KodeSurat::orderBy('kode')->get();
 
-        return view('dokumen.index', compact('dokumen', 'bagianList'));
+        return view('dokumen.index', compact('dokumen', 'bagianList', 'kodeSuratList'));
     }
 
     public function store(Request $request)
@@ -40,6 +43,7 @@ class DokumenController extends Controller
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
             'bagian_id' => ['required', 'exists:bagian,id'],
+            'kode_surat_id' => ['nullable', 'exists:kode_surat,id'],
             'tanggal_dokumen' => ['required', 'date'],
             'unit' => ['nullable', 'string', 'max:100'],
             'nomor_rak' => ['nullable', 'string', 'max:50'],
@@ -59,10 +63,18 @@ class DokumenController extends Controller
 
         try {
             $bagian = Bagian::findOrFail($validated['bagian_id']);
+            $kodeSurat = !empty($validated['kode_surat_id']) ? KodeSurat::find($validated['kode_surat_id']) : null;
+
+            $user = Auth::user();
+            $cabang = $user->cabang ?? Cabang::where('kode', 'CLC')->first();
+            $kodeCabang = $cabang ? $cabang->kode : 'CLC';
+            $cabangId = $cabang ? $cabang->id : 1;
+
+            $kodeKlasifikasi = $kodeSurat ? $kodeSurat->kode : $bagian->kode;
             $tanggalDokumen = Carbon::parse($validated['tanggal_dokumen']);
             $tahun = $tanggalDokumen->year;
 
-            $prefix = "{$bagian->kode}/CLC/{$tahun}/";
+            $prefix = "{$kodeKlasifikasi}/{$kodeCabang}/{$tahun}/";
             $dokumenTerakhir = Dokumen::withTrashed()
                 ->where('nomor', 'like', "{$prefix}%")
                 ->orderBy('id', 'desc')
@@ -77,9 +89,10 @@ class DokumenController extends Controller
 
             $nomorOtomatis = sprintf('%s%04d', $prefix, $nomorUrut);
 
+            $retensiTahun = $kodeSurat ? $kodeSurat->retensi_aktif : $bagian->retensi_tahun;
             $retensiSampai = null;
-            if ($bagian->retensi_tahun) {
-                $retensiSampai = $tanggalDokumen->copy()->addYears($bagian->retensi_tahun);
+            if ($retensiTahun) {
+                $retensiSampai = $tanggalDokumen->copy()->addYears($retensiTahun);
             }
 
             $file = $request->file('file_dokumen');
@@ -90,6 +103,8 @@ class DokumenController extends Controller
             $lokasiArsipFisik = $this->susunLokasi($request);
 
             $dokumen = Dokumen::create([
+                'cabang_id' => $cabangId,
+                'kode_surat_id' => $kodeSurat?->id,
                 'nomor' => $nomorOtomatis,
                 'judul' => $validated['judul'],
                 'bagian_id' => $bagian->id,

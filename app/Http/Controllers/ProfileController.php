@@ -14,7 +14,11 @@ class ProfileController extends Controller
     public function index()
     {
         $user = User::findOrFail(Auth::id());
-        $layout = $user->role === 'admin' ? 'admin.layout' : 'layouts.user';
+        $layout = match ($user->role) {
+            'superadmin' => 'superadmin.layout',
+            'admin' => 'admin.layout',
+            default => 'layouts.user',
+        };
 
         return view('profile.index', compact('user', 'layout'));
     }

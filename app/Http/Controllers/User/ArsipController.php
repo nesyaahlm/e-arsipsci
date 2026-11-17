@@ -399,6 +399,8 @@ class ArsipController extends Controller
     {
         return DB::table('dokumen')
             ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
+            ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
+            ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.status', 'disetujui');
     }
@@ -421,6 +423,8 @@ class ArsipController extends Controller
             'bagian.nama as bagian',
 
             DB::raw('COALESCE(bagian.nama, bagian.nama) as bagian'),
+            DB::raw('COALESCE(bagian.nama, layanan.nama) as bagian'),
+            DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
         ];
     }
 

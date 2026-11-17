@@ -373,6 +373,18 @@
                             </div>
 
                             <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Klasifikasi Kode Surat</label>
+                                <select name="kode_surat_id" id="modalKodeSurat" class="form-select rounded-3">
+                                    <option value="" selected>Pilih Kode Surat</option>
+                                    @foreach($kodeSuratList as $ks)
+                                        <option value="{{ $ks->id }}" data-bagian="{{ $ks->bagian_id }}" data-kode="{{ $ks->kode }}" data-retensi="{{ $ks->retensi_aktif }}" {{ old('kode_surat_id') == $ks->id ? 'selected' : '' }}>
+                                            {{ $ks->kode }} - {{ $ks->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-secondary">Tanggal Dokumen <span class="text-danger">*</span></label>
                                 <input type="date" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', date('Y-m-d')) }}" class="form-control rounded-3" required>
                             </div>
@@ -382,7 +394,7 @@
                                 <input type="text" name="unit" value="{{ old('unit') }}" class="form-control rounded-3" placeholder="Contoh: Cilacap">
                             </div>
 
-                            <div class="col-12 col-md-6">
+                            <div class="col-12">
                                 <label class="form-label small fw-semibold text-secondary">Berkas File <span class="text-danger">*</span></label>
                                 <input type="file" name="file_dokumen" id="inputBerkasUnggah" class="form-control rounded-3" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" required>
                                 <div id="errorBerkasUnggah" class="text-danger small mt-1 fw-semibold" style="display: none;"></div>
@@ -799,6 +811,35 @@
             document.getElementById('errorBerkasUbah'),
             document.getElementById('hintBerkasUbah')
         );
+
+        const selectBagian = document.getElementById('modalBagian');
+        const selectKodeSurat = document.getElementById('modalKodeSurat');
+
+        if (selectBagian && selectKodeSurat) {
+            const originalOptions = Array.from(selectKodeSurat.options);
+
+            function filterKodeSurat() {
+                const selectedBagianId = selectBagian.value;
+                const currentValue = selectKodeSurat.value;
+
+                selectKodeSurat.innerHTML = '';
+
+                originalOptions.forEach(opt => {
+                    if (!opt.value || !selectedBagianId || opt.dataset.bagian === selectedBagianId) {
+                        selectKodeSurat.appendChild(opt.cloneNode(true));
+                    }
+                });
+
+                if (Array.from(selectKodeSurat.options).some(o => o.value === currentValue)) {
+                    selectKodeSurat.value = currentValue;
+                } else {
+                    selectKodeSurat.selectedIndex = 0;
+                }
+            }
+
+            selectBagian.addEventListener('change', filterKodeSurat);
+            filterKodeSurat();
+        }
     </script>
     @endpush
 </x-admin.layout>

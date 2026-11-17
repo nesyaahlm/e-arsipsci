@@ -13,6 +13,7 @@ class Dokumen extends Model
     protected $table = 'dokumen';
 
     protected $fillable = [
+        'cabang_id',
         'nomor',
         'judul',
         'bagian_id',
@@ -27,16 +28,31 @@ class Dokumen extends Model
         'status',
         'diunggah_oleh',
         'retensi_sampai',
+        'status_arsip',
+        'nomor_buku',
+        'tanggal_hapus_buku',
+        'keterangan_hapus_buku',
     ];
 
     protected $casts = [
         'tanggal_dokumen' => 'date',
         'retensi_sampai' => 'date',
+        'tanggal_hapus_buku' => 'date',
     ];
 
     public function bagian(): BelongsTo
     {
         return $this->belongsTo(Bagian::class, 'bagian_id');
+    }
+
+    public function kodeSurat(): BelongsTo
+    {
+        return $this->belongsTo(KodeSurat::class, 'kode_surat_id');
+    }
+
+    public function cabang(): BelongsTo
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id');
     }
 
     public function pengunggah(): BelongsTo
