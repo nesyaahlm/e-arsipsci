@@ -75,7 +75,7 @@ class DashboardController extends Controller
             ]);
 
         $sampel = $this->sampelSaya($userId)
-            ->join('layanan', 'layanan.id', '=', 'sampel.layanan_id')
+            ->leftJoin('bagian', 'bagian.id', '=', 'sampel.bagian_id')
             ->orderByDesc('sampel.created_at')
             ->orderByDesc('sampel.id')
             ->limit(self::BATAS_TERBARU)
@@ -84,7 +84,7 @@ class DashboardController extends Controller
                 'sampel.kode_sampel',
                 'sampel.nama_sampel',
                 'sampel.created_at',
-                'layanan.nama as layanan',
+                'bagian.nama as layanan',
             ])
             ->map(fn ($s) => [
                 'tipe' => 'sampel',

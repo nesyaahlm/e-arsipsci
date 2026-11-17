@@ -18,6 +18,6 @@
         'metode' => 'POST',
         'sampel' => null,
         'kembali' => route('user.sampel.index'),
-        'layananList' => $layananList,
+        'bagianList' => $bagianList,
     ])
 </x-layouts.user>

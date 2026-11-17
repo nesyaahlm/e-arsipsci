@@ -44,7 +44,7 @@ class ArsipController extends Controller
         'sampel.kode_sampel' => 4,
         'sampel.analysis_for' => 2,
         'sampel.deskripsi' => 2,
-        'layanan.nama' => 2,
+        'bagian.nama' => 2,
         'sampel.shipper' => 1,
         'sampel.vessel' => 1,
         'sampel.bill_of_lading' => 1,
@@ -304,7 +304,7 @@ class ArsipController extends Controller
     private function kueriSampel(int $userId, array $terms, ?int $layananId, ?int $tahun): Builder
     {
         $kueri = $this->sampelMilik($userId)
-            ->when($layananId, fn (Builder $q) => $q->where('sampel.layanan_id', $layananId))
+            ->when($layananId, fn (Builder $q) => $q->where('sampel.bagian_id', $layananId))
             ->when($tahun, fn (Builder $q) => $q
                 ->where('sampel.tanggal_pengambilan', '>=', $tahun.'-01-01')
                 ->where('sampel.tanggal_pengambilan', '<', ($tahun + 1).'-01-01'));
@@ -317,7 +317,7 @@ class ArsipController extends Controller
     private function sampelMilik(int $userId): Builder
     {
         return DB::table('sampel')
-            ->join('layanan', 'layanan.id', '=', 'sampel.layanan_id')
+            ->leftJoin('bagian', 'bagian.id', '=', 'sampel.bagian_id')
             ->whereNull('sampel.deleted_at')
             ->where('sampel.diunggah_oleh', $userId);
     }
@@ -367,7 +367,7 @@ class ArsipController extends Controller
             'sampel.nama_ruang_arsip',
             'sampel.nomor_ruang_arsip',
             'sampel.created_at',
-            'layanan.nama as layanan',
+            'bagian.nama as layanan',
         ];
     }
 
