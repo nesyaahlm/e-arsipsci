@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bagian;
 use App\Models\Sampel;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,16 @@ class SampelController extends Controller
 {
     public function index(Request $request): View
     {
+        $daftarSampel = Sampel::with('bagian')->where('status', '!=', 'pemusnahan')->get();
+        foreach ($daftarSampel as $s) {
+            if ($s->tanggal_masuk_arsip && $s->bagian && $s->bagian->retensi_tahun) {
+                $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addYears($s->bagian->retensi_tahun);
+                $statusSeharusnya = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+                if ($s->status !== $statusSeharusnya) {
+                    $s->update(['status' => $statusSeharusnya]);
+                }
+            }
+        }
         $cari = trim((string) $request->input('cari'));
 
         $sampel = Sampel::with(['bagian', 'pengunggah'])
@@ -91,6 +102,8 @@ class SampelController extends Controller
         $data['foto_path'] = $request->hasFile('foto')
             ? $request->file('foto')->store('sampel', 'public')
             : null;
+            
+        $data['cabang_id'] = Auth::user()->cabang_id ?? 1;
         $data['diunggah_oleh'] = Auth::id();
 
         $sampel = Sampel::create($data);
