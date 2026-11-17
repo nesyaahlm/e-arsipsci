@@ -420,9 +420,6 @@ class ArsipController extends Controller
             'dokumen.no_box_file',
             'dokumen.lokasi_arsip_fisik',
             'dokumen.created_at',
-            'bagian.nama as bagian',
-
-            DB::raw('COALESCE(bagian.nama, bagian.nama) as bagian'),
             DB::raw('COALESCE(bagian.nama, layanan.nama) as bagian'),
             DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
         ];

@@ -66,11 +66,6 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-});
-
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', [SuperadminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/kode-surat', [KodeSuratController::class, 'index'])->name('kode-surat.index');
