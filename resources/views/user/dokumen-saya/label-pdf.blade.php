@@ -2,7 +2,7 @@
     $ukuranNilai = function ($nilai) {
         $panjang = mb_strlen((string) $nilai);
 
-        return $panjang > 8 ? 18 : ($panjang > 4 ? 26 : 38);
+        return $panjang > 7 ? 12 : ($panjang > 4 ? 16 : 24);
     };
 
     $berkasLogo = public_path('assets/sucofindo-nobg.png');
@@ -22,20 +22,20 @@
         .frame { border: 3px solid #277a72; }
         .head td { background: #ffffff; padding: 8px 14px; vertical-align: middle; border-bottom: 3px solid #277a72; }
         .logo { height: 50px; }
-        .brand { font-size: 15pt; font-weight: bold; letter-spacing: 1px; color: #277a72; }
-        .sys { font-size: 13pt; font-weight: bold; text-align: right; color: #277a72; }
-        .sys-sub { font-size: 8pt; text-align: right; color: #3e8f88; }
-        .cap { background: #aeefd5; color: #277a72; font-size: 7.5pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; padding: 5px 14px; border-top: 1px solid #277a72; }
-        .judul { font-size: 15pt; font-weight: bold; padding: 8px 14px; line-height: 1.3; word-wrap: break-word; }
+        .brand { font-size: 11pt; font-weight: bold; color: #277a72; }
+        .sys { font-size: 11pt; font-weight: bold; text-align: right; color: #277a72; }
+        .sys-sub { font-size: 7pt; text-align: right; color: #3e8f88; }
+        .cap { background: #aeefd5; color: #277a72; font-size: 6.5pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; padding: 5px 14px; border-top: 1px solid #277a72; }
+        .judul { font-size: 12pt; font-weight: bold; padding: 8px 14px; line-height: 1.3; word-wrap: break-word; }
         .info td { vertical-align: top; padding: 0; border-top: 1px solid #277a72; }
         .info td + td { border-left: 1px solid #277a72; }
-        .info-val { font-size: 12pt; font-weight: bold; padding: 8px 14px 10px 14px; word-wrap: break-word; }
+        .info-val { font-size: 10pt; font-weight: bold; padding: 8px 14px 10px 14px; word-wrap: break-word; }
         .lokasi td { text-align: center; vertical-align: top; padding: 0; border-top: 1px solid #277a72; }
         .lokasi td + td { border-left: 1px solid #277a72; }
-        .lokasi-name { background: #aeefd5; color: #277a72; font-size: 9pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; padding: 5px 4px; border-bottom: 1px solid #277a72; }
+        .lokasi-name { background: #aeefd5; color: #277a72; font-size: 7pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; padding: 5px 4px; border-bottom: 1px solid #277a72; }
         .lokasi-val { font-weight: bold; padding: 9px 6px; word-wrap: break-word; }
-        .isi-box { height: 15mm; padding: 0; border-top: 1px solid #277a72; }
-        .foot { font-size: 7pt; color: #3e8f88; padding: 5px 14px; border-top: 1px solid #277a72; }
+        .isi-box { height: 55mm; padding: 0; border-top: 1px solid #277a72; }
+        .foot { font-size: 6.5pt; color: #3e8f88; padding: 5px 14px; border-top: 1px solid #277a72; }
     </style>
 </head>
 <body>
@@ -53,15 +53,15 @@
                     <td style="padding: 0;">
                         <table class="head">
                             <tr>
-                                <td style="width: 16%;">
+                                <td style="width: 20%;">
                                     @if ($logo)
                                         <img src="{{ $logo }}" class="logo" alt="Sucofindo">
                                     @endif
                                 </td>
-                                <td style="width: 54%;">
+                                <td style="width: 48%;">
                                     <div class="brand">PT SUCOFINDO CILACAP</div>
                                 </td>
-                                <td style="width: 30%;">
+                                <td style="width: 32%;">
                                     <div class="sys">E-ARSIP SCI</div>
                                     <div class="sys-sub">Label Box Arsip</div>
                                 </td>

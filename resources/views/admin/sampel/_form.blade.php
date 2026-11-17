@@ -159,11 +159,21 @@
             <h6 class="fw-bold text-primary mb-2" style="font-size: 0.95rem;">3. Lokasi Penyimpanan Fisik &amp; Tanggal Arsip</h6>
             <div class="row g-2">
                 <div class="col-12 col-md-4">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Nomor Ruang / Rak <span class="text-danger">*</span></label>
+                    <label class="form-label small fw-semibold text-secondary mb-1">No. Rak <span class="text-danger">*</span></label>
                     <input type="text" name="nomor_ruang_arsip" class="form-control form-control-sm rounded-3 @error('nomor_ruang_arsip') is-invalid @enderror" 
                            value="{{ old('nomor_ruang_arsip', $sampel->nomor_ruang_arsip ?? '') }}" 
                            placeholder="Contoh: 01" required>
                     @error('nomor_ruang_arsip')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold text-secondary mb-1">No. Tingkat</label>
+                    <input type="text" name="nomor_tingkat_arsip" class="form-control form-control-sm rounded-3 @error('nomor_tingkat_arsip') is-invalid @enderror"
+                           value="{{ old('nomor_tingkat_arsip', $sampel->nomor_tingkat_arsip ?? '') }}"
+                           maxlength="50" placeholder="Contoh: 2">
+                    @error('nomor_tingkat_arsip')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -178,7 +188,18 @@
                     @enderror
                 </div>
 
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Tahun di Label</label>
+                    <input type="text" name="tahun_arsip" class="form-control form-control-sm rounded-3 @error('tahun_arsip') is-invalid @enderror"
+                           value="{{ old('tahun_arsip', $sampel->tahun_arsip ?? '') }}"
+                           maxlength="50" inputmode="numeric" placeholder="Contoh: 2026, 2027 dan 2028">
+                    @error('tahun_arsip')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted" style="font-size: 0.72rem;">Boleh lebih dari satu tahun. Kosong = tahun tanggal pengambilan.</small>
+                </div>
+
+                <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tanggal Masuk Arsip <span class="text-danger">*</span></label>
                     <input type="date" name="tanggal_masuk_arsip" class="form-control form-control-sm rounded-3 @error('tanggal_masuk_arsip') is-invalid @enderror" 
                            value="{{ old('tanggal_masuk_arsip', isset($sampel->tanggal_masuk_arsip) ? $sampel->tanggal_masuk_arsip->format('Y-m-d') : date('Y-m-d')) }}" required>

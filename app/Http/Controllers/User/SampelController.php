@@ -153,7 +153,7 @@ class SampelController extends Controller
 
         $pdf = new Dompdf($opsi);
         $pdf->loadHtml($html, 'UTF-8');
-        $pdf->setPaper('A5', 'landscape');
+        $pdf->setPaper('A5', 'portrait');
         $pdf->render();
 
         return response($pdf->output(), 200, [
@@ -246,6 +246,8 @@ class SampelController extends Controller
             'analysis_for' => ['required', 'string', 'max:255'],
             'bagian_id' => ['required', 'exists:bagian,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
+            'nomor_tingkat_arsip' => ['nullable', 'string', 'max:50'],
+            'tahun_arsip' => Sampel::aturanTahun(),
             'nama_ruang_arsip' => ['required', 'string', 'max:100'],
             'tanggal_masuk_arsip' => ['required', 'date'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:5120'],
@@ -260,6 +262,7 @@ class SampelController extends Controller
             'bagian_id.required' => 'Bagian wajib dipilih.',
             'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
+
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',
             'foto.image' => 'Berkas harus berupa gambar.',
@@ -283,6 +286,8 @@ class SampelController extends Controller
             'analysis_for' => $validated['analysis_for'],
             'bagian_id' => $validated['bagian_id'],
             'nomor_ruang_arsip' => $validated['nomor_ruang_arsip'],
+            'nomor_tingkat_arsip' => $validated['nomor_tingkat_arsip'] ?? null,
+            'tahun_arsip' => Sampel::rapikanTahun($validated['tahun_arsip'] ?? null),
             'nama_ruang_arsip' => $validated['nama_ruang_arsip'],
             'tanggal_masuk_arsip' => $validated['tanggal_masuk_arsip'],
             'foto_path' => $fotoPath,

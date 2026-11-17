@@ -375,6 +375,7 @@ class ArsipController extends Controller
             'sampel.analysis_for',
             'sampel.nama_ruang_arsip',
             'sampel.nomor_ruang_arsip',
+            'sampel.nomor_tingkat_arsip',
             'sampel.created_at',
             'bagian.nama as bagian',
         ];
@@ -390,7 +391,7 @@ class ArsipController extends Controller
             'bagian' => $s->bagian,
             'shipper' => $s->shipper,
             'tujuan' => $s->analysis_for,
-            'ruang' => $s->nama_ruang_arsip.' (No. '.$s->nomor_ruang_arsip.')',
+            'ruang' => $s->nama_ruang_arsip.' (Rak '.$s->nomor_ruang_arsip.(filled($s->nomor_tingkat_arsip) ? ', Tingkat '.$s->nomor_tingkat_arsip : '').')',
             'diunggah' => $this->waktuLokal($s->created_at)->translatedFormat('d M Y'),
         ];
     }

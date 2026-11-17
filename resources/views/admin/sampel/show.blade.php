@@ -4,8 +4,10 @@
         ['Nama Sampel', $sampel->nama_sampel, ''],
         ['Bagian', $sampel->bagian->nama ?? '-', ''],
         ['Tgl Masuk Arsip', $sampel->tanggal_masuk_arsip?->format('d/m/Y') ?? '-', ''],
-        ['Nomor Ruang', $sampel->nomor_ruang_arsip, ''],
+        ['No. Rak', $sampel->nomor_ruang_arsip, ''],
+        ['No. Tingkat', $sampel->nomor_tingkat_arsip ?: '-', ''],
         ['Nama Ruang', $sampel->nama_ruang_arsip, ''],
+        ['Tahun di Label', $sampel->label_tahun, ''],
         ['Diunggah Oleh', $sampel->pengunggah->name ?? '-', ''],
     ];
 
