@@ -74,20 +74,35 @@ class DokumenController extends Controller
             $tanggalDokumen = Carbon::parse($validated['tanggal_dokumen']);
             $tahun = $tanggalDokumen->year;
 
-            $prefix = "{$kodeKlasifikasi}/{$kodeCabang}/{$tahun}/";
+            $bulanRomawi = match ($tanggalDokumen->month) {
+                1 => 'I',
+                2 => 'II',
+                3 => 'III',
+                4 => 'IV',
+                5 => 'V',
+                6 => 'VI',
+                7 => 'VII',
+                8 => 'VIII',
+                9 => 'IX',
+                10 => 'X',
+                11 => 'XI',
+                12 => 'XII',
+                default => 'I',
+            };
+
+            $polaCari = "%/{$kodeKlasifikasi}/{$kodeCabang}/%/{$tahun}";
             $dokumenTerakhir = Dokumen::withTrashed()
-                ->where('nomor', 'like', "{$prefix}%")
+                ->where('nomor', 'like', $polaCari)
                 ->orderBy('id', 'desc')
                 ->first();
 
             $nomorUrut = 1;
             if ($dokumenTerakhir && $dokumenTerakhir->nomor) {
                 $bagianNomor = explode('/', $dokumenTerakhir->nomor);
-                $urutanTerakhir = end($bagianNomor);
-                $nomorUrut = intval($urutanTerakhir) + 1;
+                $nomorUrut = intval($bagianNomor[0]) + 1;
             }
 
-            $nomorOtomatis = sprintf('%s%04d', $prefix, $nomorUrut);
+            $nomorOtomatis = sprintf('%04d/%s/%s/%s/%d', $nomorUrut, $kodeKlasifikasi, $kodeCabang, $bulanRomawi, $tahun);
 
             $retensiTahun = $kodeSurat ? $kodeSurat->retensi_aktif : $bagian->retensi_tahun;
             $retensiSampai = null;
