@@ -6,8 +6,8 @@
 @php
     $adaPencarian = $kata !== '' || $adaFilter;
     $namaKategori = ['semua' => 'arsip', 'dokumen' => 'dokumen', 'sampel' => 'sampel'][$kategori];
-    $labelbagian = $kategori === 'sampel' ? 'Jenis Sampel' : 'bagian';
-    $semuabagian = $kategori === 'sampel' ? 'Semua jenis sampel' : 'Semua layanan';
+    $labelbagian = 'Bagian';
+    $semuabagian = 'Semua bagian';
     $urlResetFilter = route('user.arsip.index', array_filter([
         'q' => $kata !== '' ? $kata : null,
         'kategori' => $kategori,
@@ -147,7 +147,6 @@
                             <span class="ar-item__nomor">{{ $item['nomor'] }}</span>
 
                             <div class="ar-item__tags">
-                                <span class="ar-tag">{{ $item['jenis'] }}</span>
                                 <span class="ar-tag ar-tag--soft">{{ $item['bagian'] }}</span>
                             </div>
 

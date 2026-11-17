@@ -42,11 +42,7 @@
                         <dd>{{ $arsip['nomor'] }}</dd>
                     </div>
                     <div class="dk-info__item">
-                        <dt>Jenis Dokumen</dt>
-                        <dd>{{ $arsip['jenis'] }}</dd>
-                    </div>
-                    <div class="dk-info__item">
-                        <dt>bagian</dt>
+                        <dt>Bagian</dt>
                         <dd>{{ $arsip['bagian'] }}</dd>
                     </div>
                     <div class="dk-info__item">

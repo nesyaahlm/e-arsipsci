@@ -97,6 +97,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/dokumen-saya', [DokumenSayaController::class, 'index'])->name('user.dokumen-saya.index');
     Route::get('/dokumen-saya/label-box-semua', [DokumenSayaController::class, 'labelBoxSemua'])->name('user.dokumen-saya.label-box-semua');
+    Route::post('/dokumen-saya/label-box-terpilih', [DokumenSayaController::class, 'labelBoxTerpilih'])->name('user.dokumen-saya.label-box-terpilih');
     Route::get('/dokumen-saya/{dokumen}', [DokumenSayaController::class, 'show'])->whereNumber('dokumen')->name('user.dokumen-saya.show');
     Route::get('/dokumen-saya/{dokumen}/label-box', [DokumenSayaController::class, 'labelBox'])->whereNumber('dokumen')->name('user.dokumen-saya.label-box');
     Route::get('/unggah', [UnggahDokumenController::class, 'create'])->name('user.unggah.create');
@@ -110,7 +111,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/sampel-saya/tambah', [UserSampelController::class, 'create'])->name('user.sampel.create');
     Route::post('/sampel-saya', [UserSampelController::class, 'store'])->name('user.sampel.store');
 
+    Route::get('/sampel-saya/label-semua', [UserSampelController::class, 'labelSemua'])->name('user.sampel.label-semua');
+    Route::post('/sampel-saya/label-terpilih', [UserSampelController::class, 'labelTerpilih'])->name('user.sampel.label-terpilih');
+
     Route::get('/sampel-saya/{sampel}', [UserSampelController::class, 'show'])->whereNumber('sampel')->name('user.sampel.show');
     Route::get('/sampel-saya/{sampel}/foto', [UserSampelController::class, 'foto'])->whereNumber('sampel')->name('user.sampel.foto');
+    Route::get('/sampel-saya/{sampel}/label', [UserSampelController::class, 'labelPdf'])->whereNumber('sampel')->name('user.sampel.label');
 
 });

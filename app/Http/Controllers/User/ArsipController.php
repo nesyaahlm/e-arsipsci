@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -30,8 +31,9 @@ class ArsipController extends Controller
         'dokumen.nomor' => 4,
         'dokumen.deskripsi' => 2,
         'dokumen.unit' => 2,
+        'dokumen.tahun_arsip' => 1,
         'bagian.nama' => 2,
-        'jenis_dokumen.nama' => 1,
+        'layanan.nama' => 2,
         'dokumen.kode_rak' => 1,
         'dokumen.nomor_rak' => 1,
         'dokumen.no_tingkat' => 1,
@@ -108,7 +110,7 @@ class ArsipController extends Controller
         ]);
     }
 
-    public function show(Request $request, int $dokumen): View
+    public function show(Request $request, int $dokumen): View|RedirectResponse
     {
         $baris = $this->arsipTersedia()
             ->where('dokumen.id', $dokumen)
@@ -124,6 +126,10 @@ class ArsipController extends Controller
             );
         } catch (Throwable $e) {
             report($e);
+        }
+
+        if ((int) $baris->diunggah_oleh === (int) $request->user()->id) {
+            return redirect()->route('user.dokumen-saya.show', $baris->id);
         }
 
         return view('user.arsip.show', [
@@ -292,9 +298,12 @@ class ArsipController extends Controller
     {
         $kueri = $this->arsipTersedia()
             ->when($bagianId, fn (Builder $q) => $q->where('dokumen.bagian_id', $bagianId))
-            ->when($tahun, fn (Builder $q) => $q
-                ->where('dokumen.tanggal_dokumen', '>=', $tahun.'-01-01')
-                ->where('dokumen.tanggal_dokumen', '<', ($tahun + 1).'-01-01'));
+            ->when($tahun, fn (Builder $q) => $q->where(function (Builder $w) use ($tahun) {
+                $w->where(function (Builder $t) use ($tahun) {
+                    $t->where('dokumen.tanggal_dokumen', '>=', $tahun.'-01-01')
+                        ->where('dokumen.tanggal_dokumen', '<', ($tahun + 1).'-01-01');
+                })->orWhere('dokumen.tahun_arsip', 'like', '%'.$tahun.'%');
+            }));
 
         $this->terapkanKataKunci($kueri, array_keys(self::KOLOM_CARI), $terms);
 
@@ -389,13 +398,7 @@ class ArsipController extends Controller
     private function arsipTersedia(): Builder
     {
         return DB::table('dokumen')
-
-            ->join('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
-            ->join('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
-// =======
-//             ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
-//             ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
-//             ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
+            ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.status', 'disetujui');
     }
@@ -408,6 +411,7 @@ class ArsipController extends Controller
             'dokumen.judul',
             'dokumen.unit',
             'dokumen.tanggal_dokumen',
+            'dokumen.tahun_arsip',
             'dokumen.kode_rak',
             'dokumen.nomor_rak',
             'dokumen.no_tingkat',
@@ -415,16 +419,15 @@ class ArsipController extends Controller
             'dokumen.lokasi_arsip_fisik',
             'dokumen.created_at',
             'bagian.nama as bagian',
-            // 'jenis_dokumen.nama as jenis',
 
             DB::raw('COALESCE(bagian.nama, bagian.nama) as bagian'),
-            // DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
         ];
     }
 
     private function kolomDetail(): array
     {
         return array_merge($this->kolomDaftar(), [
+            'dokumen.diunggah_oleh',
             'dokumen.deskripsi',
             'dokumen.file_path',
             'dokumen.file_nama_asli',
@@ -470,6 +473,13 @@ class ArsipController extends Controller
         return $hasil;
     }
 
+    private function labelTahun(object $d): string
+    {
+        return filled($d->tahun_arsip)
+            ? (string) $d->tahun_arsip
+            : (string) Carbon::parse($d->tanggal_dokumen)->year;
+    }
+
     private function susunDaftar(object $d): array
     {
         $lokasi = $this->petaLokasi($d);
@@ -485,10 +495,9 @@ class ArsipController extends Controller
             'id' => $d->id,
             'nomor' => $d->nomor,
             'judul' => $d->judul,
-            'jenis' => $d->jenis,
             'bagian' => $d->bagian,
             'unit' => $d->unit,
-            'tahun' => Carbon::parse($d->tanggal_dokumen)->year,
+            'tahun' => $this->labelTahun($d),
             'diunggah' => $this->waktuLokal($d->created_at)->translatedFormat('d M Y'),
             'slot' => $slot,
             'slot_terisi' => collect($slot)->contains(fn ($nilai) => filled($nilai)),
@@ -508,7 +517,6 @@ class ArsipController extends Controller
             'nomor' => $d->nomor,
             'judul' => $d->judul,
             'deskripsi' => $d->deskripsi,
-            'jenis' => $d->jenis,
             'bagian' => $d->bagian,
             'kode_rak' => $lokasi['kode_rak'],
             'nomor_rak' => $lokasi['nomor_rak'],
@@ -518,7 +526,7 @@ class ArsipController extends Controller
             'lokasi_lama' => $d->lokasi_arsip_fisik,
             'unit_kerja' => $d->unit,
             'portofolio' => $d->bagian,
-            'tahun' => $tanggal->year,
+            'tahun' => $this->labelTahun($d),
             'tanggal' => $tanggal->translatedFormat('d F Y'),
             'diunggah' => $this->waktuLokal($d->created_at)->translatedFormat('d F Y'),
             'retensi' => $d->retensi_sampai
@@ -535,13 +543,22 @@ class ArsipController extends Controller
 
     private function tahunTersedia(): Collection
     {
-        return $this->arsipTersedia()
+        $baris = $this->arsipTersedia()
             ->distinct()
-            ->pluck('dokumen.tanggal_dokumen')
-            ->map(fn ($tanggal) => Carbon::parse($tanggal)->year)
-            ->unique()
-            ->sortDesc()
-            ->values();
+            ->get(['dokumen.tanggal_dokumen', 'dokumen.tahun_arsip']);
+
+        $dariTanggal = $baris->map(fn ($d) => Carbon::parse($d->tanggal_dokumen)->year);
+
+        $dariLabel = $baris
+            ->pluck('tahun_arsip')
+            ->filter()
+            ->flatMap(function ($nilai) {
+                preg_match_all('/(?:19|20)\\d{2}/', (string) $nilai, $cocok);
+
+                return array_map('intval', $cocok[0]);
+            });
+
+        return $dariTanggal->merge($dariLabel)->unique()->sortDesc()->values();
     }
 
     private function tahunSampel(int $userId): Collection
