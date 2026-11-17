@@ -74,7 +74,6 @@ class SampelController extends Controller
     {
         $bagianList = Bagian::orderBy('nama')->get();
         return view('user.sampel.create', compact('bagianList'));
-
     }
 
     public function store(Request $request)
@@ -101,7 +100,6 @@ class SampelController extends Controller
             'tanggal_pengambilan.required' => 'Tanggal pengambilan sampel wajib diisi.',
             'tempat_pengambilan.required' => 'Tempat pengambilan sampel wajib diisi.',
             'analysis_for.required' => 'Tujuan analisis wajib diisi.',
-
             'bagian_id.required' => 'Bagian wajib dipilih.',
             'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
