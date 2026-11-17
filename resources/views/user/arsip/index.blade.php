@@ -6,8 +6,8 @@
 @php
     $adaPencarian = $kata !== '' || $adaFilter;
     $namaKategori = ['semua' => 'arsip', 'dokumen' => 'dokumen', 'sampel' => 'sampel'][$kategori];
-    $labelLayanan = $kategori === 'sampel' ? 'Jenis Sampel' : 'Layanan';
-    $semuaLayanan = $kategori === 'sampel' ? 'Semua jenis sampel' : 'Semua layanan';
+    $labelbagian = $kategori === 'sampel' ? 'Jenis Sampel' : 'bagian';
+    $semuabagian = $kategori === 'sampel' ? 'Semua jenis sampel' : 'Semua layanan';
     $urlResetFilter = route('user.arsip.index', array_filter([
         'q' => $kata !== '' ? $kata : null,
         'kategori' => $kategori,
@@ -61,11 +61,11 @@
 
             <div class="ar-filterbox__grid">
                 <label class="ar-field">
-                    <span class="ar-field__label">{{ $labelLayanan }}</span>
-                    <select name="layanan_id" class="ar-select {{ $filter['layanan_id'] ? 'is-aktif' : '' }}" onchange="this.form.submit()">
-                        <option value="">{{ $semuaLayanan }}</option>
-                        @foreach ($layananList as $layanan)
-                            <option value="{{ $layanan->id }}" @selected((int) $layanan->id === $filter['layanan_id'])>{{ $layanan->nama }}</option>
+                    <span class="ar-field__label">{{ $labelbagian }}</span>
+                    <select name="bagian_id" class="ar-select {{ $filter['bagian_id'] ? 'is-aktif' : '' }}" onchange="this.form.submit()">
+                        <option value="">{{ $semuabagian }}</option>
+                        @foreach ($bagianList as $bagian)
+                            <option value="{{ $bagian->id }}" @selected((int) $bagian->id === $filter['bagian_id'])>{{ $bagian->nama }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -123,7 +123,7 @@
                             <span class="ar-item__nomor">{{ $item['kode'] }}</span>
 
                             <div class="ar-item__tags">
-                                <span class="ar-tag">{{ $item['layanan'] }}</span>
+                                <span class="ar-tag">{{ $item['bagian'] }}</span>
                             </div>
 
                             <dl class="ar-item__meta">
@@ -148,7 +148,7 @@
 
                             <div class="ar-item__tags">
                                 <span class="ar-tag">{{ $item['jenis'] }}</span>
-                                <span class="ar-tag ar-tag--soft">{{ $item['layanan'] }}</span>
+                                <span class="ar-tag ar-tag--soft">{{ $item['bagian'] }}</span>
                             </div>
 
                             <dl class="ar-item__meta">

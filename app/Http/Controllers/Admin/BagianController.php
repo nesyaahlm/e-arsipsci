@@ -11,11 +11,23 @@ use Illuminate\View\View;
 
 class BagianController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('bagian.index', [
-            'daftarBagian' => Bagian::orderBy('kode')->get(),
-        ]);
+        $cari = trim((string) $request->input('cari'));
+
+        $daftarBagian = Bagian::query()
+            ->when($cari !== '', function ($query) use ($cari) {
+                $query->where(function ($q) use ($cari) {
+                    $q->where('kode', 'like', "%{$cari}%")
+                      ->orWhere('nama', 'like', "%{$cari}%")
+                      ->orWhere('retensi_tahun', 'like', "%{$cari}%");
+                });
+            })
+            ->orderBy('kode')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('bagian.index', compact('daftarBagian', 'cari'));
     }
 
     public function store(Request $request): RedirectResponse

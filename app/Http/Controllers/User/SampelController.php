@@ -16,7 +16,7 @@ class SampelController extends Controller
     {
         $kata = trim((string) $request->query('q', ''));
 
-        $sampel = Sampel::with('layanan:id,nama')
+        $sampel = Sampel::with('bagian:id,nama')
             ->where('diunggah_oleh', Auth::id())
             ->when($kata !== '', function ($query) use ($kata) {
                 $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $kata).'%';
@@ -32,14 +32,15 @@ class SampelController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $layananList = Layanan::orderBy('nama')->get();
 
-        return view('user.sampel.index', compact('sampel', 'kata', 'layananList'));
+        $bagianList = Bagian::orderBy('nama')->get();
+
+        return view('user.sampel.index', compact('sampel', 'kata', 'bagianList'));
     }
 
     public function show(int $sampel)
     {
-        $data = Sampel::with('layanan:id,nama')
+        $data = Sampel::with('bagian:id,nama')
             ->where('diunggah_oleh', Auth::id())
             ->findOrFail($sampel);
 

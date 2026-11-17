@@ -93,17 +93,17 @@
         </div>
     @endif
 
-    <div class="ug-modal" id="tambah-sampel" data-modal @if ($errors->any() || session('error')) data-open @else hidden @endif>
+    <div class="ug-modal ug-admin-look" id="tambah-sampel" data-modal @if ($errors->any() || session('error')) data-open @else hidden @endif>
         <div class="ug-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="judul-tambah-sampel">
             <button type="button" class="ug-modal__close" data-modal-close aria-label="Tutup">&times;</button>
             <div class="p-3 p-md-4">
-                <h2 class="ug-title" id="judul-tambah-sampel">Catat Sampel Baru</h2>
+                <h2 class="ug-title" id="judul-tambah-sampel">Tambah Sampel Baru</h2>
                 @include('admin.sampel._form', [
                     'aksi' => route('user.sampel.store'),
                     'metode' => 'POST',
                     'sampel' => null,
                     'kembali' => route('user.sampel.index'),
-                    'layananList' => $layananList,
+                    'bagianList' => $bagianList,
                 ])
             </div>
         </div>
@@ -153,7 +153,8 @@
                     <thead>
                         <tr>
                             <th>Sampel</th>
-                            <th>Layanan</th>
+
+                            <th>Bagian</th>
                             <th>Shipper</th>
                             <th>Tujuan Analisis</th>
                             <th>Ruang Arsip</th>
@@ -167,7 +168,8 @@
                                     <a href="{{ route('user.sampel.show', $item->id) }}">{{ $item->nama_sampel }}</a>
                                     <small>{{ $item->kode_sampel }}</small>
                                 </td>
-                                <td data-label="Layanan">{{ $item->layanan?->nama ?? '-' }}</td>
+
+                                <td data-label="Bagian">{{ $item->bagian?->nama ?? '-' }}</td>
                                 <td data-label="Shipper">{{ filled($item->shipper) ? $item->shipper : '-' }}</td>
                                 <td data-label="Tujuan Analisis">{{ $item->analysis_for }}</td>
                                 <td data-label="Ruang Arsip">{{ $item->nama_ruang_arsip }} (No. {{ $item->nomor_ruang_arsip }})</td>

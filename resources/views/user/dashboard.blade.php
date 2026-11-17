@@ -52,7 +52,7 @@
                         :href="route('user.sampel.show', $item['id'])"
                         :title="$item['judul']"
                         :meta="$item['keterangan']"
-                        :badge="$item['layanan']"
+                        :badge="$item['bagian']"
                         jenis="Sampel"
                         icon="box" />
                 @else
@@ -60,7 +60,7 @@
                         :href="route('user.dokumen-saya.show', $item['id'])"
                         :title="$item['judul']"
                         :meta="$item['keterangan']"
-                        :badge="$item['layanan']"
+                        :badge="$item['bagian']"
                         jenis="Dokumen"
                         icon="file" />
                 @endif

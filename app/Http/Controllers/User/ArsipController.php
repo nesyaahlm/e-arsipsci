@@ -30,7 +30,7 @@ class ArsipController extends Controller
         'dokumen.nomor' => 4,
         'dokumen.deskripsi' => 2,
         'dokumen.unit' => 2,
-        'layanan.nama' => 2,
+        'bagian.nama' => 2,
         'jenis_dokumen.nama' => 1,
         'dokumen.kode_rak' => 1,
         'dokumen.nomor_rak' => 1,
@@ -70,7 +70,7 @@ class ArsipController extends Controller
             default => $this->tahunTersedia()->merge($this->tahunSampel($userId))->unique()->sortDesc()->values(),
         };
 
-        $layananId = $request->integer('layanan_id') ?: null;
+        $bagianId = $request->integer('bagian_id') ?: null;
         $tahun = $request->integer('tahun') ?: null;
 
         if ($tahun !== null && ! $tahunList->contains($tahun)) {
@@ -86,11 +86,11 @@ class ArsipController extends Controller
         }
 
         if ($kategori === 'sampel') {
-            $hasil = $this->cariSampel($userId, $terms, $layananId, $tahun, $urut);
+            $hasil = $this->cariSampel($userId, $terms, $bagianId, $tahun, $urut);
         } elseif ($kategori === 'dokumen') {
-            $hasil = $this->cariDokumen($terms, $layananId, $tahun, $urut);
+            $hasil = $this->cariDokumen($terms, $bagianId, $tahun, $urut);
         } else {
-            $hasil = $this->cariGabungan($userId, $terms, $layananId, $tahun, $urut);
+            $hasil = $this->cariGabungan($userId, $terms, $bagianId, $tahun, $urut);
         }
 
         return view('user.arsip.index', [
@@ -98,13 +98,13 @@ class ArsipController extends Controller
             'kata' => $kata,
             'kategori' => $kategori,
             'filter' => [
-                'layanan_id' => $layananId,
+                'bagian_id' => $bagianId,
                 'tahun' => $tahun,
                 'urut' => $urut,
             ],
-            'layananList' => DB::table('layanan')->orderBy('nama')->get(['id', 'nama']),
+            'bagianList' => DB::table('bagian')->orderBy('nama')->get(['id', 'nama']),
             'tahunList' => $tahunList,
-            'adaFilter' => (bool) ($layananId || $tahun),
+            'adaFilter' => (bool) ($bagianId || $tahun),
         ]);
     }
 
@@ -189,10 +189,10 @@ class ArsipController extends Controller
         return $disk->download($baris->file_path, $this->namaBerkas($baris));
     }
 
-    private function cariDokumen(array $terms, ?int $layananId, ?int $tahun, string $urut)
+    private function cariDokumen(array $terms, ?int $bagianId, ?int $tahun, string $urut)
     {
         $arah = $urut === 'terlama' ? 'asc' : 'desc';
-        $kueri = $this->kueriDokumen($terms, $layananId, $tahun);
+        $kueri = $this->kueriDokumen($terms, $bagianId, $tahun);
 
         if ($urut === 'relevansi') {
             [$skor, $binding] = $this->ekspresiSkor(self::KOLOM_CARI, $terms);
@@ -209,10 +209,10 @@ class ArsipController extends Controller
             ->through(fn ($baris) => $this->susunDaftar($baris));
     }
 
-    private function cariSampel(int $userId, array $terms, ?int $layananId, ?int $tahun, string $urut)
+    private function cariSampel(int $userId, array $terms, ?int $bagianId, ?int $tahun, string $urut)
     {
         $arah = $urut === 'terlama' ? 'asc' : 'desc';
-        $kueri = $this->kueriSampel($userId, $terms, $layananId, $tahun);
+        $kueri = $this->kueriSampel($userId, $terms, $bagianId, $tahun);
 
         if ($urut === 'relevansi') {
             [$skor, $binding] = $this->ekspresiSkor(self::KOLOM_CARI_SAMPEL, $terms);
@@ -229,19 +229,19 @@ class ArsipController extends Controller
             ->through(fn ($baris) => $this->susunSampel($baris));
     }
 
-    private function cariGabungan(int $userId, array $terms, ?int $layananId, ?int $tahun, string $urut)
+    private function cariGabungan(int $userId, array $terms, ?int $bagianId, ?int $tahun, string $urut)
     {
         $arah = $urut === 'terlama' ? 'asc' : 'desc';
         $skorDokumen = $urut === 'relevansi' ? $this->ekspresiSkor(self::KOLOM_CARI, $terms) : ['0', []];
         $skorSampel = $urut === 'relevansi' ? $this->ekspresiSkor(self::KOLOM_CARI_SAMPEL, $terms) : ['0', []];
 
-        $dokumen = $this->kueriDokumen($terms, $layananId, $tahun)
+        $dokumen = $this->kueriDokumen($terms, $bagianId, $tahun)
             ->selectRaw(
                 "'dokumen' as tipe, dokumen.id as arsip_id, dokumen.created_at as dibuat, ".$skorDokumen[0].' as skor',
                 $skorDokumen[1]
             );
 
-        $sampel = $this->kueriSampel($userId, $terms, $layananId, $tahun)
+        $sampel = $this->kueriSampel($userId, $terms, $bagianId, $tahun)
             ->selectRaw(
                 "'sampel' as tipe, sampel.id as arsip_id, sampel.created_at as dibuat, ".$skorSampel[0].' as skor',
                 $skorSampel[1]
@@ -288,10 +288,10 @@ class ArsipController extends Controller
         return $halaman;
     }
 
-    private function kueriDokumen(array $terms, ?int $layananId, ?int $tahun): Builder
+    private function kueriDokumen(array $terms, ?int $bagianId, ?int $tahun): Builder
     {
         $kueri = $this->arsipTersedia()
-            ->when($layananId, fn (Builder $q) => $q->where('dokumen.layanan_id', $layananId))
+            ->when($bagianId, fn (Builder $q) => $q->where('dokumen.bagian_id', $bagianId))
             ->when($tahun, fn (Builder $q) => $q
                 ->where('dokumen.tanggal_dokumen', '>=', $tahun.'-01-01')
                 ->where('dokumen.tanggal_dokumen', '<', ($tahun + 1).'-01-01'));
@@ -301,10 +301,10 @@ class ArsipController extends Controller
         return $kueri;
     }
 
-    private function kueriSampel(int $userId, array $terms, ?int $layananId, ?int $tahun): Builder
+    private function kueriSampel(int $userId, array $terms, ?int $bagianId, ?int $tahun): Builder
     {
         $kueri = $this->sampelMilik($userId)
-            ->when($layananId, fn (Builder $q) => $q->where('sampel.bagian_id', $layananId))
+            ->when($bagianId, fn (Builder $q) => $q->where('sampel.bagian_id', $bagianId))
             ->when($tahun, fn (Builder $q) => $q
                 ->where('sampel.tanggal_pengambilan', '>=', $tahun.'-01-01')
                 ->where('sampel.tanggal_pengambilan', '<', ($tahun + 1).'-01-01'));
@@ -317,7 +317,7 @@ class ArsipController extends Controller
     private function sampelMilik(int $userId): Builder
     {
         return DB::table('sampel')
-            ->leftJoin('bagian', 'bagian.id', '=', 'sampel.bagian_id')
+            ->join('bagian', 'bagian.id', '=', 'sampel.bagian_id')
             ->whereNull('sampel.deleted_at')
             ->where('sampel.diunggah_oleh', $userId);
     }
@@ -367,7 +367,7 @@ class ArsipController extends Controller
             'sampel.nama_ruang_arsip',
             'sampel.nomor_ruang_arsip',
             'sampel.created_at',
-            'bagian.nama as layanan',
+            'bagian.nama as bagian',
         ];
     }
 
@@ -378,7 +378,7 @@ class ArsipController extends Controller
             'id' => $s->id,
             'kode' => $s->kode_sampel,
             'nama' => $s->nama_sampel,
-            'layanan' => $s->layanan,
+            'bagian' => $s->bagian,
             'shipper' => $s->shipper,
             'tujuan' => $s->analysis_for,
             'ruang' => $s->nama_ruang_arsip.' (No. '.$s->nomor_ruang_arsip.')',
@@ -389,8 +389,13 @@ class ArsipController extends Controller
     private function arsipTersedia(): Builder
     {
         return DB::table('dokumen')
-            ->join('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
+
+            ->join('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->join('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+// =======
+//             ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
+//             ->leftJoin('jenis_dokumen', 'jenis_dokumen.id', '=', 'dokumen.jenis_dokumen_id')
+//             ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.status', 'disetujui');
     }
@@ -409,8 +414,11 @@ class ArsipController extends Controller
             'dokumen.no_box_file',
             'dokumen.lokasi_arsip_fisik',
             'dokumen.created_at',
-            'layanan.nama as layanan',
-            'jenis_dokumen.nama as jenis',
+            'bagian.nama as bagian',
+            // 'jenis_dokumen.nama as jenis',
+
+            DB::raw('COALESCE(bagian.nama, bagian.nama) as bagian'),
+            // DB::raw("COALESCE(jenis_dokumen.nama, '-') as jenis"),
         ];
     }
 
@@ -478,7 +486,7 @@ class ArsipController extends Controller
             'nomor' => $d->nomor,
             'judul' => $d->judul,
             'jenis' => $d->jenis,
-            'layanan' => $d->layanan,
+            'bagian' => $d->bagian,
             'unit' => $d->unit,
             'tahun' => Carbon::parse($d->tanggal_dokumen)->year,
             'diunggah' => $this->waktuLokal($d->created_at)->translatedFormat('d M Y'),
@@ -501,7 +509,7 @@ class ArsipController extends Controller
             'judul' => $d->judul,
             'deskripsi' => $d->deskripsi,
             'jenis' => $d->jenis,
-            'layanan' => $d->layanan,
+            'bagian' => $d->bagian,
             'kode_rak' => $lokasi['kode_rak'],
             'nomor_rak' => $lokasi['nomor_rak'],
             'no_tingkat' => $lokasi['no_tingkat'],
@@ -509,7 +517,7 @@ class ArsipController extends Controller
             'lokasi_terisi' => collect($lokasi)->except('kode_rak')->contains(fn ($nilai) => filled($nilai)),
             'lokasi_lama' => $d->lokasi_arsip_fisik,
             'unit_kerja' => $d->unit,
-            'portofolio' => $d->layanan,
+            'portofolio' => $d->bagian,
             'tahun' => $tanggal->year,
             'tanggal' => $tanggal->translatedFormat('d F Y'),
             'diunggah' => $this->waktuLokal($d->created_at)->translatedFormat('d F Y'),
