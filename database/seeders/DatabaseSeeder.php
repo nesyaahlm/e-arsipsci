@@ -11,6 +11,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
+            ['email' => 'superadmin@sucofindo.co.id'],
+            [
+                'name' => 'Superadmin Kantor Pusat',
+                'password' => Hash::make('password123'),
+                'role' => 'superadmin',
+                'status' => 'aktif',
+            ]
+        );
+
+        User::updateOrCreate(
             ['email' => 'admin@sucofindo.co.id'],
             [
                 'name' => 'Bagas Prakoso',
@@ -29,5 +39,11 @@ class DatabaseSeeder extends Seeder
                 'status' => 'aktif',
             ]
         );
+
+        $this->call([
+            CabangSeeder::class,
+            BagianSeeder::class,
+            KodeSuratSeeder::class,
+        ]);
     }
 }
