@@ -88,6 +88,7 @@ class SampelController extends Controller
         $validated = $request->validate($this->aturan(), $this->pesan('Kode sampel sudah terdaftar, gunakan kode lain.'));
 
         $data = collect($validated)->except('foto')->all();
+        $data['tahun_arsip'] = Sampel::rapikanTahun($data['tahun_arsip'] ?? null);
         $data['foto_path'] = $request->hasFile('foto')
             ? $request->file('foto')->store('sampel', 'public')
             : null;
@@ -140,6 +141,7 @@ class SampelController extends Controller
         $validated = $request->validate($this->aturan((int) $id), $this->pesan('Kode sampel sudah digunakan sampel lain.'));
 
         $data = collect($validated)->except('foto')->all();
+        $data['tahun_arsip'] = Sampel::rapikanTahun($data['tahun_arsip'] ?? null);
         $data['foto_path'] = $sampel->foto_path;
 
         if ($request->hasFile('foto')) {
@@ -197,6 +199,8 @@ class SampelController extends Controller
             'analysis_for' => ['required', 'string', 'max:255'],
             'bagian_id' => ['required', 'exists:bagian,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
+            'nomor_tingkat_arsip' => ['nullable', 'string', 'max:50'],
+            'tahun_arsip' => Sampel::aturanTahun(),
             'nama_ruang_arsip' => ['required', 'string', 'max:100'],
             'tanggal_masuk_arsip' => ['required', 'date'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:5120'],
@@ -215,7 +219,7 @@ class SampelController extends Controller
             'analysis_for.required' => 'Tujuan analisis wajib diisi.',
             'bagian_id.required' => 'Bagian wajib dipilih.',
             'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
-            'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
+            'nomor_ruang_arsip.required' => 'Nomor rak arsip wajib diisi.',
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',
             'foto.image' => 'Berkas harus berupa gambar.',

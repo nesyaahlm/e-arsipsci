@@ -146,9 +146,9 @@
         </div>
     @endif
 
-    @if (session('error') || $errors->has('ids') || $errors->has('ids.*'))
+    @if (session('label_error'))
         <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
-            {{ session('error') ?? $errors->first('ids') ?? $errors->first('ids.*') }}
+            {{ session('label_error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
@@ -259,7 +259,7 @@
                                 <td data-label="Ruang Arsip">
                                     <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
                                     @if (filled($item->nomor_ruang_arsip))
-                                        <small class="d-block" style="color: var(--ua-active);">No. {{ $item->nomor_ruang_arsip }}</small>
+                                        <small class="d-block" style="color: var(--ua-active);">Rak {{ $item->nomor_ruang_arsip }}@if (filled($item->nomor_tingkat_arsip)), Tingkat {{ $item->nomor_tingkat_arsip }}@endif</small>
                                     @endif
                                 </td>
                                 <td data-label="Tgl Unggah" class="text-nowrap">{{ $item->created_at->copy()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y') }}</td>

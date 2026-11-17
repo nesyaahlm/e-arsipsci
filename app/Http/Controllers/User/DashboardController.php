@@ -54,7 +54,8 @@ class DashboardController extends Controller
     private function arsipTerbaru(int $userId): Collection
     {
         $dokumen = $this->dokumenSaya($userId)
-            ->join('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
+            ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
+            ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
             ->orderByDesc('dokumen.created_at')
             ->orderByDesc('dokumen.id')
             ->limit(self::BATAS_TERBARU)
@@ -63,7 +64,7 @@ class DashboardController extends Controller
                 'dokumen.nomor',
                 'dokumen.judul',
                 'dokumen.created_at',
-                'bagian.nama as bagian',
+                DB::raw('COALESCE(bagian.nama, layanan.nama) as bagian'),
             ])
             ->map(fn ($d) => [
                 'tipe' => 'dokumen',
