@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bagian;
+use App\Models\Cabang;
 use App\Models\Sampel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,14 +20,22 @@ class SampelController extends Controller
         $daftarSampel = Sampel::with('bagian')->where('status', '!=', 'pemusnahan')->get();
         foreach ($daftarSampel as $s) {
             if ($s->tanggal_masuk_arsip && $s->bagian && $s->bagian->retensi_tahun) {
-                $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addYears($s->bagian->retensi_tahun);
-                $statusSeharusnya = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
-                if ($s->status !== $statusSeharusnya) {
-                    $s->update(['status' => $statusSeharusnya]);
+                if (($s->bagian->retensi_satuan ?? 'tahun') === 'bulan') {
+                    $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addMonths($s->bagian->retensi_tahun);
+                } else {
+                    $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addYears($s->bagian->retensi_tahun);
+                }
+
+                if ($kadaluwarsa->isPast() && $s->status !== 'inaktif') {
+                    $s->update(['status' => 'inaktif']);
+                } elseif (!$kadaluwarsa->isPast() && $s->status === 'inaktif') {
+                    $s->update(['status' => 'aktif']);
                 }
             }
         }
+
         $cari = trim((string) $request->input('cari'));
+        $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
         $sampel = Sampel::with(['bagian', 'pengunggah'])
             ->when($cari !== '', function ($query) use ($cari) {
@@ -65,9 +74,14 @@ class SampelController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $daftarBagian = Bagian::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
+
         return view('admin.sampel.index', [
             'sampel' => $sampel,
-            'daftarBagian' => Bagian::orderBy('nama')->get(),
+            'daftarBagian' => $daftarBagian,
         ]);
     }
 
@@ -89,7 +103,12 @@ class SampelController extends Controller
 
     public function create(): View
     {
-        $bagianList = Bagian::orderBy('nama')->get();
+        $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
+
+        $bagianList = Bagian::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
 
         return view('admin.sampel.create', compact('bagianList'));
     }
@@ -103,9 +122,19 @@ class SampelController extends Controller
         $data['foto_path'] = $request->hasFile('foto')
             ? $request->file('foto')->store('sampel', 'public')
             : null;
-            
-        $data['cabang_id'] = Auth::user()->cabang_id ?? 1;
+
+        $data['cabang_id'] = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
         $data['diunggah_oleh'] = Auth::id();
+
+        $bagian = Bagian::find($data['bagian_id']);
+        if ($bagian && !empty($bagian->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
+            $tgl = Carbon::parse($data['tanggal_masuk_arsip']);
+            $kadaluwarsa = (($bagian->retensi_satuan ?? 'tahun') === 'bulan')
+                ? $tgl->addMonths($bagian->retensi_tahun)
+                : $tgl->addYears($bagian->retensi_tahun);
+
+            $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+        }
 
         $sampel = Sampel::create($data);
 
@@ -126,7 +155,12 @@ class SampelController extends Controller
     public function edit($id): View
     {
         $sampel = Sampel::findOrFail($id);
-        $bagianList = Bagian::orderBy('nama')->get();
+        $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
+
+        $bagianList = Bagian::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
 
         return view('admin.sampel.edit', compact('sampel', 'bagianList'));
     }
@@ -162,6 +196,18 @@ class SampelController extends Controller
                 Storage::disk('public')->delete($sampel->foto_path);
             }
             $data['foto_path'] = $request->file('foto')->store('sampel', 'public');
+        }
+
+        $bagian = Bagian::find($data['bagian_id']);
+        if ($bagian && !empty($bagian->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
+            $tgl = Carbon::parse($data['tanggal_masuk_arsip']);
+            $kadaluwarsa = (($bagian->retensi_satuan ?? 'tahun') === 'bulan')
+                ? $tgl->addMonths($bagian->retensi_tahun)
+                : $tgl->addYears($bagian->retensi_tahun);
+
+            if ($sampel->status !== 'pemusnahan') {
+                $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+            }
         }
 
         $sampel->update($data);
