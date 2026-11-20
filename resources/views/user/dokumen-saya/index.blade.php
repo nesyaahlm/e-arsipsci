@@ -6,7 +6,6 @@
 
     @push('scripts')
         <script src="{{ asset('js/user/unggah.js') }}" defer></script>
-        <script src="{{ asset('js/admin/pemusnahan-pilih.js') }}" defer></script>
         <script>
             (function () {
                 var form = document.querySelector('[data-label-form]');
@@ -19,6 +18,8 @@
                 var items = Array.prototype.slice.call(form.querySelectorAll('[data-label-item]'));
                 var button = document.querySelector('[data-label-terpilih]');
                 var badge = document.querySelector('[data-label-jumlah]');
+                var tombolMusnah = document.querySelector('[data-pemusnahan-terpilih]');
+                var jumlahMusnah = document.querySelector('[data-pemusnahan-jumlah]');
 
                 function sync() {
                     var picked = items.filter(function (box) { return box.checked; }).length;
@@ -42,11 +43,23 @@
                     if (badge) {
                         badge.textContent = picked;
                     }
+
+                    if (tombolMusnah) {
+                        tombolMusnah.disabled = picked === 0;
+                    }
+
+                    if (jumlahMusnah) {
+                        jumlahMusnah.textContent = picked;
+                    }
                 }
 
                 if (master) {
                     master.addEventListener('change', function () {
-                        items.forEach(function (box) { box.checked = master.checked; });
+                        items.forEach(function (box) {
+                            if (!box.disabled) {
+                                box.checked = master.checked;
+                            }
+                        });
                         sync();
                     });
                 }
@@ -70,11 +83,6 @@
     </div>
 
     @include('user.unggah._form')
-
-    <form id="form-ajukan" method="POST" action="{{ route('pemusnahan.ajukan') }}" class="d-none">
-        @csrf
-        <input type="hidden" name="tipe" value="dokumen">
-    </form>
 
     @if (session('label_error'))
         <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
@@ -123,9 +131,9 @@
                 </a>
             @endif
 
-            <button type="submit" form="form-ajukan" id="btn-ajukan" class="dk-bar__btn dk-bar__btn--outline" disabled title="Masukkan dokumen yang dicentang pada kolom Musnah ke daftar pemusnahan">
+            <button type="submit" form="form-label-terpilih" formaction="{{ route('pemusnahan.ajukan') }}" class="dk-bar__btn dk-bar__btn--outline" data-pemusnahan-terpilih disabled title="Masukkan dokumen yang dicentang ke daftar pemusnahan">
                 <span>Pemusnahan</span>
-                <span class="dk-bar__badge" id="jumlah-pilih">0</span>
+                <span class="dk-bar__badge" data-pemusnahan-jumlah>0</span>
             </button>
         </div>
     </div>
@@ -141,6 +149,7 @@
     @else
         <form method="POST" action="{{ route('user.dokumen-saya.label-box-terpilih') }}" id="form-label-terpilih" data-label-form>
             @csrf
+            <input type="hidden" name="tipe" value="dokumen">
         <div class="ua-card dk-tablecard">
             <div class="ua-table-wrap">
                 <table class="dk-table">
@@ -155,12 +164,6 @@
                             <th>Lokasi Box</th>
                             <th>Label</th>
                             <th>Tgl Unggah</th>
-                            <th class="dk-check">
-                                <label class="d-flex flex-column align-items-center gap-1 mb-0">
-                                    <span>Musnah</span>
-                                    <input type="checkbox" id="cek-semua" class="dk-checkbox" aria-label="Pilih semua dokumen untuk pemusnahan" title="Pilih semua untuk pemusnahan">
-                                </label>
-                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,11 +178,7 @@
                             @endphp
                             <tr>
                                 <td class="dk-check" data-label="Pilih">
-                                    @if ($arsip['lokasi_terisi'])
-                                        <input type="checkbox" class="dk-checkbox" name="ids[]" value="{{ $arsip['id'] }}" data-label-item aria-label="Pilih dokumen {{ $arsip['nomor'] }}">
-                                    @else
-                                        <input type="checkbox" class="dk-checkbox" disabled title="Belum ada lokasi box, label tidak bisa dibuat" aria-label="Dokumen {{ $arsip['nomor'] }} belum punya lokasi box">
-                                    @endif
+                                    <input type="checkbox" class="dk-checkbox" name="ids[]" value="{{ $arsip['id'] }}" data-label-item aria-label="Pilih dokumen {{ $arsip['nomor'] }}" @disabled($statusArsip === 'pemusnahan')>
                                 </td>
                                 <td class="dk-table__judul">
                                     <a href="{{ route('user.dokumen-saya.show', $arsip['id']) }}">{{ $arsip['judul'] }}</a>
@@ -216,9 +215,6 @@
                                     @endif
                                 </td>
                                 <td data-label="Tgl Unggah">{{ $arsip['diunggah_singkat'] }}</td>
-                                <td class="dk-check" data-label="Musnah">
-                                    <input type="checkbox" class="dk-checkbox cek-item" name="ids[]" value="{{ $arsip['id'] }}" form="form-ajukan" aria-label="Pilih dokumen {{ $arsip['nomor'] }} untuk pemusnahan" @disabled($statusArsip === 'pemusnahan')>
-                                </td>
                             </tr>
                         @endforeach
                     </tbody>

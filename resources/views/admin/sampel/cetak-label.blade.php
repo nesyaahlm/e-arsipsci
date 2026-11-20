@@ -148,7 +148,7 @@
     <div class="label-container">
         <div class="label-header">
             <img src="{{ asset('assets/sucofindo-nobg.png') }}" alt="Logo Sucofindo" class="label-logo">
-            <h1 class="label-header-title">PT. SUPERINTENDING COMPANY OF INDONESIA</h1>
+            <h1 class="label-header-title">PT. SUCOFINDO PERSERO</h1>
         </div>
 
         <table class="table-label">

@@ -11,7 +11,7 @@
 <x-layouts.user title="Dashboard">
     <section class="ud-banner">
         <h1 class="ud-banner__title">Selamat Datang, {{ $user->name }}!</h1>
-        <p class="ud-banner__text">Kelola dan temukan dokumen dan sampel arsip PT Sucofindo Cabang Cilacap dengan mudah.</p>
+        <p class="ud-banner__text">Kelola dan temukan dokumen dan sampel arsip PT Sucofindo Unit Kerja Cilacap dengan mudah.</p>
 
         <form method="GET" action="{{ $urlCari }}" class="ud-search" role="search">
             <button type="submit" class="ud-search__button" aria-label="Cari">

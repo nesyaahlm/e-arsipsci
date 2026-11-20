@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h1 class="h4 fw-bold text-primary mb-1">Dokumen Nasional</h1>
-            <p class="text-secondary mb-0 small">Monitoring, audit siklus hidup arsip, dan pengawasan hapus buku lintas kantor cabang.</p>
+            <p class="text-secondary mb-0 small">Monitoring, audit siklus hidup arsip, dan pengawasan hapus buku lintas kantor unit kerja.</p>
         </div>
     </div>
 
@@ -37,11 +37,11 @@
             <form action="{{ route('superadmin.dokumen.index') }}" method="GET" class="row g-2 align-items-center">
                 <input type="hidden" name="status_arsip" value="{{ $statusArsip }}">
                 <div class="col-12 col-md-3">
-                    <input type="text" name="cari" value="{{ $cari }}" class="form-control form-control-sm rounded-3" placeholder="Cari nomor surat, judul, atau no buku...">
+                    <input type="text" name="cari" value="{{ $cari }}" class="form-control form-control-sm rounded-3" placeholder="Cari nomor, judul, atau no buku...">
                 </div>
                 <div class="col-12 col-md-3">
                     <select name="cabang_id" class="form-select form-select-sm rounded-3">
-                        <option value="">Semua Kantor Cabang</option>
+                        <option value="">Semua Kantor Unit Kerja</option>
                         @foreach ($daftarCabang as $c)
                             <option value="{{ $c->id }}" {{ $cabangId == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
                         @endforeach
@@ -79,9 +79,9 @@
                 <thead>
                     <tr>
                         <th class="py-2.5 ps-3 align-middle text-center" style="width: 50px;">NO</th>
-                        <th class="py-2.5 px-3 align-middle" style="width: 160px;">NOMOR SURAT</th>
+                        <th class="py-2.5 px-3 align-middle" style="width: 160px;">NOMOR</th>
                         <th class="py-2.5 px-3 align-middle">JUDUL DOKUMEN</th>
-                        <th class="py-2.5 px-3 align-middle" style="width: 150px;">CABANG</th>
+                        <th class="py-2.5 px-3 align-middle" style="width: 150px;">UNIT KERJA</th>
                         <th class="py-2.5 px-3 align-middle" style="width: 150px;">BAGIAN</th>
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 110px;">TGL DOKUMEN</th>
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 110px;">STATUS SIKLUS</th>
@@ -211,7 +211,7 @@
                             <div class="fw-bold text-dark font-monospace" id="modal-nomor">-</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label small text-secondary fw-semibold mb-1">Kantor Cabang</label>
+                            <label class="form-label small text-secondary fw-semibold mb-1">Kantor Unit Kerja</label>
                             <div class="fw-bold text-primary" id="modal-cabang">-</div>
                         </div>
                         <div class="col-12 col-md-6">
