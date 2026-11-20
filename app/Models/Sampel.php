@@ -96,4 +96,9 @@ class Sampel extends Model
     {
         return $this->belongsTo(User::class, 'diunggah_oleh');
     }
+
+    public function portofolio(): BelongsTo
+    {
+        return $this->belongsTo(Portofolio::class, 'portofolio_id');
+    }
 }

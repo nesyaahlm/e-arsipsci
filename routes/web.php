@@ -82,6 +82,11 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('supe
     Route::put('/bagian/{bagian}', [SuperadminBagianController::class, 'update'])->name('bagian.update');
     Route::delete('/bagian/{bagian}', [SuperadminBagianController::class, 'destroy'])->name('bagian.destroy');
 
+    Route::get('/portofolio', [\App\Http\Controllers\Superadmin\PortofolioController::class, 'index'])->name('portofolio.index');
+    Route::post('/portofolio', [\App\Http\Controllers\Superadmin\PortofolioController::class, 'store'])->name('portofolio.store');
+    Route::put('/portofolio/{portofolio}', [\App\Http\Controllers\Superadmin\PortofolioController::class, 'update'])->name('portofolio.update');
+    Route::delete('/portofolio/{portofolio}', [\App\Http\Controllers\Superadmin\PortofolioController::class, 'destroy'])->name('portofolio.destroy');
+
     Route::get('/dokumen', [DokumenNasionalController::class, 'index'])->name('dokumen.index');
     Route::get('/dokumen/{dokumen}/unduh', [DokumenNasionalController::class, 'unduh'])->name('dokumen.unduh');
     Route::get('/dokumen/{dokumen}/preview', [DokumenNasionalController::class, 'preview'])->name('dokumen.preview');
@@ -118,6 +123,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/bagian', [BagianController::class, 'store'])->name('bagian.store');
     Route::put('/bagian/{bagian}', [BagianController::class, 'update'])->name('bagian.update');
     Route::delete('/bagian/{bagian}', [BagianController::class, 'destroy'])->name('bagian.destroy');
+
+    Route::get('/portofolio', [\App\Http\Controllers\Admin\PortofolioController::class, 'index'])->name('portofolio.index');
+    Route::post('/portofolio', [\App\Http\Controllers\Admin\PortofolioController::class, 'store'])->name('portofolio.store');
+    Route::put('/portofolio/{portofolio}', [\App\Http\Controllers\Admin\PortofolioController::class, 'update'])->name('portofolio.update');
+    Route::delete('/portofolio/{portofolio}', [\App\Http\Controllers\Admin\PortofolioController::class, 'destroy'])->name('portofolio.destroy');
 
     Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
     Route::post('/dokumen', [DokumenController::class, 'store'])->name('dokumen.store');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bagian;
 use App\Models\Cabang;
 use App\Models\Sampel;
+use App\Models\Portofolio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,13 +18,14 @@ class SampelController extends Controller
 {
     public function index(Request $request): View
     {
-        $daftarSampel = Sampel::with('bagian')->where('status', '!=', 'pemusnahan')->get();
+        $daftarSampel = Sampel::with(['portofolio', 'bagian'])->where('status', '!=', 'pemusnahan')->get();
         foreach ($daftarSampel as $s) {
-            if ($s->tanggal_masuk_arsip && $s->bagian && $s->bagian->retensi_tahun) {
-                if (($s->bagian->retensi_satuan ?? 'tahun') === 'bulan') {
-                    $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addMonths($s->bagian->retensi_tahun);
+            $kategori = $s->portofolio ?? $s->bagian;
+            if ($s->tanggal_masuk_arsip && $kategori && $kategori->retensi_tahun) {
+                if (($kategori->retensi_satuan ?? 'bulan') === 'bulan') {
+                    $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addMonths($kategori->retensi_tahun);
                 } else {
-                    $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addYears($s->bagian->retensi_tahun);
+                    $kadaluwarsa = Carbon::parse($s->tanggal_masuk_arsip)->addYears($kategori->retensi_tahun);
                 }
 
                 if ($kadaluwarsa->isPast() && $s->status !== 'inaktif') {
@@ -37,7 +39,7 @@ class SampelController extends Controller
         $cari = trim((string) $request->input('cari'));
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
-        $sampel = Sampel::with(['bagian', 'pengunggah'])
+        $sampel = Sampel::with(['portofolio', 'bagian', 'pengunggah'])
             ->when($cari !== '', function ($query) use ($cari) {
                 $query->where(function ($q) use ($cari) {
                     $kolom = [
@@ -59,20 +61,36 @@ class SampelController extends Controller
                         $q->orWhere($nama, 'like', "%{$cari}%");
                     }
 
-                    $q->orWhereHas('bagian', function ($b) use ($cari) {
+                    $q->orWhereHas('portofolio', function ($p) use ($cari) {
+                        $p->where('nama', 'like', "%{$cari}%");
+                    })->orWhereHas('bagian', function ($b) use ($cari) {
                         $b->where('nama', 'like', "%{$cari}%");
                     })->orWhereHas('pengunggah', function ($u) use ($cari) {
                         $u->where('name', 'like', "%{$cari}%");
                     });
                 });
             })
+            ->when($request->filled('portofolio_id'), function ($query) use ($request) {
+                $query->where('portofolio_id', $request->input('portofolio_id'));
+            })
             ->when($request->filled('bagian_id'), function ($query) use ($request) {
-                $query->where('bagian_id', $request->input('bagian_id'));
+                $query->where(function ($q) use ($request) {
+                    $q->where('portofolio_id', $request->input('bagian_id'))
+                      ->orWhere('bagian_id', $request->input('bagian_id'));
+                });
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->input('status'));
             })
             ->orderByDesc('tanggal_masuk_arsip')
             ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
+
+        $daftarPortofolio = Portofolio::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
 
         $daftarBagian = Bagian::where(function ($q) use ($userCabangId) {
             $q->whereNull('cabang_id')
@@ -81,13 +99,14 @@ class SampelController extends Controller
 
         return view('admin.sampel.index', [
             'sampel' => $sampel,
-            'daftarBagian' => $daftarBagian,
+            'daftarBagian' => $daftarPortofolio->isNotEmpty() ? $daftarPortofolio : $daftarBagian,
+            'daftarPortofolio' => $daftarPortofolio,
         ]);
     }
 
     public function show(Sampel $sampel): View
     {
-        $sampel->load(['bagian', 'pengunggah']);
+        $sampel->load(['portofolio', 'bagian', 'pengunggah']);
 
         DB::table('log_aktivitas')->insert([
             'user_id' => Auth::id(),
@@ -105,12 +124,12 @@ class SampelController extends Controller
     {
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
-        $bagianList = Bagian::where(function ($q) use ($userCabangId) {
+        $portofolioList = Portofolio::where(function ($q) use ($userCabangId) {
             $q->whereNull('cabang_id')
                 ->orWhere('cabang_id', $userCabangId);
         })->orderBy('nama')->get();
 
-        return view('admin.sampel.create', compact('bagianList'));
+        return view('admin.sampel.create', compact('portofolioList'));
     }
 
     public function store(Request $request)
@@ -126,12 +145,12 @@ class SampelController extends Controller
         $data['cabang_id'] = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
         $data['diunggah_oleh'] = Auth::id();
 
-        $bagian = Bagian::find($data['bagian_id']);
-        if ($bagian && !empty($bagian->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
+        $portofolio = Portofolio::find($data['portofolio_id'] ?? null);
+        if ($portofolio && !empty($portofolio->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
             $tgl = Carbon::parse($data['tanggal_masuk_arsip']);
-            $kadaluwarsa = (($bagian->retensi_satuan ?? 'tahun') === 'bulan')
-                ? $tgl->addMonths($bagian->retensi_tahun)
-                : $tgl->addYears($bagian->retensi_tahun);
+            $kadaluwarsa = (($portofolio->retensi_satuan ?? 'bulan') === 'bulan')
+                ? $tgl->addMonths($portofolio->retensi_tahun)
+                : $tgl->addYears($portofolio->retensi_tahun);
 
             $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
         }
@@ -157,17 +176,17 @@ class SampelController extends Controller
         $sampel = Sampel::findOrFail($id);
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
-        $bagianList = Bagian::where(function ($q) use ($userCabangId) {
+        $portofolioList = Portofolio::where(function ($q) use ($userCabangId) {
             $q->whereNull('cabang_id')
                 ->orWhere('cabang_id', $userCabangId);
         })->orderBy('nama')->get();
 
-        return view('admin.sampel.edit', compact('sampel', 'bagianList'));
+        return view('admin.sampel.edit', compact('sampel', 'portofolioList'));
     }
 
     public function cetakLabel($id): View
     {
-        $sampel = Sampel::with(['bagian', 'pengunggah'])->findOrFail($id);
+        $sampel = Sampel::with(['portofolio', 'bagian', 'pengunggah'])->findOrFail($id);
 
         DB::table('log_aktivitas')->insert([
             'user_id' => Auth::id(),
@@ -198,12 +217,12 @@ class SampelController extends Controller
             $data['foto_path'] = $request->file('foto')->store('sampel', 'public');
         }
 
-        $bagian = Bagian::find($data['bagian_id']);
-        if ($bagian && !empty($bagian->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
+        $portofolio = Portofolio::find($data['portofolio_id'] ?? null);
+        if ($portofolio && !empty($portofolio->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
             $tgl = Carbon::parse($data['tanggal_masuk_arsip']);
-            $kadaluwarsa = (($bagian->retensi_satuan ?? 'tahun') === 'bulan')
-                ? $tgl->addMonths($bagian->retensi_tahun)
-                : $tgl->addYears($bagian->retensi_tahun);
+            $kadaluwarsa = (($portofolio->retensi_satuan ?? 'bulan') === 'bulan')
+                ? $tgl->addMonths($portofolio->retensi_tahun)
+                : $tgl->addYears($portofolio->retensi_tahun);
 
             if ($sampel->status !== 'pemusnahan') {
                 $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
@@ -255,8 +274,8 @@ class SampelController extends Controller
             'bill_of_lading' => ['nullable', 'string', 'max:255'],
             'tanggal_pengambilan' => ['required', 'date'],
             'tempat_pengambilan' => ['required', 'string', 'max:255'],
-            'analysis_for' => ['required', 'string', 'max:255'],
-            'bagian_id' => ['required', 'exists:bagian,id'],
+            'analysis_for' => ['nullable', 'string', 'max:255'],
+            'portofolio_id' => ['required', 'exists:portofolio,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
             'nomor_tingkat_arsip' => ['nullable', 'string', 'max:50'],
             'tahun_arsip' => Sampel::aturanTahun(),
@@ -275,9 +294,8 @@ class SampelController extends Controller
             'nama_sampel.required' => 'Nama sampel / komoditas wajib diisi.',
             'tanggal_pengambilan.required' => 'Tanggal pengambilan sampel wajib diisi.',
             'tempat_pengambilan.required' => 'Tempat pengambilan sampel wajib diisi.',
-            'analysis_for.required' => 'Tujuan analisis wajib diisi.',
-            'bagian_id.required' => 'Bagian wajib dipilih.',
-            'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
+            'portofolio_id.required' => 'Portofolio wajib dipilih.',
+            'portofolio_id.exists' => 'Portofolio yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor rak arsip wajib diisi.',
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',
