@@ -79,21 +79,21 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Bagian <span class="text-danger">*</span></label>
-                    <select name="bagian_id" class="form-select form-select-sm rounded-3 @error('bagian_id') is-invalid @enderror" required>
-                        <option value="" disabled {{ old('bagian_id', $sampel->bagian_id ?? '') == '' ? 'selected' : '' }}>Pilih Bagian</option>
-                        @foreach ($bagianList as $bagian)
-                            <option value="{{ $bagian->id }}" {{ old('bagian_id', $sampel->bagian_id ?? '') == $bagian->id ? 'selected' : '' }}>
-                                {{ $bagian->nama }}
+                    <label class="form-label small fw-semibold text-secondary mb-1">Portofolio <span class="text-danger">*</span></label>
+                    <select name="portofolio_id" class="form-select form-select-sm rounded-3 @error('portofolio_id') is-invalid @enderror" required>
+                        <option value="" disabled {{ old('portofolio_id', $sampel->portofolio_id ?? '') == '' ? 'selected' : '' }}>Pilih Portofolio</option>
+                        @foreach ($portofolioList as $portofolio)
+                            <option value="{{ $portofolio->id }}" {{ old('portofolio_id', $sampel->portofolio_id ?? '') == $portofolio->id ? 'selected' : '' }}>
+                                {{ $portofolio->nama }}
                             </option>
                         @endforeach
                     </select>
-                    @error('bagian_id')
+                    @error('portofolio_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="col-12 col-md-6">
+                {{-- <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tujuan Analisis (Analysis For) <span class="text-danger">*</span></label>
                     <input type="text" name="analysis_for" class="form-control form-control-sm rounded-3 @error('analysis_for') is-invalid @enderror" 
                            value="{{ old('analysis_for', $sampel->analysis_for ?? '') }}" 
@@ -101,18 +101,18 @@
                     @error('analysis_for')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
 
     <div class="card shadow-sm rounded-4 border-0 mb-3">
         <div class="card-body p-3">
-            <h6 class="fw-bold text-primary mb-1" style="font-size: 0.95rem;">2. Informasi Kargo &amp; Pengambilan Sampel</h6>
-            <p class="text-muted small mb-2" style="font-size: 0.78rem;">Kolom Shipper, Vessel, dan Bill of Lading bersifat opsional.</p>
+            <h6 class="fw-bold text-primary mb-1" style="font-size: 0.95rem;">2. Informasi Sampel / Keterangan</h6>
+            <p class="text-muted small mb-2" style="font-size: 0.78rem;">Kolom Shipper dan Vessel bersifat opsional.</p>
             <div class="row g-2">
                 <div class="col-12 col-md-6">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Shipper (Pengirim / Klien)</label>
+                    <label class="form-label small fw-semibold text-secondary mb-1">Shipper (Klien)</label>
                     <input type="text" name="shipper" class="form-control form-control-sm rounded-3" 
                            value="{{ old('shipper', $sampel->shipper ?? '') }}" 
                            placeholder="Contoh: PT. Berau Coal">
@@ -124,13 +124,13 @@
                            value="{{ old('vessel', $sampel->vessel ?? '') }}" 
                            placeholder="Contoh: SPB. DIONYSOS">
                 </div>
-
+{{-- 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Bill of Lading (BL / Kuantitas Kargo)</label>
                     <input type="text" name="bill_of_lading" class="form-control form-control-sm rounded-3" 
                            value="{{ old('bill_of_lading', $sampel->bill_of_lading ?? '') }}" 
                            placeholder="Contoh: 10.024 MT">
-                </div>
+                </div> --}}
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tempat Pengambilan Sampel <span class="text-danger">*</span></label>
