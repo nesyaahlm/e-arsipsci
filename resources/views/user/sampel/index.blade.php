@@ -155,9 +155,9 @@
         </div>
     @endif
 
-    @if (session('error') || $errors->has('ids') || $errors->has('ids.*'))
+    @if (session('label_error'))
         <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
-            {{ session('error') ?? $errors->first('ids') ?? $errors->first('ids.*') }}
+            {{ session('label_error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
@@ -283,13 +283,9 @@
                                 <td data-label="Shipper">{{ filled($item->shipper) ? $item->shipper : '-' }}</td>
                                 <td data-label="Tujuan Analisis">{{ filled($item->analysis_for) ? $item->analysis_for : '-' }}</td>
                                 <td data-label="Ruang Arsip">
-                                    @if ($item->nama_ruang_arsip === '-' && $item->nomor_ruang_arsip === '-')
-                                        <span class="d-block">-</span>
-                                    @else
-                                        <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
-                                        @if (filled($item->nomor_ruang_arsip))
-                                            <small class="d-block" style="color: var(--ua-active);">No. {{ $item->nomor_ruang_arsip }}</small>
-                                        @endif
+                                    <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
+                                    @if (filled($item->nomor_ruang_arsip))
+                                        <small class="d-block" style="color: var(--ua-active);">Rak {{ $item->nomor_ruang_arsip }}@if (filled($item->nomor_tingkat_arsip)), Tingkat {{ $item->nomor_tingkat_arsip }}@endif</small>
                                     @endif
                                 </td>
                                 <td data-label="Tgl Unggah" class="text-nowrap">{{ $item->created_at->copy()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y') }}</td>

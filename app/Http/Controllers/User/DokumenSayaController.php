@@ -146,7 +146,7 @@ class DokumenSayaController extends Controller
 
         $pdf = new Dompdf($opsi);
         $pdf->loadHtml($html, 'UTF-8');
-        $pdf->setPaper('A5', 'landscape');
+        $pdf->setPaper('A5', 'portrait');
         $pdf->render();
 
         return response($pdf->output(), 200, [

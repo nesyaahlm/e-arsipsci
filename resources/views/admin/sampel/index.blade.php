@@ -130,14 +130,10 @@
                             <td class="py-2 text-center text-nowrap">{{ $item->tanggal_masuk_arsip?->format('d/m/Y') }}</td>
 
                             <td class="py-2">
-                                @if ($item->nomor_ruang_arsip === '-' && $item->nama_ruang_arsip === '-')
-                                    <span class="d-block text-center text-muted">-</span>
-                                @else
-                                    <span class="d-inline-block text-nowrap rounded border px-2 py-1"
-                                          style="background-color: #f4f8f7; font-size: 0.75rem;">
-                                        {{ $item->nomor_ruang_arsip }} / {{ $item->nama_ruang_arsip }}
-                                    </span>
-                                @endif
+                                <span class="d-inline-block text-nowrap rounded border px-2 py-1"
+                                      style="background-color: #f4f8f7; font-size: 0.75rem;">
+                                    {{ $item->nama_ruang_arsip }} &middot; Rak {{ $item->nomor_ruang_arsip }}@if (filled($item->nomor_tingkat_arsip)), Tingkat {{ $item->nomor_tingkat_arsip }}@endif
+                                </span>
                             </td>
                             <td class="py-2">{{ $item->pengunggah->name ?? '-' }}</td>
                             <td class="py-2 text-center pe-3">

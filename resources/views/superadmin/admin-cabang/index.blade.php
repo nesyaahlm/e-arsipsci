@@ -1,17 +1,17 @@
 <x-superadmin.layout title="Kelola Cabang & Admin">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h1 class="h4 fw-bold text-primary mb-1">Kelola Kantor Cabang & Administrator</h1>
-            <p class="text-secondary mb-0 small">Manajemen kantor cabang nasional dan penetapan penugasan administrator wilayah.</p>
+            <h1 class="h4 fw-bold text-primary mb-1">Kelola Kantor Unit Kerja & Administrator</h1>
+            <p class="text-secondary mb-0 small">Manajemen kantor unit kerja nasional dan penetapan penugasan administrator wilayah.</p>
         </div>
         <div>
             @if ($tab === 'admin')
                 <button type="button" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambahAdmin">
-                    + Tambah Admin Cabang
+                    + Tambah Admin Unit Kerja
                 </button>
             @else
                 <button type="button" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambahCabang">
-                    + Tambah Kantor Cabang
+                    + Tambah Kantor Unit Kerja
                 </button>
             @endif
         </div>
@@ -45,11 +45,11 @@
     <div class="d-flex gap-2 mb-3 flex-wrap">
         <a href="{{ route('superadmin.admin-cabang.index', array_merge(request()->except('tab', 'admin_page', 'cabang_page'), ['tab' => 'admin'])) }}"
            class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold {{ $tab === 'admin' ? 'btn-primary' : 'btn-light border text-secondary' }}">
-            Administrator Cabang ({{ $totalAdmin }})
+            Administrator Unit Kerja ({{ $totalAdmin }})
         </a>
         <a href="{{ route('superadmin.admin-cabang.index', array_merge(request()->except('tab', 'admin_page', 'cabang_page'), ['tab' => 'cabang'])) }}"
            class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold {{ $tab === 'cabang' ? 'btn-primary' : 'btn-light border text-secondary' }}">
-            Master Kantor Cabang ({{ $totalCabang }})
+            Master Kantor Unit Kerja ({{ $totalCabang }})
         </a>
     </div>
 
@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-12 col-md-3">
                         <select name="cabang_id" class="form-select form-select-sm rounded-3">
-                            <option value="">Semua Kantor Cabang</option>
+                            <option value="">Semua Kantor Unit Kerja</option>
                             @foreach ($daftarCabang as $c)
                                 <option value="{{ $c->id }}" {{ $cabangId == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
                             @endforeach
@@ -94,7 +94,7 @@
                             <th class="py-2.5 ps-3 align-middle text-center" style="width: 50px;">NO</th>
                             <th class="py-2.5 px-3 align-middle">NAMA ADMINISTRATOR</th>
                             <th class="py-2.5 px-3 align-middle">EMAIL AKUN</th>
-                            <th class="py-2.5 px-3 align-middle" style="width: 180px;">KANTOR CABANG</th>
+                            <th class="py-2.5 px-3 align-middle" style="width: 180px;">KANTOR UNIT KERJA</th>
                             <th class="py-2.5 px-3 align-middle text-center" style="width: 120px;">STATUS</th>
                             <th class="py-2.5 px-3 align-middle text-center" style="width: 130px;">TERDAFTAR</th>
                             <th class="py-2.5 pe-3 align-middle text-center" style="width: 100px;">AKSI</th>
@@ -112,7 +112,7 @@
                                         </div>
                                         <div>
                                             <div class="fw-semibold text-dark">{{ $admin->name }}</div>
-                                            <div class="text-muted small" style="font-size: 0.73rem;">Role: Admin Cabang</div>
+                                            <div class="text-muted small" style="font-size: 0.73rem;">Role: Admin Unit Kerja</div>
                                         </div>
                                     </div>
                                 </td>
@@ -162,7 +162,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted small">Tidak ada data administrator cabang ditemukan.</td>
+                                <td colspan="7" class="text-center py-4 text-muted small">Tidak ada data administrator unit kerja ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -187,7 +187,7 @@
                 <form action="{{ route('superadmin.admin-cabang.index') }}" method="GET" class="row g-2 align-items-center">
                     <input type="hidden" name="tab" value="cabang">
                     <div class="col-12 col-md-5">
-                        <input type="text" name="cari" value="{{ $cari }}" class="form-control form-control-sm rounded-3" placeholder="Cari nama cabang, kode, atau kota...">
+                        <input type="text" name="cari" value="{{ $cari }}" class="form-control form-control-sm rounded-3" placeholder="Cari nama unit kerja, kode, atau kota...">
                     </div>
                     <div class="col-auto d-flex gap-2">
                         <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Cari</button>
@@ -206,7 +206,7 @@
                         <tr>
                             <th class="py-2.5 ps-3 align-middle text-center" style="width: 50px;">NO</th>
                             <th class="py-2.5 px-3 align-middle text-center" style="width: 120px;">KODE</th>
-                            <th class="py-2.5 px-3 align-middle" style="width: 220px;">NAMA KANTOR CABANG</th>
+                            <th class="py-2.5 px-3 align-middle" style="width: 220px;">NAMA KANTOR UNIT KERJA</th>
                             <th class="py-2.5 px-3 align-middle" style="width: 140px;">KOTA</th>
                             <th class="py-2.5 px-3 align-middle">ALAMAT KANTOR</th>
                             <th class="py-2.5 px-3 align-middle text-center" style="width: 180px;">DATA TERHUBUNG</th>
@@ -262,7 +262,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted small">Tidak ada data kantor cabang ditemukan.</td>
+                                <td colspan="7" class="text-center py-4 text-muted small">Tidak ada data kantor unit kerja ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -288,7 +288,7 @@
                 <form action="{{ route('superadmin.admin-cabang.store') }}" method="POST">
                     @csrf
                     <div class="modal-header border-0 pb-0 pt-3 px-3">
-                        <h5 class="modal-title fw-bold text-primary" id="modalTambahAdminLabel">Tambah Admin Cabang</h5>
+                        <h5 class="modal-title fw-bold text-primary" id="modalTambahAdminLabel">Tambah Admin Unit Kerja</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-3">
@@ -301,9 +301,9 @@
                             <input type="email" name="email" class="form-control" placeholder="contoh: admin.semarang@sucofindo.co.id" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Kantor Cabang Penugasan <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">Kantor Unit Kerja Penugasan <span class="text-danger">*</span></label>
                             <select name="cabang_id" class="form-select" required>
-                                <option value="" disabled selected>Pilih Kantor Cabang</option>
+                                <option value="" disabled selected>Pilih Kantor Unit Kerja</option>
                                 @foreach ($daftarCabang as $c)
                                     <option value="{{ $c->id }}">{{ $c->nama }} ({{ $c->kode }})</option>
                                 @endforeach
@@ -330,7 +330,7 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-header border-0 pb-0 pt-3 px-3">
-                        <h5 class="modal-title fw-bold text-primary" id="modalEditAdminLabel">Ubah Admin Cabang</h5>
+                        <h5 class="modal-title fw-bold text-primary" id="modalEditAdminLabel">Ubah Admin Unit Kerja</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-3">
@@ -343,9 +343,9 @@
                             <input type="email" id="edit_email" name="email" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Kantor Cabang Penugasan <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">Kantor Unit Kerja Penugasan <span class="text-danger">*</span></label>
                             <select id="edit_cabang_id" name="cabang_id" class="form-select" required>
-                                <option value="" disabled>Pilih Kantor Cabang</option>
+                                <option value="" disabled>Pilih Kantor Unit Kerja</option>
                                 @foreach ($daftarCabang as $c)
                                     <option value="{{ $c->id }}">{{ $c->nama }} ({{ $c->kode }})</option>
                                 @endforeach
@@ -378,17 +378,17 @@
                 <form action="{{ route('superadmin.admin-cabang.cabang.store') }}" method="POST">
                     @csrf
                     <div class="modal-header border-0 pb-0 pt-3 px-3">
-                        <h5 class="modal-title fw-bold text-primary" id="modalTambahCabangLabel">Tambah Kantor Cabang</h5>
+                        <h5 class="modal-title fw-bold text-primary" id="modalTambahCabangLabel">Tambah Kantor Unit Kerja</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-3">
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Kode Cabang <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">Kode Unit Kerja <span class="text-danger">*</span></label>
                             <input type="text" name="kode" class="form-control text-uppercase" placeholder="Contoh: MKS, PLM, PKU" maxlength="10" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Nama Kantor Cabang <span class="text-danger">*</span></label>
-                            <input type="text" name="nama" class="form-control" placeholder="Contoh: Cabang Makassar" maxlength="255" required>
+                            <label class="form-label small fw-semibold text-secondary">Nama Kantor Unit Kerja <span class="text-danger">*</span></label>
+                            <input type="text" name="nama" class="form-control" placeholder="Contoh: Unit Kerja Makassar" maxlength="255" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Kota</label>
@@ -396,12 +396,12 @@
                         </div>
                         <div>
                             <label class="form-label small fw-semibold text-secondary">Alamat Kantor</label>
-                            <textarea name="alamat" class="form-control" rows="2" placeholder="Alamat lengkap gedung kantor cabang..."></textarea>
+                            <textarea name="alamat" class="form-control" rows="2" placeholder="Alamat lengkap gedung kantor unit kerja..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-3 px-3">
                         <button type="button" class="btn btn-light btn-sm rounded-3 px-3" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Simpan Cabang</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Simpan Unit Kerja</button>
                     </div>
                 </form>
             </div>
@@ -415,16 +415,16 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-header border-0 pb-0 pt-3 px-3">
-                        <h5 class="modal-title fw-bold text-primary" id="modalEditCabangLabel">Ubah Kantor Cabang</h5>
+                        <h5 class="modal-title fw-bold text-primary" id="modalEditCabangLabel">Ubah Kantor Unit Kerja</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-3">
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Kode Cabang <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">Kode Unit Kerja <span class="text-danger">*</span></label>
                             <input type="text" id="edit_cabang_kode" name="kode" class="form-control text-uppercase" maxlength="10" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Nama Kantor Cabang <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">Nama Kantor Unit Kerja <span class="text-danger">*</span></label>
                             <input type="text" id="edit_cabang_nama" name="nama" class="form-control" maxlength="255" required>
                         </div>
                         <div class="mb-3">
@@ -438,7 +438,7 @@
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-3 px-3">
                         <button type="button" class="btn btn-light btn-sm rounded-3 px-3" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Perbarui Cabang</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Perbarui Unit Kerja</button>
                     </div>
                 </form>
             </div>

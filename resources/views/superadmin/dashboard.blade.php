@@ -5,7 +5,7 @@
             <span class="badge bg-white text-success fw-bold rounded-pill px-2.5 py-1 small shadow-sm">Kantor Pusat</span>
         </div>
         <p class="text-white mb-3" style="font-size: 0.95rem; opacity: 0.95;">
-            Pantau dan kelola arsip dokumen nasional, sampel, standarisasi kode surat, dan pengawasan kantor cabang.
+            Pantau dan kelola arsip dokumen nasional, sampel, standarisasi kode surat, dan pengawasan kantor unit kerja.
         </p>
 
     <form id="formPencarianDashboard" action="{{ route('superadmin.dokumen.index') }}" method="GET">
@@ -81,7 +81,7 @@
                 <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="background-color: #f0f7f6; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="text-muted small fw-semibold text-uppercase">Admin Cabang</div>
+                            <div class="text-muted small fw-semibold text-uppercase">Admin Unit Kerja</div>
                             <div class="h2 fw-bold text-dark mb-0 mt-1">{{ number_format($totalAdminCabang) }}</div>
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-3 p-2.5" style="background-color: #277a72; color: #ffffff;">

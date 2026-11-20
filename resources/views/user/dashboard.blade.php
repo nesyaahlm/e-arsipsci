@@ -5,12 +5,13 @@
 @php
     $urlCari = Route::has('user.arsip.index') ? route('user.arsip.index') : '#';
     $urlUnggah = Route::has('user.dokumen-saya.index') ? route('user.dokumen-saya.index').'#unggah' : '#';
+    $urlSampel = Route::has('user.sampel.index') ? route('user.sampel.index').'#unggah' : '#';
 @endphp
 
 <x-layouts.user title="Dashboard">
     <section class="ud-banner">
         <h1 class="ud-banner__title">Selamat Datang, {{ $user->name }}!</h1>
-        <p class="ud-banner__text">Kelola dan temukan dokumen dan sampel arsip PT Sucofindo Cabang Cilacap dengan mudah.</p>
+        <p class="ud-banner__text">Kelola dan temukan dokumen dan sampel arsip PT Sucofindo Unit Kerja Cilacap dengan mudah.</p>
 
         <form method="GET" action="{{ $urlCari }}" class="ud-search" role="search">
             <button type="submit" class="ud-search__button" aria-label="Cari">
@@ -20,7 +21,7 @@
         </form>
     </section>
 
-    <section class="ud-shortcuts" aria-label="Pintasan">
+    <section class="ud-shortcuts" aria-label="Pintasan" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
         <a href="{{ $urlCari }}" class="ud-shortcut">
             <span class="ud-shortcut__icon"><x-user.icon name="search" :size="24" /></span>
             <span class="ud-shortcut__body">
@@ -33,6 +34,13 @@
             <span class="ud-shortcut__body">
                 <span class="ud-shortcut__title">Unggah Dokumen</span>
                 <span class="ud-shortcut__text">Unggah dokumen baru, langsung tersedia di arsip.</span>
+            </span>
+        </a>
+        <a href="{{ $urlSampel }}" class="ud-shortcut ud-shortcut--primary">
+            <span class="ud-shortcut__icon"><x-user.icon name="box" :size="24" /></span>
+            <span class="ud-shortcut__body">
+                <span class="ud-shortcut__title">Catat Sampel</span>
+                <span class="ud-shortcut__text">Catat sampel baru lengkap dengan lokasi arsipnya.</span>
             </span>
         </a>
     </section>

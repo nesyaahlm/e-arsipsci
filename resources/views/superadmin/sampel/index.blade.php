@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h1 class="h4 fw-bold text-primary mb-1">Sampel Nasional</h1>
-            <p class="text-secondary mb-0 small">Monitoring, audit arsip sampel fisik laboratorium, dan pengawasan hapus buku lintas kantor cabang.</p>
+            <p class="text-secondary mb-0 small">Monitoring, audit arsip sampel fisik laboratorium, dan pengawasan hapus buku lintas kantor unit kerja.</p>
         </div>
     </div>
 
@@ -41,7 +41,7 @@
                 </div>
                 <div class="col-12 col-md-3">
                     <select name="cabang_id" class="form-select form-select-sm rounded-3">
-                        <option value="">Semua Kantor Cabang</option>
+                        <option value="">Semua Kantor Unit Kerja</option>
                         @foreach ($daftarCabang as $c)
                             <option value="{{ $c->id }}" {{ $cabangId == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
                         @endforeach
@@ -81,7 +81,7 @@
                         <th class="py-2.5 ps-3 align-middle text-center" style="width: 50px;">NO</th>
                         <th class="py-2.5 px-3 align-middle" style="width: 150px;">KODE SAMPEL</th>
                         <th class="py-2.5 px-3 align-middle">NAMA SAMPEL / KOMODITAS</th>
-                        <th class="py-2.5 px-3 align-middle" style="width: 150px;">CABANG</th>
+                        <th class="py-2.5 px-3 align-middle" style="width: 150px;">UNIT KERJA</th>
                         <th class="py-2.5 px-3 align-middle" style="width: 140px;">BAGIAN</th>
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 110px;">TGL MASUK</th>
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 110px;">STATUS SIKLUS</th>
@@ -208,7 +208,7 @@
                             <div class="fw-bold text-dark font-monospace" id="modal-kode">-</div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label small text-secondary fw-semibold mb-1">Kantor Cabang</label>
+                            <label class="form-label small text-secondary fw-semibold mb-1">Kantor Unit Kerja</label>
                             <div class="fw-bold text-primary" id="modal-cabang">-</div>
                         </div>
                         <div class="col-12 col-md-6">

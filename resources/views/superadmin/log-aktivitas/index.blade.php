@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h1 class="h4 fw-bold text-primary mb-1">Log Aktivitas Nasional (Audit Trail)</h1>
-            <p class="text-secondary mb-0 small">Rekam jejak, audit kepatuhan, dan kronologi aktivitas pengguna lintas kantor cabang.</p>
+            <p class="text-secondary mb-0 small">Rekam jejak, audit kepatuhan, dan kronologi aktivitas pengguna lintas kantor unit kerja.</p>
         </div>
         <div>
             @if ($tab === 'aktif')
@@ -48,7 +48,7 @@
                 </div>
                 <div class="col-12 col-md-3">
                     <select name="cabang_id" class="form-select form-select-sm rounded-3">
-                        <option value="">Semua Kantor Cabang</option>
+                        <option value="">Semua Kantor Unit Kerja</option>
                         @foreach ($daftarCabang as $c)
                             <option value="{{ $c->id }}" {{ $cabangId == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
                         @endforeach
@@ -83,7 +83,7 @@
                         <th class="py-2.5 ps-3 align-middle text-center" style="width: 50px;">NO</th>
                         <th class="py-2.5 px-3 align-middle" style="width: 170px;">WAKTU AKTIVITAS</th>
                         <th class="py-2.5 px-3 align-middle" style="width: 200px;">PENGGUNA / PERSONIL</th>
-                        <th class="py-2.5 px-3 align-middle" style="width: 150px;">KANTOR CABANG</th>
+                        <th class="py-2.5 px-3 align-middle" style="width: 150px;">KANTOR UNIT KERJA</th>
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 140px;">AKTIVITAS</th>
                         <th class="py-2.5 px-3 align-middle">RINCIAN DOKUMEN / KETERANGAN</th>
                         @if ($tab === 'arsip')
