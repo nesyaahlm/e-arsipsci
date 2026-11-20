@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dokumen;
 use App\Models\Sampel;
 use App\Models\JenisDokumen;
-use App\Models\Bagian; // <-- Ganti Layanan dengan Bagian
+use App\Models\Bagian; 
 use Illuminate\View\View;
 
 class DashboardController extends Controller

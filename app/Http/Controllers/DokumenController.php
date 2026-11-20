@@ -7,6 +7,7 @@ use App\Models\Dokumen;
 use App\Models\Cabang;
 use App\Models\KodeSurat;
 use App\Models\LogAktivitas;
+use App\Support\RekapExcel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,26 +17,62 @@ class DokumenController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Dokumen::with(['bagian', 'pengunggah'])->latest();
-
-        if ($request->filled('cari')) {
-            $cari = $request->cari;
-            $query->where(function ($q) use ($cari) {
-                $q->where('nomor', 'like', "%{$cari}%")
-                    ->orWhere('judul', 'like', "%{$cari}%");
-            });
-        }
-
-        if ($request->filled('bagian_id')) {
-            $query->where('bagian_id', $request->bagian_id);
-        }
-
-        $dokumen = $query->paginate(10)->withQueryString();
+        $dokumen = $this->queryFilter($request)->paginate(10)->withQueryString();
 
         $bagianList = Bagian::orderBy('nama')->get();
         $kodeSuratList = KodeSurat::orderBy('kode')->get();
 
         return view('dokumen.index', compact('dokumen', 'bagianList', 'kodeSuratList'));
+    }
+
+    public function export(Request $request)
+    {
+        $daftar = $this->queryFilter($request)->get();
+
+        $kolom = [
+            ['judul' => 'Nomor', 'lebar' => 28],
+            ['judul' => 'Judul Dokumen', 'lebar' => 42],
+            ['judul' => 'Bagian', 'lebar' => 22],
+            ['judul' => 'Unit', 'lebar' => 16],
+            ['judul' => 'Tanggal Dokumen', 'lebar' => 17],
+            ['judul' => 'Retensi Sampai', 'lebar' => 17],
+            ['judul' => 'Tahun Arsip', 'lebar' => 14],
+            ['judul' => 'Status', 'lebar' => 14],
+            ['judul' => 'Lokasi Fisik', 'lebar' => 28],
+            ['judul' => 'Diunggah Oleh', 'lebar' => 22],
+            ['judul' => 'Tanggal Unggah', 'lebar' => 17],
+            ['judul' => 'Deskripsi', 'lebar' => 38],
+        ];
+
+        $baris = $daftar->map(function ($d) {
+            return [
+                $d->nomor,
+                $d->judul,
+                $d->bagian->nama ?? '-',
+                $d->unit ?: '-',
+                $d->tanggal_dokumen?->format('d/m/Y') ?? '-',
+                $d->retensi_sampai?->format('d/m/Y') ?? '-',
+                $d->tahun_arsip ?: '-',
+                ucfirst((string) $d->status),
+                $d->lokasi_arsip_fisik ?: '-',
+                $d->pengunggah->name ?? '-',
+                $d->created_at?->format('d/m/Y') ?? '-',
+                $d->deskripsi ?: '-',
+            ];
+        });
+
+        $keterangan = 'Diunduh: ' . now('Asia/Jakarta')->format('d/m/Y H:i')
+            . ' | Filter: ' . $this->keteranganFilter($request)
+            . ' | Total: ' . $daftar->count() . ' dokumen';
+
+        return RekapExcel::unduh(
+            'rekap-dokumen-' . now('Asia/Jakarta')->format('Ymd-His') . '.xlsx',
+            'Rekap Dokumen',
+            'Rekap Arsip Dokumen',
+            $keterangan,
+            $kolom,
+            $baris
+        );
     }
 
     public function store(Request $request)
@@ -208,6 +245,42 @@ class DokumenController extends Controller
             'Content-Type' => $mimeType,
             'Content-Disposition' => 'inline; filename="' . $dokumen->file_nama_asli . '"',
         ]);
+    }
+
+    private function queryFilter(Request $request)
+    {
+        return Dokumen::with(['bagian', 'pengunggah'])
+            ->when($request->filled('cari'), function ($q) use ($request) {
+                $cari = $request->cari;
+                $q->where(function ($w) use ($cari) {
+                    $w->where('nomor', 'like', "%{$cari}%")
+                        ->orWhere('judul', 'like', "%{$cari}%");
+                });
+            })
+            ->when($request->filled('bagian_id'), function ($q) use ($request) {
+                $q->where('bagian_id', $request->bagian_id);
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->latest();
+    }
+
+    private function keteranganFilter(Request $request): string
+    {
+        $filter = [];
+
+        if ($request->filled('cari')) {
+            $filter[] = 'Cari "' . $request->cari . '"';
+        }
+        if ($request->filled('bagian_id')) {
+            $filter[] = 'Bagian ' . (Bagian::find($request->bagian_id)?->nama ?? '-');
+        }
+        if ($request->filled('status')) {
+            $filter[] = 'Status ' . ucfirst((string) $request->status);
+        }
+
+        return $filter ? implode(', ', $filter) : 'Semua data';
     }
 
     private function susunLokasi(Request $request): ?string

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bagian;
 use App\Models\Sampel;
+use App\Support\RekapExcel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,42 +16,7 @@ class SampelController extends Controller
 {
     public function index(Request $request): View
     {
-        $cari = trim((string) $request->input('cari'));
-
-        $sampel = Sampel::with(['bagian', 'pengunggah'])
-            ->when($cari !== '', function ($query) use ($cari) {
-                $query->where(function ($q) use ($cari) {
-                    $kolom = [
-                        'kode_sampel',
-                        'nama_sampel',
-                        'shipper',
-                        'vessel',
-                        'bill_of_lading',
-                        'tempat_pengambilan',
-                        'analysis_for',
-                        'nomor_ruang_arsip',
-                        'nama_ruang_arsip',
-                        'deskripsi',
-                        'tanggal_pengambilan',
-                        'tanggal_masuk_arsip',
-                    ];
-
-                    foreach ($kolom as $nama) {
-                        $q->orWhere($nama, 'like', "%{$cari}%");
-                    }
-
-                    $q->orWhereHas('bagian', function ($b) use ($cari) {
-                        $b->where('nama', 'like', "%{$cari}%");
-                    })->orWhereHas('pengunggah', function ($u) use ($cari) {
-                        $u->where('name', 'like', "%{$cari}%");
-                    });
-                });
-            })
-            ->when($request->filled('bagian_id'), function ($query) use ($request) {
-                $query->where('bagian_id', $request->input('bagian_id'));
-            })
-            ->orderByDesc('tanggal_masuk_arsip')
-            ->orderByDesc('id')
+        $sampel = $this->queryFilter($request)
             ->paginate(10)
             ->withQueryString();
 
@@ -58,6 +24,66 @@ class SampelController extends Controller
             'sampel' => $sampel,
             'daftarBagian' => Bagian::orderBy('nama')->get(),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $daftar = $this->queryFilter($request)->get();
+
+        $kolom = [
+            ['judul' => 'Kode Sampel', 'lebar' => 18],
+            ['judul' => 'Nama Sampel', 'lebar' => 30],
+            ['judul' => 'Bagian', 'lebar' => 22],
+            ['judul' => 'Status', 'lebar' => 14],
+            ['judul' => 'Shipper', 'lebar' => 24],
+            ['judul' => 'Vessel', 'lebar' => 22],
+            ['judul' => 'Bill of Lading', 'lebar' => 20],
+            ['judul' => 'Tanggal Pengambilan', 'lebar' => 20],
+            ['judul' => 'Tahun Arsip', 'lebar' => 16],
+            ['judul' => 'Tempat Pengambilan', 'lebar' => 26],
+            ['judul' => 'Analysis For', 'lebar' => 22],
+            ['judul' => 'Tanggal Masuk Arsip', 'lebar' => 20],
+            ['judul' => 'No. Rak', 'lebar' => 12],
+            ['judul' => 'No. Tingkat', 'lebar' => 12],
+            ['judul' => 'Ruang Arsip', 'lebar' => 22],
+            ['judul' => 'Diunggah Oleh', 'lebar' => 22],
+            ['judul' => 'Deskripsi', 'lebar' => 38],
+        ];
+
+        $baris = $daftar->map(function ($s) {
+            return [
+                $s->kode_sampel,
+                $s->nama_sampel,
+                $s->bagian->nama ?? '-',
+                ucfirst((string) $s->status),
+                $s->shipper ?: '-',
+                $s->vessel ?: '-',
+                $s->bill_of_lading ?: '-',
+                $s->tanggal_pengambilan?->format('d/m/Y') ?? '-',
+                $s->label_tahun,
+                $s->tempat_pengambilan ?: '-',
+                $s->analysis_for ?: '-',
+                $s->tanggal_masuk_arsip?->format('d/m/Y') ?? '-',
+                $s->nomor_ruang_arsip ?: '-',
+                $s->nomor_tingkat_arsip ?: '-',
+                $s->nama_ruang_arsip ?: '-',
+                $s->pengunggah->name ?? '-',
+                $s->deskripsi ?: '-',
+            ];
+        });
+
+        $keterangan = 'Diunduh: ' . now('Asia/Jakarta')->format('d/m/Y H:i')
+            . ' | Filter: ' . $this->keteranganFilter($request)
+            . ' | Total: ' . $daftar->count() . ' sampel';
+
+        return RekapExcel::unduh(
+            'rekap-sampel-' . now('Asia/Jakarta')->format('Ymd-His') . '.xlsx',
+            'Rekap Sampel',
+            'Rekap Arsip Sampel',
+            $keterangan,
+            $kolom,
+            $baris
+        );
     }
 
     public function show(Sampel $sampel): View
@@ -184,6 +210,66 @@ class SampelController extends Controller
         return redirect()
             ->route('admin.sampel.index')
             ->with('success', 'Sampel ' . $kode . ' berhasil dihapus.');
+    }
+
+    private function queryFilter(Request $request)
+    {
+        $cari = trim((string) $request->input('cari'));
+
+        return Sampel::with(['bagian', 'pengunggah'])
+            ->when($cari !== '', function ($query) use ($cari) {
+                $query->where(function ($q) use ($cari) {
+                    $kolom = [
+                        'kode_sampel',
+                        'nama_sampel',
+                        'shipper',
+                        'vessel',
+                        'bill_of_lading',
+                        'tempat_pengambilan',
+                        'analysis_for',
+                        'nomor_ruang_arsip',
+                        'nama_ruang_arsip',
+                        'deskripsi',
+                        'tanggal_pengambilan',
+                        'tanggal_masuk_arsip',
+                    ];
+
+                    foreach ($kolom as $nama) {
+                        $q->orWhere($nama, 'like', "%{$cari}%");
+                    }
+
+                    $q->orWhereHas('bagian', function ($b) use ($cari) {
+                        $b->where('nama', 'like', "%{$cari}%");
+                    })->orWhereHas('pengunggah', function ($u) use ($cari) {
+                        $u->where('name', 'like', "%{$cari}%");
+                    });
+                });
+            })
+            ->when($request->filled('bagian_id'), function ($query) use ($request) {
+                $query->where('bagian_id', $request->input('bagian_id'));
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->input('status'));
+            })
+            ->orderByDesc('tanggal_masuk_arsip')
+            ->orderByDesc('id');
+    }
+
+    private function keteranganFilter(Request $request): string
+    {
+        $filter = [];
+
+        if (trim((string) $request->input('cari')) !== '') {
+            $filter[] = 'Cari "' . trim((string) $request->input('cari')) . '"';
+        }
+        if ($request->filled('bagian_id')) {
+            $filter[] = 'Bagian ' . (Bagian::find($request->input('bagian_id'))?->nama ?? '-');
+        }
+        if ($request->filled('status')) {
+            $filter[] = 'Status ' . ucfirst((string) $request->input('status'));
+        }
+
+        return $filter ? implode(', ', $filter) : 'Semua data';
     }
 
     private function aturan(?int $abaikanId = null): array

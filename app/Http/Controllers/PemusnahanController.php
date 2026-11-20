@@ -26,19 +26,17 @@ class PemusnahanController extends Controller
             ->latest()
             ->get();
 
-        $riwayat = Pemusnahan::with('items')
-            ->withCount('items')
-            ->when(! $this->admin(), function ($q) {
-                $q->where('dibuat_oleh', Auth::id());
-            })
-            ->latest('tanggal')
-            ->latest('id')
-            ->paginate(10, ['*'], 'riwayat')
+        $riwayatDokumen = $this->queryRiwayat('dokumen')
+            ->paginate(10, ['*'], 'riwayat_dokumen')
+            ->withQueryString();
+
+        $riwayatSampel = $this->queryRiwayat('sampel')
+            ->paginate(10, ['*'], 'riwayat_sampel')
             ->withQueryString();
 
         $layout = $this->layout();
 
-        return view('pemusnahan.index', compact('antrean', 'riwayat', 'layout'));
+        return view('pemusnahan.index', compact('antrean', 'riwayatDokumen', 'riwayatSampel', 'layout'));
     }
 
     public function ajukan(Request $request)
@@ -203,6 +201,97 @@ class PemusnahanController extends Controller
         return redirect()->route('pemusnahan.index')->with('success', "{$antrean->count()} data berhasil dimusnahkan dengan nomor {$data['nomor']}. Lokasi fisik diubah menjadi '-'.");
     }
 
+    public function destroyRiwayat(Request $request, $id)
+    {
+        $tipe = $request->validate([
+            'tipe' => ['required', Rule::in(['dokumen', 'sampel'])],
+        ])['tipe'];
+
+        $riwayat = Pemusnahan::findOrFail($id);
+
+        abort_unless($this->admin() || $riwayat->dibuat_oleh === Auth::id(), 403);
+
+        DB::transaction(function () use ($riwayat, $tipe) {
+            $riwayat->items()->where('tipe', $tipe)->delete();
+
+            $this->hapusRiwayatKosong($riwayat);
+        });
+
+        return redirect()->route('pemusnahan.index')->with('success', 'Riwayat pemusnahan ' . $tipe . ' berhasil dihapus.');
+    }
+
+    public function destroyRiwayatMassal(Request $request)
+    {
+        $tipe = $request->validate([
+            'tipe_riwayat' => ['required', Rule::in(['dokumen', 'sampel'])],
+        ])['tipe_riwayat'];
+
+        $mode = $request->input('mode_riwayat', 'terpilih');
+
+        $query = $this->queryRiwayat($tipe);
+
+        if ($mode === 'terpilih') {
+            $data = $request->validate([
+                'ids_riwayat' => ['required', 'array', 'min:1'],
+                'ids_riwayat.*' => ['integer'],
+            ], [
+                'ids_riwayat.required' => 'Pilih minimal satu riwayat yang akan dihapus.',
+            ]);
+
+            $query->whereIn('id', $data['ids_riwayat']);
+        }
+
+        $riwayatList = $query->get();
+
+        if ($riwayatList->isEmpty()) {
+            return redirect()->route('pemusnahan.index')->with('error', 'Tidak ada riwayat yang dapat dihapus.');
+        }
+
+        DB::transaction(function () use ($riwayatList, $tipe) {
+            foreach ($riwayatList as $riwayat) {
+                $riwayat->items()->where('tipe', $tipe)->delete();
+
+                $this->hapusRiwayatKosong($riwayat);
+            }
+        });
+
+        $jumlah = $riwayatList->count();
+
+        return redirect()->route('pemusnahan.index')->with('success', "{$jumlah} riwayat pemusnahan {$tipe} berhasil dihapus.");
+    }
+
+    private function queryRiwayat(string $tipe)
+    {
+        return Pemusnahan::query()
+            ->whereHas('items', function ($q) use ($tipe) {
+                $q->where('tipe', $tipe);
+            })
+            ->with(['items' => function ($q) use ($tipe) {
+                $q->where('tipe', $tipe);
+            }])
+            ->withCount(['items' => function ($q) use ($tipe) {
+                $q->where('tipe', $tipe);
+            }])
+            ->when(! $this->admin(), function ($q) {
+                $q->where('dibuat_oleh', Auth::id());
+            })
+            ->latest('tanggal')
+            ->latest('id');
+    }
+
+    private function hapusRiwayatKosong(Pemusnahan $riwayat): void
+    {
+        if ($riwayat->items()->exists()) {
+            return;
+        }
+
+        if ($riwayat->bukti_path && Storage::disk('public')->exists($riwayat->bukti_path)) {
+            Storage::disk('public')->delete($riwayat->bukti_path);
+        }
+
+        $riwayat->delete();
+    }
+
     private function admin(): bool
     {
         return Auth::user()->role === 'admin';
@@ -252,69 +341,5 @@ class PemusnahanController extends Controller
         } catch (\Throwable $e) {
             report($e);
         }
-    }
-    public function destroyRiwayat($id)
-    {
-        $riwayat = Pemusnahan::with('items')->findOrFail($id);
-
-        abort_unless($this->admin() || $riwayat->dibuat_oleh === Auth::id(), 403);
-
-        DB::transaction(function () use ($riwayat) {
-            if ($riwayat->bukti_path && Storage::disk('public')->exists($riwayat->bukti_path)) {
-                Storage::disk('public')->delete($riwayat->bukti_path);
-            }
-
-            foreach ($riwayat->items as $item) {
-                $item->delete();
-            }
-
-            $riwayat->delete();
-        });
-
-        return redirect()->route('pemusnahan.index')->with('success', 'Riwayat pemusnahan berhasil dihapus.');
-    }
-
-    public function destroyRiwayatMassal(Request $request)
-    {
-        $mode = $request->input('mode_riwayat', 'terpilih');
-        
-        $query = Pemusnahan::with('items')
-            ->when(! $this->admin(), function ($q) {
-                $q->where('dibuat_oleh', Auth::id());
-            });
-
-        if ($mode === 'terpilih') {
-            $data = $request->validate([
-                'ids_riwayat' => ['required', 'array', 'min:1'],
-                'ids_riwayat.*' => ['integer'],
-            ], [
-                'ids_riwayat.required' => 'Pilih minimal satu riwayat yang akan dihapus.',
-            ]);
-
-            $query->whereIn('id', $data['ids_riwayat']);
-        }
-
-        $riwayatList = $query->get();
-
-        if ($riwayatList->isEmpty()) {
-            return redirect()->route('pemusnahan.index')->with('error', 'Tidak ada riwayat yang dapat dihapus.');
-        }
-
-        DB::transaction(function () use ($riwayatList) {
-            foreach ($riwayatList as $riwayat) {
-                if ($riwayat->bukti_path && Storage::disk('public')->exists($riwayat->bukti_path)) {
-                    Storage::disk('public')->delete($riwayat->bukti_path);
-                }
-
-                foreach ($riwayat->items as $item) {
-                    $item->delete();
-                }
-                
-                $riwayat->delete();
-            }
-        });
-
-        $jumlah = $riwayatList->count();
-        return redirect()->route('pemusnahan.index')->with('success', "{$jumlah} riwayat pemusnahan berhasil dihapus.");
     }
 }

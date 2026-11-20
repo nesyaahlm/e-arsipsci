@@ -37,15 +37,20 @@
         </div>
     @endif
 
-    <ul class="nav nav-tabs mb-3" id="pemusnahanTab" role="tablist">
+    <ul class="nav nav-tabs flex-nowrap overflow-x-auto overflow-y-hidden mb-3" id="pemusnahanTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="antrean-tab" data-bs-toggle="tab" data-bs-target="#antrean-pane" type="button" role="tab" aria-controls="antrean-pane" aria-selected="true">
+            <button class="nav-link fw-semibold text-nowrap" id="antrean-tab" data-bs-toggle="tab" data-bs-target="#antrean-pane" type="button" role="tab" aria-controls="antrean-pane" aria-selected="true">
                 Menunggu Dimusnahkan <span class="badge bg-danger ms-1">{{ $antrean->count() }}</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="riwayat-tab" data-bs-toggle="tab" data-bs-target="#riwayat-pane" type="button" role="tab" aria-controls="riwayat-pane" aria-selected="false">
-                Riwayat Pemusnahan <span class="badge bg-secondary ms-1">{{ $riwayat->total() }}</span>
+            <button class="nav-link fw-semibold text-nowrap" id="riwayat-dokumen-tab" data-bs-toggle="tab" data-bs-target="#riwayat-dokumen-pane" type="button" role="tab" aria-controls="riwayat-dokumen-pane" aria-selected="false">
+                Riwayat Pemusnahan Dokumen <span class="badge bg-secondary ms-1">{{ $riwayatDokumen->total() }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold text-nowrap" id="riwayat-sampel-tab" data-bs-toggle="tab" data-bs-target="#riwayat-sampel-pane" type="button" role="tab" aria-controls="riwayat-sampel-pane" aria-selected="false">
+                Riwayat Pemusnahan Sampel <span class="badge bg-secondary ms-1">{{ $riwayatSampel->total() }}</span>
             </button>
         </li>
     </ul>
@@ -109,137 +114,12 @@
             </div>
         </div>
 
-        <div class="tab-pane fade" id="riwayat-pane" role="tabpanel" aria-labelledby="riwayat-tab" tabindex="0">
-            <div class="card shadow-sm rounded-4" style="border: 1.5px solid #cfdedb;">
-                <div class="card-header bg-white border-0 pt-3 pb-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h2 class="h6 fw-bold mb-0" style="color: #1f5f55;">Riwayat Pemusnahan Fisik Arsip</h2>
-                    @if (Auth::user()->role === 'admin')
-                        <div class="d-flex gap-2">
-                            <button type="button" id="btn-hapus-riwayat-terpilih" class="btn btn-outline-danger btn-sm rounded-3 px-3" disabled>
-                                Hapus Terpilih (<span id="jumlah-riwayat-terpilih">0</span>)
-                            </button>
-                            <button type="button" id="btn-hapus-riwayat-semua" class="btn btn-danger btn-sm rounded-3 px-3" @disabled($riwayat->isEmpty())>
-                                Hapus Semua Riwayat
-                            </button>
-                        </div>
-                    @endif
-                </div>
+        <div class="tab-pane fade" id="riwayat-dokumen-pane" role="tabpanel" aria-labelledby="riwayat-dokumen-tab" tabindex="0">
+            @include('pemusnahan._riwayat', ['tipe' => 'dokumen', 'riwayat' => $riwayatDokumen])
+        </div>
 
-                @if (Auth::user()->role === 'admin')
-                    <form id="form-hapus-riwayat-massal" method="POST" action="{{ route('pemusnahan.destroy-riwayat-massal') }}">
-                        @csrf
-                        @method('DELETE')
-                        <input type="hidden" name="mode_riwayat" id="mode-riwayat" value="terpilih">
-                    </form>
-                @endif
-
-                <div class="table-responsive">
-                    <table class="table table-sm small align-middle mb-0">
-                        <thead style="--bs-table-bg: #e3f1ee; --bs-table-color: #1f5f55; font-size: 0.8rem;">
-                            <tr>
-                                @if (Auth::user()->role === 'admin')
-                                    <th class="text-center py-2" style="width: 44px;">
-                                        <input type="checkbox" id="cek-semua-riwayat" class="form-check-input" @disabled($riwayat->isEmpty())>
-                                    </th>
-                                @endif
-                                <th class="text-center fw-bold py-2">Nomor Pemusnahan</th>
-                                <th class="text-center fw-bold py-2">Tanggal</th>
-                                <th class="text-center fw-bold py-2">Pelaksana</th>
-                                <th class="text-center fw-bold py-2">Jumlah</th>
-                                <th class="text-center fw-bold py-2">Bukti</th>
-                                <th class="text-center fw-bold py-2">Rincian</th>
-                                @if (Auth::user()->role === 'admin')
-                                    <th class="text-center fw-bold py-2">Aksi</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($riwayat as $p)
-                                <tr>
-                                    @if (Auth::user()->role === 'admin')
-                                        <td class="text-center">
-                                            <input type="checkbox" class="form-check-input cek-riwayat" name="ids_riwayat[]" value="{{ $p->id }}" form="form-hapus-riwayat-massal">
-                                        </td>
-                                    @endif
-                                    <td class="text-center font-monospace text-nowrap fw-semibold">{{ $p->nomor }}</td>
-                                    <td class="text-center text-nowrap">{{ $p->tanggal->format('d/m/Y') }}</td>
-                                    <td class="text-center">{{ $p->pelaksana }}</td>
-                                    <td class="text-center">{{ $p->items_count }}</td>
-                                    <td class="text-center">
-                                        <a href="{{ Storage::disk('public')->url($p->bukti_path) }}" target="_blank" rel="noopener" class="link-dark link-underline-opacity-25">Lihat</a>
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" data-bs-toggle="collapse" data-bs-target="#rincian-{{ $p->id }}">Lihat</button>
-                                    </td>
-                                    @if (Auth::user()->role === 'admin')
-                                        <td class="text-center">
-                                            <form method="POST" action="{{ route('pemusnahan.destroy-riwayat', $p->id) }}" data-konfirmasi="Hapus riwayat pemusnahan nomor {{ $p->nomor }} ini?">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">Hapus</button>
-                                            </form>
-                                        </td>
-                                    @endif
-                                </tr>
-                                <tr class="collapse" id="rincian-{{ $p->id }}">
-                                    <td colspan="{{ Auth::user()->role === 'admin' ? 8 : 6 }}" class="bg-light px-4 py-2">
-                                        <ul class="mb-0 ps-3">
-                                            @foreach ($p->items as $it)
-                                                <li>
-                                                    <span class="badge bg-secondary-subtle text-secondary me-1">{{ ucfirst($it->tipe) }}</span>
-                                                    <span class="font-monospace">{{ $it->kode }}</span> &ndash; {{ $it->judul }}
-                                                    <span class="text-muted">(lokasi semula: {{ $it->lokasi_sebelumnya ?: '-' }})</span>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="{{ Auth::user()->role === 'admin' ? 8 : 6 }}" class="text-center text-muted py-4">Belum ada riwayat pemusnahan.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                @if ($riwayat->hasPages())
-                    <div class="card-footer bg-white border-0 py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-                        <div class="small text-muted">
-                            Menampilkan {{ $riwayat->firstItem() }}&ndash;{{ $riwayat->lastItem() }} dari {{ $riwayat->total() }} riwayat pemusnahan
-                        </div>
-                        <div>
-                            <nav aria-label="Navigasi Halaman Riwayat">
-                                <ul class="pagination pagination-sm mb-0">
-                                    @if ($riwayat->onFirstPage())
-                                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-                                    @else
-                                        <li class="page-item"><a class="page-link" href="{{ $riwayat->previousPageUrl() }}" rel="prev">&laquo;</a></li>
-                                    @endif
-
-                                    @foreach ($riwayat->getUrlRange(1, $riwayat->lastPage()) as $page => $url)
-                                        @if ($page == 1 || $page == $riwayat->lastPage() || abs($page - $riwayat->currentPage()) <= 1)
-                                            @if ($page == $riwayat->currentPage())
-                                                <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
-                                            @else
-                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                                            @endif
-                                        @elseif ($page == $riwayat->currentPage() - 2 || $page == $riwayat->currentPage() + 2)
-                                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                                        @endif
-                                    @endforeach
-
-                                    @if ($riwayat->hasMorePages())
-                                        <li class="page-item"><a class="page-link" href="{{ $riwayat->nextPageUrl() }}" rel="next">&raquo;</a></li>
-                                    @else
-                                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                @endif
-            </div>
+        <div class="tab-pane fade" id="riwayat-sampel-pane" role="tabpanel" aria-labelledby="riwayat-sampel-tab" tabindex="0">
+            @include('pemusnahan._riwayat', ['tipe' => 'sampel', 'riwayat' => $riwayatSampel])
         </div>
     </div>
 
@@ -333,60 +213,67 @@
         const formMusnah = document.getElementById('form-musnah');
         const btnSubmit = document.getElementById('btn-submit-musnah');
 
-        const tabAntrean = document.getElementById('antrean-tab');
-        const tabRiwayat = document.getElementById('riwayat-tab');
-        const paneAntrean = document.getElementById('antrean-pane');
-        const paneRiwayat = document.getElementById('riwayat-pane');
-        const badgeAntrean = tabAntrean.querySelector('.badge');
-        const badgeRiwayat = tabRiwayat.querySelector('.badge');
-
-        function aturWarnaTab(aktifTab) {
-            if (aktifTab === 'riwayat') {
-                tabRiwayat.classList.add('active', 'fw-bold');
-                tabRiwayat.style.color = '#1f5f55';
-                tabRiwayat.classList.remove('text-secondary');
-
-                badgeRiwayat.className = 'badge bg-success ms-1';
-                badgeAntrean.className = 'badge bg-secondary ms-1';
-
-                tabAntrean.classList.remove('active', 'fw-bold');
-                tabAntrean.classList.add('text-secondary');
-                tabAntrean.style.color = '';
-
-                paneRiwayat.classList.add('show', 'active');
-                paneAntrean.classList.remove('show', 'active');
-            } else {
-                tabAntrean.classList.add('active', 'fw-bold');
-                tabAntrean.style.color = '#1f5f55';
-                tabAntrean.classList.remove('text-secondary');
-
-                badgeAntrean.className = 'badge bg-danger ms-1';
-                badgeRiwayat.className = 'badge bg-secondary ms-1';
-
-                tabRiwayat.classList.remove('active', 'fw-bold');
-                tabRiwayat.classList.add('text-secondary');
-                tabRiwayat.style.color = '';
-
-                paneAntrean.classList.add('show', 'active');
-                paneRiwayat.classList.remove('show', 'active');
+        const daftarTab = {
+            'antrean': {
+                tab: document.getElementById('antrean-tab'),
+                pane: document.getElementById('antrean-pane'),
+                badgeAktif: 'badge bg-danger ms-1'
+            },
+            'riwayat-dokumen': {
+                tab: document.getElementById('riwayat-dokumen-tab'),
+                pane: document.getElementById('riwayat-dokumen-pane'),
+                badgeAktif: 'badge bg-success ms-1'
+            },
+            'riwayat-sampel': {
+                tab: document.getElementById('riwayat-sampel-tab'),
+                pane: document.getElementById('riwayat-sampel-pane'),
+                badgeAktif: 'badge bg-success ms-1'
             }
+        };
+
+        function aturWarnaTab(aktif) {
+            Object.keys(daftarTab).forEach(function (kunci) {
+                const t = daftarTab[kunci];
+                const badge = t.tab.querySelector('.badge');
+
+                if (kunci === aktif) {
+                    t.tab.classList.add('active', 'fw-bold');
+                    t.tab.style.color = '#1f5f55';
+                    t.tab.classList.remove('text-secondary');
+                    badge.className = t.badgeAktif;
+                    t.pane.classList.add('show', 'active');
+                } else {
+                    t.tab.classList.remove('active', 'fw-bold');
+                    t.tab.classList.add('text-secondary');
+                    t.tab.style.color = '';
+                    badge.className = 'badge bg-secondary ms-1';
+                    t.pane.classList.remove('show', 'active');
+                }
+            });
+        }
+
+        function tabTersimpan() {
+            let simpan = localStorage.getItem('active_tab');
+            if (simpan === 'riwayat') {
+                simpan = 'riwayat-dokumen';
+            }
+            return daftarTab[simpan] ? simpan : 'antrean';
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('riwayat') || localStorage.getItem('active_tab') === 'riwayat') {
-            aturWarnaTab('riwayat');
+        if (urlParams.has('riwayat_dokumen')) {
+            aturWarnaTab('riwayat-dokumen');
+        } else if (urlParams.has('riwayat_sampel')) {
+            aturWarnaTab('riwayat-sampel');
         } else {
-            aturWarnaTab('antrean');
+            aturWarnaTab(tabTersimpan());
         }
 
-        tabAntrean.addEventListener('click', function () {
-            aturWarnaTab('antrean');
-            localStorage.setItem('active_tab', 'antrean');
-        });
-
-        tabRiwayat.addEventListener('click', function () {
-            aturWarnaTab('riwayat');
-            localStorage.setItem('active_tab', 'riwayat');
+        Object.keys(daftarTab).forEach(function (kunci) {
+            daftarTab[kunci].tab.addEventListener('click', function () {
+                aturWarnaTab(kunci);
+                localStorage.setItem('active_tab', kunci);
+            });
         });
 
         function jumlahDipilih() {
@@ -445,45 +332,11 @@
             modalMusnah.show();
         @endif
 
-        const kotakRiwayat = Array.from(document.querySelectorAll('.cek-riwayat'));
-        const cekSemuaRiwayat = document.getElementById('cek-semua-riwayat');
-        const btnRiwayatTerpilih = document.getElementById('btn-hapus-riwayat-terpilih');
-        const btnRiwayatSemua = document.getElementById('btn-hapus-riwayat-semua');
-        const jumlahRiwayatTerpilih = document.getElementById('jumlah-riwayat-terpilih');
-        const modeRiwayat = document.getElementById('mode-riwayat');
-        const formHapusRiwayat = document.getElementById('form-hapus-riwayat-massal');
-
         const kfOverlay = document.getElementById('kf-overlay');
         const kfPesan = document.getElementById('kf-pesan');
         const kfBatal = document.getElementById('kf-batal');
         const kfYa = document.getElementById('kf-ya');
         let targetFormAktif = null;
-
-        function jumlahRiwayatDipilih() {
-            return kotakRiwayat.filter(function (k) { return k.checked; }).length;
-        }
-
-        function segarkanRiwayat() {
-            if (kotakRiwayat.length === 0) return;
-            const n = jumlahRiwayatDipilih();
-            if (jumlahRiwayatTerpilih) jumlahRiwayatTerpilih.textContent = n;
-            if (btnRiwayatTerpilih) btnRiwayatTerpilih.disabled = n === 0;
-            if (cekSemuaRiwayat) {
-                cekSemuaRiwayat.checked = n > 0 && n === kotakRiwayat.length;
-                cekSemuaRiwayat.indeterminate = n > 0 && n < kotakRiwayat.length;
-            }
-        }
-
-        kotakRiwayat.forEach(function (k) {
-            k.addEventListener('change', segarkanRiwayat);
-        });
-
-        if (cekSemuaRiwayat) {
-            cekSemuaRiwayat.addEventListener('change', function () {
-                kotakRiwayat.forEach(function (k) { k.checked = cekSemuaRiwayat.checked; });
-                segarkanRiwayat();
-            });
-        }
 
         function tampilkanKonfirmasiKustom(pesanText, formTarget) {
             if (kfOverlay && kfPesan) {
@@ -498,22 +351,60 @@
             }
         }
 
-        if (btnRiwayatTerpilih) {
-            btnRiwayatTerpilih.addEventListener('click', function () {
-                const n = jumlahRiwayatDipilih();
-                if (n > 0) {
-                    modeRiwayat.value = 'terpilih';
-                    tampilkanKonfirmasiKustom('Hapus ' + n + ' riwayat pemusnahan yang dipilih?', formHapusRiwayat);
-                }
-            });
-        }
+        ['dokumen', 'sampel'].forEach(function (tipe) {
+            const kotakRiwayat = Array.from(document.querySelectorAll('.cek-riwayat-' + tipe));
+            const cekSemuaRiwayat = document.getElementById('cek-semua-riwayat-' + tipe);
+            const btnRiwayatTerpilih = document.getElementById('btn-hapus-riwayat-terpilih-' + tipe);
+            const btnRiwayatSemua = document.getElementById('btn-hapus-riwayat-semua-' + tipe);
+            const jumlahRiwayatTerpilih = document.getElementById('jumlah-riwayat-terpilih-' + tipe);
+            const modeRiwayat = document.getElementById('mode-riwayat-' + tipe);
+            const formHapusRiwayat = document.getElementById('form-hapus-riwayat-' + tipe);
 
-        if (btnRiwayatSemua) {
-            btnRiwayatSemua.addEventListener('click', function () {
-                modeRiwayat.value = 'semua';
-                tampilkanKonfirmasiKustom('Apakah Anda yakin ingin menghapus seluruh riwayat pemusnahan?', formHapusRiwayat);
+            function jumlahRiwayatDipilih() {
+                return kotakRiwayat.filter(function (k) { return k.checked; }).length;
+            }
+
+            function segarkanRiwayat() {
+                if (kotakRiwayat.length === 0) return;
+                const n = jumlahRiwayatDipilih();
+                if (jumlahRiwayatTerpilih) jumlahRiwayatTerpilih.textContent = n;
+                if (btnRiwayatTerpilih) btnRiwayatTerpilih.disabled = n === 0;
+                if (cekSemuaRiwayat) {
+                    cekSemuaRiwayat.checked = n > 0 && n === kotakRiwayat.length;
+                    cekSemuaRiwayat.indeterminate = n > 0 && n < kotakRiwayat.length;
+                }
+            }
+
+            kotakRiwayat.forEach(function (k) {
+                k.addEventListener('change', segarkanRiwayat);
             });
-        }
+
+            if (cekSemuaRiwayat) {
+                cekSemuaRiwayat.addEventListener('change', function () {
+                    kotakRiwayat.forEach(function (k) { k.checked = cekSemuaRiwayat.checked; });
+                    segarkanRiwayat();
+                });
+            }
+
+            if (btnRiwayatTerpilih) {
+                btnRiwayatTerpilih.addEventListener('click', function () {
+                    const n = jumlahRiwayatDipilih();
+                    if (n > 0) {
+                        modeRiwayat.value = 'terpilih';
+                        tampilkanKonfirmasiKustom('Hapus ' + n + ' riwayat pemusnahan ' + tipe + ' yang dipilih?', formHapusRiwayat);
+                    }
+                });
+            }
+
+            if (btnRiwayatSemua) {
+                btnRiwayatSemua.addEventListener('click', function () {
+                    modeRiwayat.value = 'semua';
+                    tampilkanKonfirmasiKustom('Apakah Anda yakin ingin menghapus seluruh riwayat pemusnahan ' + tipe + '?', formHapusRiwayat);
+                });
+            }
+
+            segarkanRiwayat();
+        });
 
         document.querySelectorAll('form[data-konfirmasi]').forEach(function (form) {
             form.addEventListener('submit', function (e) {
@@ -524,7 +415,7 @@
         });
 
         if (kfYa) {
-            kfYa.onclick = function() {
+            kfYa.onclick = function () {
                 if (targetFormAktif) {
                     targetFormAktif.submit();
                 }
@@ -532,7 +423,7 @@
         }
 
         if (kfBatal) {
-            kfBatal.onclick = function() {
+            kfBatal.onclick = function () {
                 if (kfOverlay) {
                     kfOverlay.hidden = true;
                     document.body.classList.remove('kf-terkunci');
@@ -540,8 +431,6 @@
                 targetFormAktif = null;
             };
         }
-
-        segarkanRiwayat();
 
         document.querySelectorAll('.alert-otomatis').forEach(function (el) {
             setTimeout(function () {

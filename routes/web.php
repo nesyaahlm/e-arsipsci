@@ -121,6 +121,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
     Route::post('/dokumen', [DokumenController::class, 'store'])->name('dokumen.store');
+    Route::get('/dokumen/export', [DokumenController::class, 'export'])->name('dokumen.export');
     Route::get('/dokumen/{id}', fn () => redirect()->route('dokumen.index'));
     Route::put('/dokumen/{dokumen}', [DokumenController::class, 'update'])->name('dokumen.update');
     Route::delete('/dokumen/{id}', [DokumenController::class, 'destroy'])->name('dokumen.destroy');
@@ -128,6 +129,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dokumen/{dokumen}/preview', [DokumenController::class, 'preview'])->name('dokumen.preview');
 
     Route::get('/sampel', [AdminSampelController::class, 'index'])->name('admin.sampel.index');
+    Route::get('/sampel/export', [AdminSampelController::class, 'export'])->name('admin.sampel.export');
     Route::get('/sampel/create', [AdminSampelController::class, 'create'])->name('admin.sampel.create');
     Route::post('/sampel', [AdminSampelController::class, 'store'])->name('admin.sampel.store');
     Route::get('/sampel/{sampel}', [AdminSampelController::class, 'show'])->whereNumber('sampel')->name('admin.sampel.show');
