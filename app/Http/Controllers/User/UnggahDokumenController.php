@@ -23,10 +23,16 @@ class UnggahDokumenController extends Controller
     {
         $layanan = $this->layananUser($user->layanan_id);
 
+        $userCabangId = $user->cabang_id ?? 1;
+        $bagianList = Bagian::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
+
         return [
             'layanan' => $layanan,
             'jenisList' => $layanan ? $this->jenisUntuk($layanan->id) : collect(),
-            'bagianList' => Bagian::orderBy('nama')->get(),
+            'bagianList' => $bagianList,
             'kodeSuratList' => KodeSurat::orderBy('kode')->get(),
             'hariIni' => now('Asia/Jakarta')->toDateString(),
         ];
@@ -66,7 +72,7 @@ class UnggahDokumenController extends Controller
 
         $bagian = DB::table('bagian')
             ->where('id', $data['bagian_id'])
-            ->first(['id', 'kode', 'retensi_tahun']);
+            ->first(['id', 'kode', 'retensi_tahun', 'retensi_satuan']);
 
         $file = $request->file('file_dokumen');
         $namaAsli = Str::limit(preg_replace('/[\x00-\x1F\x7F]+/', '', $file->getClientOriginalName()), 200, '') ?: 'dokumen';
@@ -119,10 +125,18 @@ class UnggahDokumenController extends Controller
             default => 'I',
         };
 
-        $retensiTahun = $kodeSurat ? $kodeSurat->retensi_aktif : $bagian->retensi_tahun;
-        $retensi = $retensiTahun
-            ? $tanggal->copy()->addYears((int) $retensiTahun)->toDateString()
-            : null;
+        if ($kodeSurat && !empty($kodeSurat->retensi_aktif)) {
+            $retensi = $tanggal->copy()->addYears((int) $kodeSurat->retensi_aktif)->toDateString();
+        } elseif ($bagian && !empty($bagian->retensi_tahun)) {
+            if (($bagian->retensi_satuan ?? 'tahun') === 'bulan') {
+                $retensi = $tanggal->copy()->addMonths((int) $bagian->retensi_tahun)->toDateString();
+            } else {
+                $retensi = $tanggal->copy()->addYears((int) $bagian->retensi_tahun)->toDateString();
+            }
+        } else {
+            $retensi = null;
+        }
+
         $sekarang = now();
 
         $nomorRak = $this->bersih($data['nomor_rak'] ?? null);

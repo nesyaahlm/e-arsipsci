@@ -172,7 +172,7 @@
                     'metode' => 'POST',
                     'sampel' => null,
                     'kembali' => route('user.sampel.index'),
-                    'bagianList' => $bagianList,
+                    'portofolioList' => $portofolioList,
                 ])
             </div>
         </div>
@@ -250,7 +250,7 @@
                                 <input type="checkbox" class="dk-checkbox" data-label-semua-halaman aria-label="Pilih semua sampel di halaman ini" title="Pilih semua di halaman ini">
                             </th>
                             <th>Sampel</th>
-                            <th>Bagian</th>
+                            <th>Portofolio</th>
                             <th>Status</th>
                             <th>Shipper</th>
                             <th>Tujuan Analisis</th>
@@ -276,7 +276,7 @@
                                     <a href="{{ route('user.sampel.show', $item->id) }}">{{ $item->nama_sampel }}</a>
                                     <small>{{ $item->kode_sampel }}</small>
                                 </td>
-                                <td data-label="Bagian">{{ $item->bagian?->nama ?? '-' }}</td>
+                                <td data-label="Portofolio">{{ $item->portofolio?->nama ?? $item->bagian?->nama ?? '-' }}</td>
                                 <td data-label="Status">
                                     <span class="badge {{ $warnaStatus }}">{{ ucfirst($item->status) }}</span>
                                 </td>

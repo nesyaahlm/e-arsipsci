@@ -31,7 +31,7 @@
     ];
 
     $baris = [
-        'Bagian' => $sampel->bagian?->nama,
+        'Portofolio' => $sampel->portofolio?->nama ?? $sampel->bagian?->nama,
         'Tahun' => $sampel->label_tahun,
     ];
 
