@@ -9,7 +9,7 @@ class Sampel extends Model
 {
     protected $table = 'sampel';
 
-    protected $fillable = [
+    protected $fillable = [ 
         'cabang_id',
         'kode_sampel',
         'nama_sampel',
@@ -17,6 +17,9 @@ class Sampel extends Model
         'vessel',
         'bill_of_lading',
         'tanggal_pengambilan',
+        'keterangan_1',
+        'keterangan_2',
+        'keterangan_3',
         'tahun_arsip',
         'tempat_pengambilan',
         'analysis_for',
@@ -40,11 +43,6 @@ class Sampel extends Model
         'tanggal_masuk_arsip' => 'date',
         'tanggal_hapus_buku' => 'date',
     ];
-
-    /**
-     * Tahun di label: isi kolom tahun_arsip bila ada (boleh lebih dari satu tahun,
-     * mis. "2026 dan 2027"), selain itu tahun tanggal pengambilan.
-     */
     public function getLabelTahunAttribute(): string
     {
         if (filled($this->tahun_arsip)) {
