@@ -19,7 +19,10 @@ class BagianController extends Controller
         $cari = trim((string) $request->input('cari'));
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
-        $daftarBagian = Bagian::with('kodeSurat')
+        $daftarBagian = Bagian::with(['kodeSurat' => function ($q) use ($userCabangId) {
+                $q->whereNull('cabang_id')
+                  ->orWhere('cabang_id', $userCabangId);
+            }])
             ->where(function ($q) use ($userCabangId) {
                 $q->whereNull('cabang_id')
                     ->orWhere('cabang_id', $userCabangId);
@@ -97,12 +100,6 @@ class BagianController extends Controller
     {
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
-        if (is_null($bagian->cabang_id) || (int) $bagian->cabang_id !== (int) $userCabangId) {
-            return redirect()
-                ->route('bagian.index')
-                ->with('galat', 'Klasifikasi pada bagian standar nasional hanya dapat dikelola oleh Superadmin.');
-        }
-
         $request->merge(['kode' => strtoupper(trim((string) $request->input('kode')))]);
 
         $data = $request->validate([
@@ -113,15 +110,20 @@ class BagianController extends Controller
             'keterangan' => ['nullable', 'string'],
         ], [
             'kode.required' => 'Kode surat wajib diisi.',
-            'kode.unique' => 'Kode surat sudah digunakan.',
+            'kode.unique' => 'Kode surat sudah digunakan di sistem.',
+            'kode.max' => 'Kode surat maksimal 20 karakter.',
             'nama.required' => 'Nama klasifikasi surat wajib diisi.',
+            'nama.max' => 'Nama klasifikasi surat maksimal 255 karakter.',
             'retensi_aktif.required' => 'Masa retensi aktif wajib diisi.',
+            'retensi_aktif.integer' => 'Masa retensi aktif harus berupa angka.',
             'retensi_inaktif.required' => 'Masa retensi inaktif wajib diisi.',
+            'retensi_inaktif.integer' => 'Masa retensi inaktif harus berupa angka.',
         ]);
 
         KodeSurat::create([
             'bagian_id' => $bagian->id,
             'portofolio_id' => null,
+            'cabang_id' => $userCabangId,
             'kode' => $data['kode'],
             'nama' => $data['nama'],
             'retensi_aktif' => $data['retensi_aktif'],
@@ -131,18 +133,23 @@ class BagianController extends Controller
 
         return redirect()
             ->route('bagian.index')
-            ->with('sukses', 'Klasifikasi surat berhasil ditambahkan ke bagian ' . $bagian->nama . '.');
+            ->with('sukses', 'Klasifikasi surat ' . $data['kode'] . ' berhasil ditambahkan ke bagian ' . $bagian->nama . '.');
     }
 
     public function destroyKlasifikasi(KodeSurat $kodeSurat): RedirectResponse
     {
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
-        $bagian = $kodeSurat->bagian;
 
-        if (!$bagian || is_null($bagian->cabang_id) || (int) $bagian->cabang_id !== (int) $userCabangId) {
+        if (is_null($kodeSurat->cabang_id)) {
             return redirect()
                 ->route('bagian.index')
-                ->with('galat', 'Anda tidak memiliki hak akses untuk menghapus klasifikasi ini.');
+                ->with('galat', 'Klasifikasi standar nasional tidak dapat dihapus oleh Admin Cabang.');
+        }
+
+        if ((int) $kodeSurat->cabang_id !== (int) $userCabangId) {
+            return redirect()
+                ->route('bagian.index')
+                ->with('galat', 'Anda tidak memiliki hak akses untuk menghapus klasifikasi cabang lain.');
         }
 
         $kode = $kodeSurat->kode;
