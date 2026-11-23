@@ -17,7 +17,7 @@ class PortofolioController extends Controller
         $cabangId = $request->query('cabang_id', 'nasional');
 
         $query = Portofolio::with(['cabang'])
-            ->withCount(['sampel']);
+            ->withCount(['kodeSurat', 'sampel']);
 
         if (!empty($cari)) {
             $query->where(function ($q) use ($cari) {
