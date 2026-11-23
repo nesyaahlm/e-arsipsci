@@ -102,7 +102,7 @@
                         <th class="text-center" style="width: 120px;">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                aku <tbody>
                     @forelse ($daftarBagian as $index => $bagian)
                         @php
                             $bisaKelola = !is_null($bagian->cabang_id);
@@ -113,6 +113,14 @@
                                 <span class="badge rounded-pill px-2.5 py-1 font-monospace" style="background-color: #e6f4f1; color: #277a72; font-size: 0.82rem;">
                                     {{ $bagian->kode }}
                                 </span>
+                            </td>
+                            <td class="text-start">
+                                <div class="fw-semibold text-dark">{{ $bagian->nama }}</div>
+                                @if (!$bisaKelola)
+                                    <span class="badge bg-primary-subtle text-primary border" style="font-size: 0.7rem;">Standar Nasional</span>
+                                @else
+                                    <span class="badge bg-success-subtle text-success border" style="font-size: 0.7rem;">Khusus Cabang</span>
+                                @endif
                             </td>
                             <td class="text-start">
                                 @if ($bagian->kodeSurat && $bagian->kodeSurat->isNotEmpty())
