@@ -70,9 +70,10 @@
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 140px;">KODE PORTOFOLIO</th>
                         <th class="py-2.5 px-3 align-middle">NAMA PORTOFOLIO / KOMODITAS</th>
                         <th class="py-2.5 px-3 align-middle text-center" style="width: 170px;">CAKUPAN / CABANG</th>
-                        <th class="py-2.5 px-3 align-middle text-center" style="width: 160px;">RETENSI DEFAULT</th>
-                        <th class="py-2.5 px-3 align-middle text-center" style="width: 130px;">SAMPEL FISIK</th>
-                        <th class="py-2.5 pe-3 align-middle text-center" style="width: 100px;">AKSI</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 120px;">RETENSI</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 150px;">KOMODITAS SAMPEL</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 110px;">SAMPEL</th>
+                        <th class="py-2.5 pe-3 align-middle fw-bold text-center" style="width: 90px;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,6 +101,13 @@
                                 <span class="badge bg-light text-dark border">
                                     {{ $item->retensi_tahun ? $item->retensi_tahun . ' ' . ucfirst($item->retensi_satuan ?? 'bulan') : 'Permanen / Khusus' }}
                                 </span>
+                            </td>
+                            <td class="px-3 text-center">
+                                <a href="{{ route('superadmin.kode-surat.index', ['tab' => 'sampel', 'portofolio_id' => $item->id]) }}"
+                                   class="badge rounded-pill bg-primary-subtle text-primary border text-decoration-none px-2.5 py-1"
+                                   title="Lihat komoditas sampel portofolio {{ $item->nama }}">
+                                    {{ $item->kode_surat_count }} Komoditas &rarr;
+                                </a>
                             </td>
                             <td class="px-3 text-center">
                                 <span class="badge rounded-pill bg-light text-secondary border px-2.5 py-1">
@@ -137,7 +145,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted small">Belum ada data portofolio sampel.</td>
+                            <td colspan="8" class="text-center py-4 text-muted small">Belum ada data portofolio sampel.</td>
                         </tr>
                     @endforelse
                 </tbody>

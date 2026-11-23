@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Superadmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bagian;
+use App\Models\Cabang;
 use App\Models\KodeSurat;
 use App\Models\Portofolio;
 use Illuminate\Http\RedirectResponse;
@@ -23,46 +24,61 @@ class KodeSuratController extends Controller
         $cari = trim((string) $request->input('cari'));
         $bagianId = $request->input('bagian_id');
         $portofolioId = $request->input('portofolio_id');
+        $cabangId = $request->input('cabang_id');
 
-        $query = KodeSurat::query();
+        $query = KodeSurat::with('cabang');
 
         if ($tab === 'sampel') {
-            $query->with('portofolio')->whereNotNull('portofolio_id');
+            $query->with('portofolio.cabang')
+                ->whereNotNull('portofolio_id')
+                ->leftJoin('portofolio', 'kode_surat.portofolio_id', '=', 'portofolio.id')
+                ->select('kode_surat.*')
+                ->orderBy('portofolio.nama', 'asc')
+                ->orderBy('kode_surat.kode', 'asc');
+
             if ($portofolioId) {
-                $query->where('portofolio_id', $portofolioId);
+                $query->where('kode_surat.portofolio_id', $portofolioId);
             }
         } else {
-            $query->with('bagian')->whereNotNull('bagian_id');
+            $query->with('bagian.cabang')
+                ->whereNotNull('bagian_id')
+                ->leftJoin('bagian', 'kode_surat.bagian_id', '=', 'bagian.id')
+                ->select('kode_surat.*')
+                ->orderBy('bagian.nama', 'asc')
+                ->orderBy('kode_surat.kode', 'asc');
+
             if ($bagianId) {
-                $query->where('bagian_id', $bagianId);
+                $query->where('kode_surat.bagian_id', $bagianId);
             }
+        }
+
+        if ($cabangId === 'nasional') {
+            $query->whereNull('kode_surat.cabang_id');
+        } elseif ($cabangId && $cabangId !== 'semua') {
+            $query->where('kode_surat.cabang_id', $cabangId);
         }
 
         if ($cari !== '') {
             $query->where(function ($q) use ($cari, $tab) {
-                $q->where('kode', 'like', "%{$cari}%")
-                  ->orWhere('nama', 'like', "%{$cari}%")
-                  ->orWhere('keterangan', 'like', "%{$cari}%");
+                $q->where('kode_surat.kode', 'like', "%{$cari}%")
+                  ->orWhere('kode_surat.nama', 'like', "%{$cari}%")
+                  ->orWhere('kode_surat.keterangan', 'like', "%{$cari}%");
 
                 if ($tab === 'sampel') {
-                    $q->orWhereHas('portofolio', function ($p) use ($cari) {
-                        $p->where('nama', 'like', "%{$cari}%")
-                          ->orWhere('kode', 'like', "%{$cari}%");
-                    });
+                    $q->orWhere('portofolio.nama', 'like', "%{$cari}%")
+                      ->orWhere('portofolio.kode', 'like', "%{$cari}%");
                 } else {
-                    $q->orWhereHas('bagian', function ($b) use ($cari) {
-                        $b->where('nama', 'like', "%{$cari}%");
-                    });
+                    $q->orWhere('bagian.nama', 'like', "%{$cari}%")
+                      ->orWhere('bagian.kode', 'like', "%{$cari}%");
                 }
             });
         }
 
-        $daftarKodeSurat = $query->orderBy('kode')
-            ->paginate(10)
-            ->withQueryString();
+        $daftarKodeSurat = $query->paginate(10)->withQueryString();
 
         $daftarBagian = Bagian::orderBy('nama')->get();
         $daftarPortofolio = Portofolio::orderBy('nama')->get();
+        $daftarCabang = Cabang::orderBy('nama')->get();
 
         $jumlahDokumen = KodeSurat::whereNotNull('bagian_id')->count();
         $jumlahSampel = KodeSurat::whereNotNull('portofolio_id')->count();
@@ -71,10 +87,12 @@ class KodeSuratController extends Controller
             'daftarKodeSurat',
             'daftarBagian',
             'daftarPortofolio',
+            'daftarCabang',
             'cari',
             'tab',
             'bagianId',
             'portofolioId',
+            'cabangId',
             'jumlahDokumen',
             'jumlahSampel'
         ));
@@ -86,6 +104,7 @@ class KodeSuratController extends Controller
         $request->merge(['kode' => strtoupper(trim((string) $request->input('kode')))]);
 
         $aturan = [
+            'cabang_id' => ['nullable', 'exists:cabang,id'],
             'kode' => ['required', 'string', 'max:20', 'unique:kode_surat,kode'],
             'nama' => ['required', 'string', 'max:255'],
             'retensi_aktif' => ['required', 'integer', 'min:1', 'max:50'],
@@ -132,6 +151,7 @@ class KodeSuratController extends Controller
         $request->merge(['kode' => strtoupper(trim((string) $request->input('kode')))]);
 
         $aturan = [
+            'cabang_id' => ['nullable', 'exists:cabang,id'],
             'kode' => ['required', 'string', 'max:20', Rule::unique('kode_surat', 'kode')->ignore($kodeSurat->id)],
             'nama' => ['required', 'string', 'max:255'],
             'retensi_aktif' => ['required', 'integer', 'min:1', 'max:50'],

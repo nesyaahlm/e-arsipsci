@@ -57,7 +57,7 @@
                         <select name="bagian_id" class="form-select form-select-sm rounded-3">
                             <option value="">Semua Bagian</option>
                             @foreach ($daftarBagian as $b)
-                                <option value="{{ $b->id }}" {{ $bagianId == $b->id ? 'selected' : '' }}>{{ $b->nama }}</option>
+                                <option value="{{ $b->id }}" {{ $bagianId == $b->id ? 'selected' : '' }}>{{ $b->nama }} ({{ $b->kode }})</option>
                             @endforeach
                         </select>
                     </div>
@@ -72,9 +72,19 @@
                     </div>
                 @endif
 
+                <div class="col-12 col-md-3 col-lg-3">
+                    <select name="cabang_id" class="form-select form-select-sm rounded-3">
+                        <option value="">Semua Cakupan</option>
+                        <option value="nasional" {{ ($cabangId ?? '') === 'nasional' ? 'selected' : '' }}>Standar Nasional (Pusat)</option>
+                        @foreach ($daftarCabang as $cb)
+                            <option value="{{ $cb->id }}" {{ (string)($cabangId ?? '') === (string)$cb->id ? 'selected' : '' }}>Cabang: {{ $cb->nama }} ({{ $cb->kode }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="col-auto d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Filter</button>
-                    @if ($cari || ($tab === 'dokumen' && $bagianId) || ($tab === 'sampel' && $portofolioId))
+                    @if ($cari || ($tab === 'dokumen' && $bagianId) || ($tab === 'sampel' && $portofolioId) || $cabangId)
                         <a href="{{ route('superadmin.kode-surat.index', ['tab' => $tab]) }}" class="btn btn-outline-secondary btn-sm rounded-3 px-3">Reset</a>
                     @endif
                 </div>
@@ -89,16 +99,66 @@
                     <tr>
                         <th class="py-2.5 ps-3 align-middle fw-bold text-center" style="width: 50px;">NO</th>
                         <th class="py-2.5 px-3 align-middle fw-bold" style="width: 130px;">KODE</th>
-                        <th class="py-2.5 px-3 align-middle fw-bold" style="width: 180px;">{{ $tab === 'dokumen' ? 'BAGIAN' : 'PORTOFOLIO' }}</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold" style="width: 150px;">CAKUPAN</th>
                         <th class="py-2.5 px-3 align-middle fw-bold">NAMA KLASIFIKASI</th>
-                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 120px;">RETENSI AKTIF</th>
-                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 120px;">RETENSI INAKTIF</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 110px;">RETENSI AKTIF</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 110px;">RETENSI INAKTIF</th>
                         <th class="py-2.5 px-3 align-middle fw-bold">KETERANGAN</th>
-                        <th class="py-2.5 pe-3 align-middle fw-bold text-center" style="width: 110px;">AKSI</th>
+                        <th class="py-2.5 pe-3 align-middle fw-bold text-center" style="width: 90px;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $currentGroup = null;
+                    @endphp
+
                     @forelse ($daftarKodeSurat as $item)
+                        @php
+                            $groupId = $tab === 'dokumen' ? $item->bagian_id : $item->portofolio_id;
+                            $groupObj = $tab === 'dokumen' ? $item->bagian : $item->portofolio;
+                            $groupNama = $groupObj->nama ?? ($tab === 'dokumen' ? 'Tanpa Bagian' : 'Tanpa Portofolio');
+                            $groupKode = $groupObj->kode ?? '-';
+                            $groupCabang = $groupObj->cabang ?? null;
+                        @endphp
+
+                        @if ($currentGroup !== $groupId)
+                            @php
+                                $currentGroup = $groupId;
+                            @endphp
+                            <tr style="background-color: #eef7f5; border-top: 2px solid #b7dfd2; border-bottom: 1px solid #cce8de;">
+                                <td colspan="8" class="py-2.5 px-3">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-primary fw-bold" style="font-size: 0.88rem;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    @if ($tab === 'dokumen')
+                                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                                    @else
+                                                        <path d="M10 2v7.31L4.47 19.34A2 2 0 0 0 6.17 22h11.66a2 2 0 0 0 1.7-2.66L14 9.31V2"></path><path d="M8.5 2h7"></path>
+                                                    @endif
+                                                </svg>
+                                                {{ $groupNama }} ({{ $groupKode }})
+                                            </span>
+                                            @if (!$groupCabang)
+                                                <span class="badge bg-primary-subtle text-primary border" style="font-size: 0.68rem;">{{ $tab === 'dokumen' ? 'Bagian' : 'Portofolio' }} Nasional</span>
+                                            @else
+                                                <span class="badge bg-info-subtle text-info border" style="font-size: 0.68rem;">{{ $tab === 'dokumen' ? 'Bagian' : 'Portofolio' }} {{ $groupCabang->nama }} ({{ $groupCabang->kode }})</span>
+                                            @endif
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-outline-primary btn-sm py-0.5 px-2.5 rounded-2 fw-semibold"
+                                                style="font-size: 0.72rem;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalTambah"
+                                                data-group-id="{{ $groupId }}"
+                                                title="Tambah klasifikasi langsung ke {{ $groupKode }}">
+                                            + Tambah di {{ $groupKode }}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+
                         <tr>
                             <td class="ps-3 text-center text-secondary small">{{ $loop->iteration + ($daftarKodeSurat->currentPage() - 1) * $daftarKodeSurat->perPage() }}</td>
                             <td class="px-3">
@@ -107,10 +167,12 @@
                                 </span>
                             </td>
                             <td class="px-3">
-                                @if ($tab === 'dokumen')
-                                    <span class="badge bg-light text-dark border">{{ $item->bagian->nama ?? '-' }}</span>
+                                @if (!$item->cabang_id)
+                                    <span class="badge bg-primary-subtle text-primary border" style="font-size: 0.72rem;">Standar Nasional</span>
                                 @else
-                                    <span class="badge bg-light text-dark border">{{ $item->portofolio->nama ?? '-' }}</span>
+                                    <span class="badge bg-info-subtle text-info border" style="font-size: 0.72rem;">
+                                        {{ $item->cabang->nama ?? 'Cabang' }} ({{ $item->cabang->kode ?? '' }})
+                                    </span>
                                 @endif
                             </td>
                             <td class="px-3 fw-semibold text-dark">{{ $item->nama }}</td>
@@ -127,6 +189,7 @@
                                             data-id="{{ $item->id }}"
                                             data-bagian-id="{{ $item->bagian_id }}"
                                             data-portofolio-id="{{ $item->portofolio_id }}"
+                                            data-cabang-id="{{ $item->cabang_id ?? '' }}"
                                             data-kode="{{ $item->kode }}"
                                             data-nama="{{ $item->nama }}"
                                             data-aktif="{{ $item->retensi_aktif }}"
@@ -157,13 +220,18 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    @if ($daftarKodeSurat->hasPages())
-        <div class="mt-3 d-flex justify-content-center">
-            {{ $daftarKodeSurat->links('pagination::bootstrap-5') }}
+        <div class="card-footer bg-white border-0 py-3 px-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="small text-muted">
+                Menampilkan <span class="fw-semibold text-dark">{{ $daftarKodeSurat->firstItem() ?? 0 }}</span> sampai <span class="fw-semibold text-dark">{{ $daftarKodeSurat->lastItem() ?? 0 }}</span> dari <span class="fw-semibold text-dark">{{ $daftarKodeSurat->total() }}</span> data klasifikasi
+            </div>
+            @if ($daftarKodeSurat->hasPages())
+                <div>
+                    {{ $daftarKodeSurat->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
-    @endif
+    </div>
 
     <div class="modal fade" id="modalTambah" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -197,6 +265,16 @@
                                 </select>
                             </div>
                         @endif
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary mb-1">Cakupan Klasifikasi</label>
+                            <select name="cabang_id" class="form-select form-select-sm rounded-3">
+                                <option value="">Standar Nasional (Pusat - Berlaku Semua Cabang)</option>
+                                @foreach ($daftarCabang as $cb)
+                                    <option value="{{ $cb->id }}">Khusus Cabang: {{ $cb->nama }} ({{ $cb->kode }})</option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Kode Klasifikasi <span class="text-danger">*</span></label>
@@ -265,6 +343,16 @@
                         @endif
 
                         <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary mb-1">Cakupan Klasifikasi</label>
+                            <select id="edit_cabang_id" name="cabang_id" class="form-select form-select-sm rounded-3">
+                                <option value="">Standar Nasional (Pusat - Berlaku Semua Cabang)</option>
+                                @foreach ($daftarCabang as $cb)
+                                    <option value="{{ $cb->id }}">Khusus Cabang: {{ $cb->nama }} ({{ $cb->kode }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Kode Klasifikasi <span class="text-danger">*</span></label>
                             <input type="text" id="edit_kode" name="kode" class="form-control text-uppercase" maxlength="20" required>
                         </div>
@@ -299,6 +387,21 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                var modalTambah = document.getElementById('modalTambah');
+                if (modalTambah) {
+                    modalTambah.addEventListener('show.bs.modal', function (event) {
+                        var button = event.relatedTarget;
+                        if (!button) return;
+                        var groupId = button.getAttribute('data-group-id');
+                        if (groupId) {
+                            var selectBagian = document.querySelector('#modalTambah select[name="bagian_id"]');
+                            if (selectBagian) selectBagian.value = groupId;
+                            var selectPorto = document.querySelector('#modalTambah select[name="portofolio_id"]');
+                            if (selectPorto) selectPorto.value = groupId;
+                        }
+                    });
+                }
+
                 var modalEdit = document.getElementById('modalEdit');
                 if (modalEdit) {
                     modalEdit.addEventListener('show.bs.modal', function (event) {
@@ -306,6 +409,7 @@
                         var id = button.getAttribute('data-id');
                         var bagianId = button.getAttribute('data-bagian-id');
                         var portofolioId = button.getAttribute('data-portofolio-id');
+                        var cabangId = button.getAttribute('data-cabang-id');
                         var kode = button.getAttribute('data-kode');
                         var nama = button.getAttribute('data-nama');
                         var aktif = button.getAttribute('data-aktif');
@@ -323,6 +427,11 @@
                         var selectPortofolio = document.getElementById('edit_portofolio_id');
                         if (selectPortofolio && portofolioId) {
                             selectPortofolio.value = portofolioId;
+                        }
+
+                        var selectCabang = document.getElementById('edit_cabang_id');
+                        if (selectCabang) {
+                            selectCabang.value = cabangId || '';
                         }
 
                         document.getElementById('edit_kode').value = kode;
