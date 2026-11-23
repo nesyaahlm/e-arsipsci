@@ -16,6 +16,16 @@ class DokumenController extends Controller
 {
     public function index(Request $request)
     {
+        Dokumen::where('status', 'aktif')
+            ->whereNotNull('retensi_sampai')
+            ->where('retensi_sampai', '<', now()->startOfDay())
+            ->update(['status' => 'inaktif']);
+
+        Dokumen::where('status', 'inaktif')
+            ->whereNotNull('retensi_sampai')
+            ->where('retensi_sampai', '>=', now()->startOfDay())
+            ->update(['status' => 'aktif']);
+
         $query = Dokumen::with(['bagian', 'pengunggah'])->latest();
 
         if ($request->filled('cari')) {
@@ -30,9 +40,23 @@ class DokumenController extends Controller
             $query->where('bagian_id', $request->bagian_id);
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         $dokumen = $query->paginate(10)->withQueryString();
 
-        $bagianList = Bagian::orderBy('nama')->get();
+        $user = Auth::user();
+        $userCabangId = $user->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
+
+        $bagianList = Bagian::query()
+            ->when($user && $user->role !== 'superadmin', function ($q) use ($userCabangId) {
+                $q->whereNull('cabang_id')
+                    ->orWhere('cabang_id', $userCabangId);
+            })
+            ->orderBy('nama')
+            ->get();
+
         $kodeSuratList = KodeSurat::orderBy('kode')->get();
 
         return view('dokumen.index', compact('dokumen', 'bagianList', 'kodeSuratList'));
@@ -74,26 +98,48 @@ class DokumenController extends Controller
             $tanggalDokumen = Carbon::parse($validated['tanggal_dokumen']);
             $tahun = $tanggalDokumen->year;
 
-            $prefix = "{$kodeKlasifikasi}/{$kodeCabang}/{$tahun}/";
+            $bulanRomawi = match ($tanggalDokumen->month) {
+                1 => 'I',
+                2 => 'II',
+                3 => 'III',
+                4 => 'IV',
+                5 => 'V',
+                6 => 'VI',
+                7 => 'VII',
+                8 => 'VIII',
+                9 => 'IX',
+                10 => 'X',
+                11 => 'XI',
+                12 => 'XII',
+                default => 'I',
+            };
+
+            $polaCari = "%/{$kodeKlasifikasi}/{$kodeCabang}/%/{$tahun}";
             $dokumenTerakhir = Dokumen::withTrashed()
-                ->where('nomor', 'like', "{$prefix}%")
+                ->where('nomor', 'like', $polaCari)
                 ->orderBy('id', 'desc')
                 ->first();
 
             $nomorUrut = 1;
             if ($dokumenTerakhir && $dokumenTerakhir->nomor) {
                 $bagianNomor = explode('/', $dokumenTerakhir->nomor);
-                $urutanTerakhir = end($bagianNomor);
-                $nomorUrut = intval($urutanTerakhir) + 1;
+                $nomorUrut = intval($bagianNomor[0]) + 1;
             }
 
-            $nomorOtomatis = sprintf('%s%04d', $prefix, $nomorUrut);
+            $nomorOtomatis = sprintf('%04d/%s/%s/%s/%d', $nomorUrut, $kodeKlasifikasi, $kodeCabang, $bulanRomawi, $tahun);
 
-            $retensiTahun = $kodeSurat ? $kodeSurat->retensi_aktif : $bagian->retensi_tahun;
             $retensiSampai = null;
-            if ($retensiTahun) {
-                $retensiSampai = $tanggalDokumen->copy()->addYears($retensiTahun);
+            if ($kodeSurat && !empty($kodeSurat->retensi_aktif)) {
+                $retensiSampai = $tanggalDokumen->copy()->addYears($kodeSurat->retensi_aktif);
+            } elseif ($bagian && !empty($bagian->retensi_tahun)) {
+                if (($bagian->retensi_satuan ?? 'tahun') === 'bulan') {
+                    $retensiSampai = $tanggalDokumen->copy()->addMonths($bagian->retensi_tahun);
+                } else {
+                    $retensiSampai = $tanggalDokumen->copy()->addYears($bagian->retensi_tahun);
+                }
             }
+
+            $statusAwal = ($retensiSampai && $retensiSampai->isPast()) ? 'inaktif' : 'aktif';
 
             $file = $request->file('file_dokumen');
             $namaAsli = $file->getClientOriginalName();
@@ -111,6 +157,7 @@ class DokumenController extends Controller
                 'unit' => $validated['unit'] ?? null,
                 'tanggal_dokumen' => $validated['tanggal_dokumen'],
                 'retensi_sampai' => $retensiSampai,
+                'status' => $statusAwal,
                 'deskripsi' => $validated['deskripsi'] ?? null,
                 'lokasi_arsip_fisik' => $lokasiArsipFisik,
                 'file_path' => $path,
@@ -131,6 +178,7 @@ class DokumenController extends Controller
     {
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
+            'tanggal_dokumen' => ['nullable', 'date'],
             'unit' => ['nullable', 'string', 'max:100'],
             'nomor_rak' => ['nullable', 'string', 'max:50'],
             'no_tingkat' => ['nullable', 'string', 'max:50'],
@@ -149,6 +197,30 @@ class DokumenController extends Controller
             'lokasi_arsip_fisik' => $this->susunLokasi($request),
             'deskripsi' => $validated['deskripsi'] ?? null,
         ];
+
+        if (!empty($validated['tanggal_dokumen'])) {
+            $tglBaru = Carbon::parse($validated['tanggal_dokumen']);
+            $updateData['tanggal_dokumen'] = $tglBaru;
+
+            $retensiSampai = null;
+            if ($dokumen->kodeSurat && !empty($dokumen->kodeSurat->retensi_aktif)) {
+                $retensiSampai = $tglBaru->copy()->addYears($dokumen->kodeSurat->retensi_aktif);
+            } elseif ($dokumen->bagian && !empty($dokumen->bagian->retensi_tahun)) {
+                if (($dokumen->bagian->retensi_satuan ?? 'tahun') === 'bulan') {
+                    $retensiSampai = $tglBaru->copy()->addMonths($dokumen->bagian->retensi_tahun);
+                } else {
+                    $retensiSampai = $tglBaru->copy()->addYears($dokumen->bagian->retensi_tahun);
+                }
+            }
+
+            if ($retensiSampai) {
+                $updateData['retensi_sampai'] = $retensiSampai;
+
+                if ($dokumen->status !== 'pemusnahan') {
+                    $updateData['status'] = $retensiSampai->isPast() ? 'inaktif' : 'aktif';
+                }
+            }
+        }
 
         if ($request->hasFile('file_dokumen')) {
             $file = $request->file('file_dokumen');

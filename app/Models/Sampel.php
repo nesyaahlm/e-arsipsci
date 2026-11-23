@@ -9,7 +9,7 @@ class Sampel extends Model
 {
     protected $table = 'sampel';
 
-    protected $fillable = [ 
+    protected $fillable = [
         'cabang_id',
         'kode_sampel',
         'nama_sampel',
@@ -24,6 +24,7 @@ class Sampel extends Model
         'tempat_pengambilan',
         'analysis_for',
         'bagian_id',
+        'portofolio_id',
         'nomor_ruang_arsip',
         'nomor_tingkat_arsip',
         'nama_ruang_arsip',
@@ -43,6 +44,7 @@ class Sampel extends Model
         'tanggal_masuk_arsip' => 'date',
         'tanggal_hapus_buku' => 'date',
     ];
+
     public function getLabelTahunAttribute(): string
     {
         if (filled($this->tahun_arsip)) {
@@ -93,5 +95,10 @@ class Sampel extends Model
     public function pengunggah(): BelongsTo
     {
         return $this->belongsTo(User::class, 'diunggah_oleh');
+    }
+
+    public function portofolio(): BelongsTo
+    {
+        return $this->belongsTo(Portofolio::class, 'portofolio_id');
     }
 }

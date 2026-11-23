@@ -4,6 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bagian;
+use App\Models\Cabang;
+use App\Models\KodeSurat;
 use Carbon\Carbon;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
@@ -21,10 +23,17 @@ class UnggahDokumenController extends Controller
     {
         $layanan = $this->layananUser($user->layanan_id);
 
+        $userCabangId = $user->cabang_id ?? 1;
+        $bagianList = Bagian::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
+
         return [
             'layanan' => $layanan,
             'jenisList' => $layanan ? $this->jenisUntuk($layanan->id) : collect(),
-            'bagianList' => Bagian::orderBy('nama')->get(),
+            'bagianList' => $bagianList,
+            'kodeSuratList' => KodeSurat::orderBy('kode')->get(),
             'hariIni' => now('Asia/Jakarta')->toDateString(),
         ];
     }
@@ -37,6 +46,7 @@ class UnggahDokumenController extends Controller
         $data = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
             'bagian_id' => ['required', 'integer', 'exists:bagian,id'],
+            'kode_surat_id' => ['nullable', 'integer', 'exists:kode_surat,id'],
             'tanggal_dokumen' => ['required', 'date'],
             'tahun_arsip' => ['nullable', 'string', 'max:50', function ($atribut, $nilai, $gagal) {
                 if (! preg_match('/^(?:19|20)\d{2}(?:\s*(?:,|&|dan)\s*(?:19|20)\d{2})*$/i', trim((string) $nilai))) {
@@ -62,7 +72,7 @@ class UnggahDokumenController extends Controller
 
         $bagian = DB::table('bagian')
             ->where('id', $data['bagian_id'])
-            ->first(['id', 'kode', 'retensi_tahun']);
+            ->first(['id', 'kode', 'retensi_tahun', 'retensi_satuan']);
 
         $file = $request->file('file_dokumen');
         $namaAsli = Str::limit(preg_replace('/[\x00-\x1F\x7F]+/', '', $file->getClientOriginalName()), 200, '') ?: 'dokumen';
@@ -88,11 +98,45 @@ class UnggahDokumenController extends Controller
 
     private function simpan(int $userId, ?int $layananId, object $bagian, array $data, string $path, string $namaAsli, int $ukuran): string
     {
+        $user = DB::table('users')->where('id', $userId)->first();
+        $cabang = $user && $user->cabang_id ? DB::table('cabang')->where('id', $user->cabang_id)->first() : DB::table('cabang')->where('kode', 'CLC')->first();
+        $kodeCabang = $cabang ? $cabang->kode : 'CLC';
+        $cabangId = $cabang ? $cabang->id : 1;
+
+        $kodeSurat = !empty($data['kode_surat_id']) ? DB::table('kode_surat')->where('id', $data['kode_surat_id'])->first() : null;
+        $kodeKlasifikasi = $kodeSurat ? $kodeSurat->kode : $bagian->kode;
+
         $tanggal = Carbon::parse($data['tanggal_dokumen']);
-        $prefix = $bagian->kode.'/CLC/'.$tanggal->year.'/';
-        $retensi = $bagian->retensi_tahun
-            ? $tanggal->copy()->addYears((int) $bagian->retensi_tahun)->toDateString()
-            : null;
+        $tahun = $tanggal->year;
+
+        $bulanRomawi = match ($tanggal->month) {
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII',
+            default => 'I',
+        };
+
+        if ($kodeSurat && !empty($kodeSurat->retensi_aktif)) {
+            $retensi = $tanggal->copy()->addYears((int) $kodeSurat->retensi_aktif)->toDateString();
+        } elseif ($bagian && !empty($bagian->retensi_tahun)) {
+            if (($bagian->retensi_satuan ?? 'tahun') === 'bulan') {
+                $retensi = $tanggal->copy()->addMonths((int) $bagian->retensi_tahun)->toDateString();
+            } else {
+                $retensi = $tanggal->copy()->addYears((int) $bagian->retensi_tahun)->toDateString();
+            }
+        } else {
+            $retensi = null;
+        }
+
         $sekarang = now();
 
         $nomorRak = $this->bersih($data['nomor_rak'] ?? null);
@@ -106,19 +150,28 @@ class UnggahDokumenController extends Controller
             $noBox !== null ? 'Box '.$noBox : null,
         ]);
 
+        $polaCari = "%/{$kodeKlasifikasi}/{$kodeCabang}/%/{$tahun}";
+
         for ($percobaan = 1; ; $percobaan++) {
             try {
-                return DB::transaction(function () use ($userId, $layananId, $bagian, $data, $path, $namaAsli, $ukuran, $tanggal, $prefix, $retensi, $sekarang, $nomorRak, $noTingkat, $noBox, $lokasi, $tahunArsip) {
+                return DB::transaction(function () use ($userId, $layananId, $bagian, $kodeSurat, $cabangId, $kodeCabang, $kodeKlasifikasi, $data, $path, $namaAsli, $ukuran, $tanggal, $tahun, $bulanRomawi, $polaCari, $retensi, $sekarang, $nomorRak, $noTingkat, $noBox, $lokasi, $tahunArsip) {
                     $terakhir = DB::table('dokumen')
-                        ->where('nomor', 'like', $prefix.'%')
-                        ->orderByDesc('nomor')
+                        ->where('nomor', 'like', $polaCari)
+                        ->orderByDesc('id')
                         ->lockForUpdate()
                         ->value('nomor');
 
-                    $urutan = $terakhir ? ((int) substr($terakhir, strlen($prefix))) + 1 : 1;
-                    $nomor = sprintf('%s%04d', $prefix, $urutan);
+                    $urutan = 1;
+                    if ($terakhir) {
+                        $bagianNomor = explode('/', $terakhir);
+                        $urutan = intval($bagianNomor[0]) + 1;
+                    }
+
+                    $nomor = sprintf('%04d/%s/%s/%s/%d', $urutan, $kodeKlasifikasi, $kodeCabang, $bulanRomawi, $tahun);
 
                     $dokumenId = DB::table('dokumen')->insertGetId([
+                        'cabang_id' => $cabangId,
+                        'kode_surat_id' => $kodeSurat?->id,
                         'nomor' => $nomor,
                         'judul' => $data['judul'],
                         'bagian_id' => $bagian->id,
@@ -153,7 +206,7 @@ class UnggahDokumenController extends Controller
                     return $nomor;
                 });
             } catch (UniqueConstraintViolationException $e) {
-                if ($percobaan >= 3) {
+                if ($percobaan >= 5) {
                     throw $e;
                 }
             }

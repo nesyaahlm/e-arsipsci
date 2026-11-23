@@ -58,11 +58,19 @@
                     <div class="invalid-feedback">{{ $errors->bagian->first('nama') }}</div>
                 </div>
                 <div class="col-12 col-md-6">
-                    <label for="bagian-retensi" class="form-label">Retensi Bagian (tahun, kosong = selama berlaku)</label>
-                    <input type="number" id="bagian-retensi" name="retensi_tahun" min="1" max="100"
-                           class="form-control {{ $errors->bagian->has('retensi_tahun') ? 'is-invalid' : '' }}"
-                           value="{{ $errors->bagian->any() ? old('retensi_tahun') : '' }}">
-                    <div class="invalid-feedback">{{ $errors->bagian->first('retensi_tahun') }}</div>
+                    <label for="bagian-retensi" class="form-label">Retensi Bagian (kosong = selama berlaku)</label>
+                    <div class="input-group">
+                        <input type="number" id="bagian-retensi" name="retensi_tahun" min="1" max="100"
+                               class="form-control {{ $errors->bagian->has('retensi_tahun') ? 'is-invalid' : '' }}"
+                               style="border: 1px solid #2a7f72; border-top-right-radius: 0; border-bottom-right-radius: 0;"
+                               value="{{ $errors->bagian->any() ? old('retensi_tahun') : '' }}">
+                        <select id="bagian-retensi-satuan" name="retensi_satuan" class="form-select"
+                                style="max-width: 110px; border: 1px solid #2a7f72; border-left: none; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 8px; border-bottom-right-radius: 8px;">
+                            <option value="tahun" {{ old('retensi_satuan') === 'tahun' ? 'selected' : '' }}>Tahun</option>
+                            <option value="bulan" {{ old('retensi_satuan') === 'bulan' ? 'selected' : '' }}>Bulan</option>
+                        </select>
+                    </div>
+                    <div class="invalid-feedback d-block">{{ $errors->bagian->first('retensi_tahun') }}</div>
                 </div>
             </div>
 
@@ -88,25 +96,37 @@
                         <tr>
                             <td class="text-center">{{ $daftarBagian->firstItem() + $index }}</td>
                             <td class="fw-bold text-center">{{ $bagian->kode }}</td>
-                            <td class="text-start">{{ $bagian->nama }}</td>
-                            <td class="text-center">{{ $bagian->retensi_tahun ? $bagian->retensi_tahun.' tahun' : '-' }}</td>
+                            <td class="text-start">
+                                <div>{{ $bagian->nama }}</div>
+                                @if (is_null($bagian->cabang_id))
+                                    <span class="badge bg-primary-subtle text-primary border" style="font-size: 0.7rem;">Standar Nasional</span>
+                                @else
+                                    <span class="badge bg-success-subtle text-success border" style="font-size: 0.7rem;">Khusus Cabang</span>
+                                @endif
+                            </td>
+                            <td class="text-center">{{ $bagian->retensi_tahun ? $bagian->retensi_tahun.' '.($bagian->retensi_satuan ?? 'tahun') : '-' }}</td>
                             <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <button type="button"
-                                            class="btn btn-sm btn-outline-primary btn-edit-bagian"
-                                            data-action="{{ route('bagian.update', $bagian) }}"
-                                            data-id="{{ $bagian->id }}"
-                                            data-kode="{{ $bagian->kode }}"
-                                            data-nama="{{ $bagian->nama }}"
-                                            data-retensi="{{ $bagian->retensi_tahun }}">Edit</button>
-                                    <form method="POST"
-                                          action="{{ route('bagian.destroy', $bagian) }}"
-                                          data-konfirmasi="Hapus bagian {{ $bagian->nama }}?">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
-                                    </form>
-                                </div>
+                                @if (is_null($bagian->cabang_id))
+                                    <span class="text-muted small fst-italic">Terkunci (Pusat)</span>
+                                @else
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary btn-edit-bagian"
+                                                data-action="{{ route('bagian.update', $bagian) }}"
+                                                data-id="{{ $bagian->id }}"
+                                                data-kode="{{ $bagian->kode }}"
+                                                data-nama="{{ $bagian->nama }}"
+                                                data-retensi="{{ $bagian->retensi_tahun }}"
+                                                data-satuan="{{ $bagian->retensi_satuan ?? 'tahun' }}">Edit</button>
+                                        <form method="POST"
+                                              action="{{ route('bagian.destroy', $bagian) }}"
+                                              data-konfirmasi="Hapus bagian {{ $bagian->nama }}?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                                        </form>
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                     @empty

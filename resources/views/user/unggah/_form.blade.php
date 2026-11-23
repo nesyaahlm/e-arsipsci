@@ -95,6 +95,21 @@
                                     @enderror
                                 </div>
 
+                                                                <div class="col-12 col-md-6">
+                                    <label for="kode_surat_id" class="form-label small fw-semibold text-secondary">Klasifikasi Kode Surat</label>
+                                    <select id="kode_surat_id" name="kode_surat_id" class="form-select rounded-3 @error('kode_surat_id') is-invalid @enderror">
+                                        <option value="" selected>Pilih Kode Surat (Opsional)</option>
+                                        @foreach ($kodeSuratList as $ks)
+                                            <option value="{{ $ks->id }}" data-bagian="{{ $ks->bagian_id }}" data-kode="{{ $ks->kode }}" data-retensi="{{ $ks->retensi_aktif }}" @selected((string) old('kode_surat_id') === (string) $ks->id)>
+                                                {{ $ks->kode }} - {{ $ks->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('kode_surat_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="col-12 col-md-6">
                                     <label for="tanggal_dokumen" class="form-label small fw-semibold text-secondary">Tanggal Dokumen <span class="text-danger">*</span></label>
                                     <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', $hariIni) }}" class="form-control rounded-3 @error('tanggal_dokumen') is-invalid @enderror" required>
@@ -166,6 +181,39 @@
                             <button type="submit" class="btn btn-primary rounded-3 px-4" data-submit>Unggah &amp; Simpan</button>
                         </div>
                     </fieldset>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const selectBagianUser = document.getElementById('bagian_id');
+                            const selectKodeSuratUser = document.getElementById('kode_surat_id');
+
+                            if (selectBagianUser && selectKodeSuratUser) {
+                                const originalOptions = Array.from(selectKodeSuratUser.options);
+
+                                function filterKodeSuratUser() {
+                                    const selectedBagianId = selectBagianUser.value;
+                                    const currentValue = selectKodeSuratUser.value;
+
+                                    selectKodeSuratUser.innerHTML = '';
+
+                                    originalOptions.forEach(opt => {
+                                        if (!opt.value || !selectedBagianId || opt.dataset.bagian === selectedBagianId) {
+                                            selectKodeSuratUser.appendChild(opt.cloneNode(true));
+                                        }
+                                    });
+
+                                    if (Array.from(selectKodeSuratUser.options).some(o => o.value === currentValue)) {
+                                        selectKodeSuratUser.value = currentValue;
+                                    } else {
+                                        selectKodeSuratUser.selectedIndex = 0;
+                                    }
+                                }
+
+                                selectBagianUser.addEventListener('change', filterKodeSuratUser);
+                                filterKodeSuratUser();
+                            }
+                        });
+                    </script>
                 </form>
             </div>
         </div>

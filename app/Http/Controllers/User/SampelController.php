@@ -5,6 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Sampel;
 use App\Models\Bagian;
+use App\Models\Portofolio;
+use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,9 +27,10 @@ class SampelController extends Controller
     public function index(Request $request)
     {
         $kata = trim((string) $request->query('q', ''));
+        $userCabangId = Auth::user()->cabang_id ?? 1;
 
         $sampel = $this->kueriCari($kata)
-            ->with('bagian:id,nama')
+            ->with(['portofolio:id,nama', 'bagian:id,nama'])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(10)
@@ -35,9 +38,12 @@ class SampelController extends Controller
 
         $jumlahLabel = $this->kueriCari($kata)->count();
 
-        $bagianList = Bagian::orderBy('nama')->get();
+        $portofolioList = Portofolio::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
 
-        return view('user.sampel.index', compact('sampel', 'kata', 'bagianList', 'jumlahLabel'));
+        return view('user.sampel.index', compact('sampel', 'kata', 'portofolioList', 'jumlahLabel'));
     }
 
     public function show(int $sampel)
@@ -229,8 +235,14 @@ class SampelController extends Controller
 
     public function create()
     {
-        $bagianList = Bagian::orderBy('nama')->get();
-        return view('user.sampel.create', compact('bagianList'));
+        $userCabangId = Auth::user()->cabang_id ?? 1;
+
+        $portofolioList = Portofolio::where(function ($q) use ($userCabangId) {
+            $q->whereNull('cabang_id')
+                ->orWhere('cabang_id', $userCabangId);
+        })->orderBy('nama')->get();
+
+        return view('user.sampel.create', compact('portofolioList'));
     }
 
     public function store(Request $request)
@@ -243,8 +255,8 @@ class SampelController extends Controller
             'bill_of_lading' => ['nullable', 'string', 'max:255'],
             'tanggal_pengambilan' => ['required', 'date'],
             'tempat_pengambilan' => ['required', 'string', 'max:255'],
-            'analysis_for' => ['required', 'string', 'max:255'],
-            'bagian_id' => ['required', 'exists:bagian,id'],
+            'analysis_for' => ['nullable', 'string', 'max:255'],
+            'portofolio_id' => ['required', 'exists:portofolio,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
             'nomor_tingkat_arsip' => ['nullable', 'string', 'max:50'],
             'tahun_arsip' => Sampel::aturanTahun(),
@@ -258,11 +270,9 @@ class SampelController extends Controller
             'nama_sampel.required' => 'Nama sampel / komoditas wajib diisi.',
             'tanggal_pengambilan.required' => 'Tanggal pengambilan sampel wajib diisi.',
             'tempat_pengambilan.required' => 'Tempat pengambilan sampel wajib diisi.',
-            'analysis_for.required' => 'Tujuan analisis wajib diisi.',
-            'bagian_id.required' => 'Bagian wajib dipilih.',
-            'bagian_id.exists' => 'Bagian yang dipilih tidak valid.',
+            'portofolio_id.required' => 'Portofolio wajib dipilih.',
+            'portofolio_id.exists' => 'Portofolio yang dipilih tidak valid.',
             'nomor_ruang_arsip.required' => 'Nomor ruang/rak arsip wajib diisi.',
-
             'nama_ruang_arsip.required' => 'Nama ruang arsip sampel wajib diisi.',
             'tanggal_masuk_arsip.required' => 'Tanggal masuk arsip wajib diisi.',
             'foto.image' => 'Berkas harus berupa gambar.',
@@ -275,7 +285,18 @@ class SampelController extends Controller
             $fotoPath = $request->file('foto')->store('sampel', 'public');
         }
 
+        $portofolio = Portofolio::find($validated['portofolio_id']);
+        $status = 'aktif';
+        if ($portofolio && !empty($portofolio->retensi_tahun) && !empty($validated['tanggal_masuk_arsip'])) {
+            $tgl = Carbon::parse($validated['tanggal_masuk_arsip']);
+            $kadaluwarsa = (($portofolio->retensi_satuan ?? 'bulan') === 'bulan')
+                ? $tgl->addMonths($portofolio->retensi_tahun)
+                : $tgl->addYears($portofolio->retensi_tahun);
+            $status = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+        }
+
         $sampel = Sampel::create([
+            'cabang_id' => Auth::user()->cabang_id ?? 1,
             'kode_sampel' => $validated['kode_sampel'],
             'nama_sampel' => $validated['nama_sampel'],
             'shipper' => $validated['shipper'] ?? null,
@@ -283,13 +304,14 @@ class SampelController extends Controller
             'bill_of_lading' => $validated['bill_of_lading'] ?? null,
             'tanggal_pengambilan' => $validated['tanggal_pengambilan'],
             'tempat_pengambilan' => $validated['tempat_pengambilan'],
-            'analysis_for' => $validated['analysis_for'],
-            'bagian_id' => $validated['bagian_id'],
+            'analysis_for' => $validated['analysis_for'] ?? null,
+            'portofolio_id' => $validated['portofolio_id'],
             'nomor_ruang_arsip' => $validated['nomor_ruang_arsip'],
             'nomor_tingkat_arsip' => $validated['nomor_tingkat_arsip'] ?? null,
             'tahun_arsip' => Sampel::rapikanTahun($validated['tahun_arsip'] ?? null),
             'nama_ruang_arsip' => $validated['nama_ruang_arsip'],
             'tanggal_masuk_arsip' => $validated['tanggal_masuk_arsip'],
+            'status' => $status,
             'foto_path' => $fotoPath,
             'deskripsi' => $validated['deskripsi'] ?? null,
             'diunggah_oleh' => Auth::id(),
