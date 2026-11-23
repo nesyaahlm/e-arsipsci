@@ -24,6 +24,7 @@
         'sampel' => null,
         'kembali' => route('user.sampel.index'),
         'portofolioList' => $portofolioList,
+        'kodeSuratList' => $kodeSuratList,
     ])
     </div>
 </x-layouts.user>

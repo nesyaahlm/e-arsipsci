@@ -1,11 +1,11 @@
-<x-superadmin.layout title="Master Kode Surat">
+<x-superadmin.layout title="Master Klasifikasi Arsip">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h1 class="h4 fw-bold text-primary mb-1">Master Kode Surat</h1>
-            <p class="text-secondary mb-0 small">Standarisasi kode klasifikasi surat dinas dan masa retensi arsip per bagian.</p>
+            <h1 class="h4 fw-bold text-primary mb-1">Master Klasifikasi Arsip</h1>
+            <p class="text-secondary mb-0 small">Standarisasi kode klasifikasi dan masa retensi arsip untuk dokumen dan sampel komoditas.</p>
         </div>
         <button type="button" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambah">
-            + Tambah Kode Surat
+            + Tambah Klasifikasi
         </button>
     </div>
 
@@ -27,24 +27,55 @@
         </div>
     @endif
 
+    <ul class="nav nav-pills mb-3 p-1 rounded-3 bg-white shadow-sm d-inline-flex border" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link py-2 px-3 fw-semibold small {{ $tab === 'dokumen' ? 'active bg-primary text-white' : 'text-secondary' }}"
+               href="{{ route('superadmin.kode-surat.index', ['tab' => 'dokumen']) }}">
+                Klasifikasi Dokumen (Bagian)
+                <span class="badge {{ $tab === 'dokumen' ? 'bg-white text-primary' : 'bg-secondary' }} ms-1">{{ $jumlahDokumen }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link py-2 px-3 fw-semibold small {{ $tab === 'sampel' ? 'active bg-primary text-white' : 'text-secondary' }}"
+               href="{{ route('superadmin.kode-surat.index', ['tab' => 'sampel']) }}">
+                Klasifikasi Sampel (Portofolio)
+                <span class="badge {{ $tab === 'sampel' ? 'bg-white text-primary' : 'bg-secondary' }} ms-1">{{ $jumlahSampel }}</span>
+            </a>
+        </li>
+    </ul>
+
     <div class="card border-0 shadow-sm rounded-4 mb-3" style="background-color: #ffffff;">
         <div class="card-body p-3">
             <form action="{{ route('superadmin.kode-surat.index') }}" method="GET" class="row g-2 align-items-center">
+                <input type="hidden" name="tab" value="{{ $tab }}">
                 <div class="col-12 col-md-5 col-lg-4">
                     <input type="text" name="cari" value="{{ $cari }}" class="form-control form-control-sm rounded-3" placeholder="Cari kode, nama, atau keterangan...">
                 </div>
-                <div class="col-12 col-md-4 col-lg-3">
-                    <select name="bagian_id" class="form-select form-select-sm rounded-3">
-                        <option value="">Semua Bagian</option>
-                        @foreach ($daftarBagian as $b)
-                            <option value="{{ $b->id }}" {{ $bagianId == $b->id ? 'selected' : '' }}>{{ $b->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
+
+                @if ($tab === 'dokumen')
+                    <div class="col-12 col-md-4 col-lg-3">
+                        <select name="bagian_id" class="form-select form-select-sm rounded-3">
+                            <option value="">Semua Bagian</option>
+                            @foreach ($daftarBagian as $b)
+                                <option value="{{ $b->id }}" {{ $bagianId == $b->id ? 'selected' : '' }}>{{ $b->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @else
+                    <div class="col-12 col-md-4 col-lg-3">
+                        <select name="portofolio_id" class="form-select form-select-sm rounded-3">
+                            <option value="">Semua Portofolio</option>
+                            @foreach ($daftarPortofolio as $p)
+                                <option value="{{ $p->id }}" {{ $portofolioId == $p->id ? 'selected' : '' }}>{{ $p->nama }} ({{ $p->kode }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+
                 <div class="col-auto d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">Filter</button>
-                    @if ($cari || $bagianId)
-                        <a href="{{ route('superadmin.kode-surat.index') }}" class="btn btn-outline-secondary btn-sm rounded-3 px-3">Reset</a>
+                    @if ($cari || ($tab === 'dokumen' && $bagianId) || ($tab === 'sampel' && $portofolioId))
+                        <a href="{{ route('superadmin.kode-surat.index', ['tab' => $tab]) }}" class="btn btn-outline-secondary btn-sm rounded-3 px-3">Reset</a>
                     @endif
                 </div>
             </form>
@@ -57,8 +88,8 @@
                 <thead style="--bs-table-bg: #e3f1ee; --bs-table-color: #1f5f55; --bs-table-border-color: #a3cfbb; font-size: 0.82rem;">
                     <tr>
                         <th class="py-2.5 ps-3 align-middle fw-bold text-center" style="width: 50px;">NO</th>
-                        <th class="py-2.5 px-3 align-middle fw-bold" style="width: 130px;">KODE SURAT</th>
-                        <th class="py-2.5 px-3 align-middle fw-bold" style="width: 160px;">BAGIAN</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold" style="width: 130px;">KODE</th>
+                        <th class="py-2.5 px-3 align-middle fw-bold" style="width: 180px;">{{ $tab === 'dokumen' ? 'BAGIAN' : 'PORTOFOLIO' }}</th>
                         <th class="py-2.5 px-3 align-middle fw-bold">NAMA KLASIFIKASI</th>
                         <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 120px;">RETENSI AKTIF</th>
                         <th class="py-2.5 px-3 align-middle fw-bold text-center" style="width: 120px;">RETENSI INAKTIF</th>
@@ -76,7 +107,11 @@
                                 </span>
                             </td>
                             <td class="px-3">
-                                <span class="badge bg-light text-dark border">{{ $item->bagian->nama ?? '-' }}</span>
+                                @if ($tab === 'dokumen')
+                                    <span class="badge bg-light text-dark border">{{ $item->bagian->nama ?? '-' }}</span>
+                                @else
+                                    <span class="badge bg-light text-dark border">{{ $item->portofolio->nama ?? '-' }}</span>
+                                @endif
                             </td>
                             <td class="px-3 fw-semibold text-dark">{{ $item->nama }}</td>
                             <td class="px-3 text-center"><span class="badge bg-light text-dark border">{{ $item->retensi_aktif }} Thn</span></td>
@@ -91,6 +126,7 @@
                                             data-bs-target="#modalEdit"
                                             data-id="{{ $item->id }}"
                                             data-bagian-id="{{ $item->bagian_id }}"
+                                            data-portofolio-id="{{ $item->portofolio_id }}"
                                             data-kode="{{ $item->kode }}"
                                             data-nama="{{ $item->nama }}"
                                             data-aktif="{{ $item->retensi_aktif }}"
@@ -99,9 +135,10 @@
                                             title="Edit">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                     </button>
-                                    <form action="{{ route('superadmin.kode-surat.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kode surat {{ $item->kode }}?')">
+                                    <form action="{{ route('superadmin.kode-surat.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus klasifikasi {{ $item->kode }}?')">
                                         @csrf
                                         @method('DELETE')
+                                        <input type="hidden" name="tab" value="{{ $tab }}">
                                         <button type="submit"
                                                 class="btn btn-outline-danger btn-sm p-1 rounded-2 d-flex align-items-center justify-content-center"
                                                 style="width: 30px; height: 30px;"
@@ -114,7 +151,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted small">Belum ada data kode surat.</td>
+                            <td colspan="8" class="text-center py-4 text-muted small">Belum ada data klasifikasi {{ $tab === 'dokumen' ? 'dokumen' : 'sampel' }}.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -133,27 +170,41 @@
             <div class="modal-content border-0 shadow rounded-4">
                 <form action="{{ route('superadmin.kode-surat.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="tab" value="{{ $tab }}">
                     <div class="modal-header border-0 pb-0 pt-3 px-3">
-                        <h5 class="modal-title fw-bold text-primary" id="modalTambahLabel">Tambah Kode Surat</h5>
+                        <h5 class="modal-title fw-bold text-primary" id="modalTambahLabel">Tambah Klasifikasi {{ $tab === 'dokumen' ? 'Dokumen' : 'Sampel' }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-3">
+                        @if ($tab === 'dokumen')
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Bagian / Divisi <span class="text-danger">*</span></label>
+                                <select name="bagian_id" class="form-select" required>
+                                    <option value="" disabled selected>Pilih Bagian</option>
+                                    @foreach ($daftarBagian as $b)
+                                        <option value="{{ $b->id }}">{{ $b->nama }} ({{ $b->kode }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Portofolio Komoditas <span class="text-danger">*</span></label>
+                                <select name="portofolio_id" class="form-select" required>
+                                    <option value="" disabled selected>Pilih Portofolio</option>
+                                    @foreach ($daftarPortofolio as $p)
+                                        <option value="{{ $p->id }}">{{ $p->nama }} ({{ $p->kode }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Bagian / Divisi <span class="text-danger">*</span></label>
-                            <select name="bagian_id" class="form-select" required>
-                                <option value="" disabled selected>Pilih Bagian</option>
-                                @foreach ($daftarBagian as $b)
-                                    <option value="{{ $b->id }}">{{ $b->nama }} ({{ $b->kode }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Kode Surat <span class="text-danger">*</span></label>
-                            <input type="text" name="kode" class="form-control text-uppercase" placeholder="Contoh: KWI, INV, LHU" maxlength="20" required>
+                            <label class="form-label small fw-semibold text-secondary">Kode Klasifikasi <span class="text-danger">*</span></label>
+                            <input type="text" name="kode" class="form-control text-uppercase" placeholder="{{ $tab === 'dokumen' ? 'Contoh: KWI, INV, LHU' : 'Contoh: MNR, MGS, ENV' }}" maxlength="20" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Nama Klasifikasi <span class="text-danger">*</span></label>
-                            <input type="text" name="nama" class="form-control" placeholder="Contoh: Kuitansi Pembayaran" maxlength="255" required>
+                            <input type="text" name="nama" class="form-control" placeholder="{{ $tab === 'dokumen' ? 'Contoh: Kuitansi Pembayaran' : 'Contoh: Batubara / Nikel' }}" maxlength="255" required>
                         </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
@@ -167,7 +218,7 @@
                         </div>
                         <div>
                             <label class="form-label small fw-semibold text-secondary">Keterangan</label>
-                            <textarea name="keterangan" class="form-control" rows="2" placeholder="Catatan atau dasar aturan kearsipan..."></textarea>
+                            <textarea name="keterangan" class="form-control" rows="2" placeholder="Catatan aturan kearsipan..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-3 px-3">
@@ -185,22 +236,36 @@
                 <form id="formEditKodeSurat" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="tab" value="{{ $tab }}">
                     <div class="modal-header border-0 pb-0 pt-3 px-3">
-                        <h5 class="modal-title fw-bold text-primary" id="modalEditLabel">Ubah Kode Surat</h5>
+                        <h5 class="modal-title fw-bold text-primary" id="modalEditLabel">Ubah Klasifikasi {{ $tab === 'dokumen' ? 'Dokumen' : 'Sampel' }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-3">
+                        @if ($tab === 'dokumen')
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Bagian / Divisi <span class="text-danger">*</span></label>
+                                <select id="edit_bagian_id" name="bagian_id" class="form-select" required>
+                                    <option value="" disabled>Pilih Bagian</option>
+                                    @foreach ($daftarBagian as $b)
+                                        <option value="{{ $b->id }}">{{ $b->nama }} ({{ $b->kode }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Portofolio Komoditas <span class="text-danger">*</span></label>
+                                <select id="edit_portofolio_id" name="portofolio_id" class="form-select" required>
+                                    <option value="" disabled>Pilih Portofolio</option>
+                                    @foreach ($daftarPortofolio as $p)
+                                        <option value="{{ $p->id }}">{{ $p->nama }} ({{ $p->kode }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Bagian / Divisi <span class="text-danger">*</span></label>
-                            <select id="edit_bagian_id" name="bagian_id" class="form-select" required>
-                                <option value="" disabled>Pilih Bagian</option>
-                                @foreach ($daftarBagian as $b)
-                                    <option value="{{ $b->id }}">{{ $b->nama }} ({{ $b->kode }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Kode Surat <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">Kode Klasifikasi <span class="text-danger">*</span></label>
                             <input type="text" id="edit_kode" name="kode" class="form-control text-uppercase" maxlength="20" required>
                         </div>
                         <div class="mb-3">
@@ -240,6 +305,7 @@
                         var button = event.relatedTarget;
                         var id = button.getAttribute('data-id');
                         var bagianId = button.getAttribute('data-bagian-id');
+                        var portofolioId = button.getAttribute('data-portofolio-id');
                         var kode = button.getAttribute('data-kode');
                         var nama = button.getAttribute('data-nama');
                         var aktif = button.getAttribute('data-aktif');
@@ -249,7 +315,16 @@
                         var form = document.getElementById('formEditKodeSurat');
                         form.action = '/superadmin/kode-surat/' + id;
 
-                        document.getElementById('edit_bagian_id').value = bagianId;
+                        var selectBagian = document.getElementById('edit_bagian_id');
+                        if (selectBagian && bagianId) {
+                            selectBagian.value = bagianId;
+                        }
+
+                        var selectPortofolio = document.getElementById('edit_portofolio_id');
+                        if (selectPortofolio && portofolioId) {
+                            selectPortofolio.value = portofolioId;
+                        }
+
                         document.getElementById('edit_kode').value = kode;
                         document.getElementById('edit_nama').value = nama;
                         document.getElementById('edit_aktif').value = aktif;

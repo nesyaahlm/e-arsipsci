@@ -7,6 +7,7 @@ use App\Models\Bagian;
 use App\Models\Cabang;
 use App\Models\Sampel;
 use App\Models\Portofolio;
+use App\Models\KodeSurat;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -132,7 +133,9 @@ class SampelController extends Controller
                 ->orWhere('cabang_id', $userCabangId);
         })->orderBy('nama')->get();
 
-        return view('admin.sampel.create', compact('portofolioList'));
+        $kodeSuratList = KodeSurat::whereNotNull('portofolio_id')->orderBy('kode')->get();
+
+        return view('admin.sampel.create', compact('portofolioList', 'kodeSuratList'));
     }
 
     public function store(Request $request)
@@ -148,14 +151,20 @@ class SampelController extends Controller
         $data['cabang_id'] = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
         $data['diunggah_oleh'] = Auth::id();
 
+        $kodeSurat = !empty($data['kode_surat_id']) ? KodeSurat::find($data['kode_surat_id']) : null;
         $portofolio = Portofolio::find($data['portofolio_id'] ?? null);
-        if ($portofolio && !empty($portofolio->retensi_tahun) && !empty($data['tanggal_masuk_arsip'])) {
+        
+        if (!empty($data['tanggal_masuk_arsip'])) {
             $tgl = Carbon::parse($data['tanggal_masuk_arsip']);
-            $kadaluwarsa = (($portofolio->retensi_satuan ?? 'bulan') === 'bulan')
-                ? $tgl->addMonths($portofolio->retensi_tahun)
-                : $tgl->addYears($portofolio->retensi_tahun);
-
-            $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+            if ($kodeSurat && !empty($kodeSurat->retensi_aktif)) {
+                $kadaluwarsa = $tgl->addYears($kodeSurat->retensi_aktif);
+                $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+            } elseif ($portofolio && !empty($portofolio->retensi_tahun)) {
+                $kadaluwarsa = (($portofolio->retensi_satuan ?? 'bulan') === 'bulan')
+                    ? $tgl->addMonths($portofolio->retensi_tahun)
+                    : $tgl->addYears($portofolio->retensi_tahun);
+                $data['status'] = $kadaluwarsa->isPast() ? 'inaktif' : 'aktif';
+            }
         }
 
         $sampel = Sampel::create($data);
@@ -184,7 +193,13 @@ class SampelController extends Controller
                 ->orWhere('cabang_id', $userCabangId);
         })->orderBy('nama')->get();
 
-        return view('admin.sampel.edit', compact('sampel', 'portofolioList'));
+        $kodeSuratList = KodeSurat::whereNotNull('portofolio_id')->orderBy('kode')->get();
+
+        return view('admin.sampel.edit', [
+            'sampel' => $sampel,
+            'portofolioList' => $portofolioList,
+            'kodeSuratList' => $kodeSuratList,
+        ]);
     }
 
     public function cetakLabel($id): View
@@ -248,6 +263,68 @@ class SampelController extends Controller
             ->with('success', 'Data sampel ' . $sampel->kode_sampel . ' berhasil diperbarui!');
     }
 
+    public function generateKode(Request $request)
+    {
+        $portofolioId = $request->input('portofolio_id');
+        $kodeSuratId = $request->input('kode_surat_id');
+
+        $portofolio = Portofolio::find($portofolioId);
+        $kodeSurat = KodeSurat::find($kodeSuratId);
+
+        $kodeTengah = 'SMP';
+        if ($kodeSurat && !empty($kodeSurat->kode)) {
+            $kodeTengah = 'SMP-' . strtoupper(trim($kodeSurat->kode));
+        } elseif ($portofolio && !empty($portofolio->kode)) {
+            $kodeTengah = 'SMP-' . strtoupper(trim($portofolio->kode));
+        }
+
+        $user = Auth::user();
+        $cabangId = $user->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
+        $cabang = Cabang::find($cabangId);
+        $kodeCabang = $cabang && !empty($cabang->kode) ? strtoupper(trim($cabang->kode)) : 'CLC';
+
+        $tanggalInput = $request->input('tanggal');
+        $tgl = $tanggalInput ? Carbon::parse($tanggalInput) : now('Asia/Jakarta');
+        $tahun = $tgl->year;
+
+        $bulanRomawi = match ($tgl->month) {
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII',
+            default => 'I',
+        };
+
+        $polaCari = "%/SMP-%/{$kodeCabang}/%/{$tahun}";
+        $terakhir = Sampel::where('cabang_id', $cabangId)
+            ->where('kode_sampel', 'like', $polaCari)
+            ->orderByDesc('id')
+            ->value('kode_sampel');
+
+        $urutan = 1;
+        if ($terakhir) {
+            $bagianNomor = explode('/', $terakhir);
+            if (isset($bagianNomor[0]) && is_numeric($bagianNomor[0])) {
+                $urutan = intval($bagianNomor[0]) + 1;
+            }
+        }
+
+        $kodeSampel = sprintf('%04d/%s/%s/%s/%d', $urutan, $kodeTengah, $kodeCabang, $bulanRomawi, $tahun);
+
+        return response()->json([
+            'kode_sampel' => $kodeSampel,
+            'urutan' => $urutan,
+        ]);
+    }
+
     public function destroy(Sampel $sampel)
     {
         DB::table('log_aktivitas')->insert([
@@ -282,6 +359,7 @@ class SampelController extends Controller
             'keterangan_3' => ['nullable', 'string', 'max:255'],
             'analysis_for' => ['nullable', 'string', 'max:255'],
             'portofolio_id' => ['required', 'exists:portofolio,id'],
+            'kode_surat_id' => ['nullable', 'exists:kode_surat,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
             'nomor_tingkat_arsip' => ['nullable', 'string', 'max:50'],
             'tahun_arsip' => Sampel::aturanTahun(),

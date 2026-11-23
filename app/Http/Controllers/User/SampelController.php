@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Sampel;
 use App\Models\Bagian;
 use App\Models\Portofolio;
+use App\Models\KodeSurat;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -43,7 +44,9 @@ class SampelController extends Controller
                 ->orWhere('cabang_id', $userCabangId);
         })->orderBy('nama')->get();
 
-        return view('user.sampel.index', compact('sampel', 'kata', 'portofolioList', 'jumlahLabel'));
+        $kodeSuratList = KodeSurat::whereNotNull('portofolio_id')->orderBy('kode')->get();
+
+        return view('user.sampel.index', compact('sampel', 'kata', 'portofolioList', 'kodeSuratList', 'jumlahLabel'));
     }
 
     public function show(int $sampel)
@@ -242,7 +245,9 @@ class SampelController extends Controller
                 ->orWhere('cabang_id', $userCabangId);
         })->orderBy('nama')->get();
 
-        return view('user.sampel.create', compact('portofolioList'));
+        $kodeSuratList = KodeSurat::whereNotNull('portofolio_id')->orderBy('kode')->get();
+
+        return view('user.sampel.create', compact('portofolioList', 'kodeSuratList'));
     }
 
     public function store(Request $request)
@@ -257,6 +262,7 @@ class SampelController extends Controller
             'tempat_pengambilan' => ['required', 'string', 'max:255'],
             'analysis_for' => ['nullable', 'string', 'max:255'],
             'portofolio_id' => ['required', 'exists:portofolio,id'],
+            'kode_surat_id' => ['nullable', 'exists:kode_surat,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
             'nomor_tingkat_arsip' => ['nullable', 'string', 'max:50'],
             'tahun_arsip' => Sampel::aturanTahun(),
@@ -306,6 +312,7 @@ class SampelController extends Controller
             'tempat_pengambilan' => $validated['tempat_pengambilan'],
             'analysis_for' => $validated['analysis_for'] ?? null,
             'portofolio_id' => $validated['portofolio_id'],
+            'kode_surat_id' => $validated['kode_surat_id'] ?? null,
             'nomor_ruang_arsip' => $validated['nomor_ruang_arsip'],
             'nomor_tingkat_arsip' => $validated['nomor_tingkat_arsip'] ?? null,
             'tahun_arsip' => Sampel::rapikanTahun($validated['tahun_arsip'] ?? null),
