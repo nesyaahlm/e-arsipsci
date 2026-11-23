@@ -18,6 +18,7 @@
         'metode' => 'POST',
         'sampel' => null,
         'kembali' => route('admin.sampel.index'),
-        'bagianList' => $bagianList,
+        'portofolioList' => $portofolioList,
+        'kodeSuratList' => $kodeSuratList,
     ])
 </x-admin.layout>

@@ -248,6 +248,7 @@
                                                 data-id="{{ $item->id }}"
                                                 data-nomor="{{ $item->nomor }}"
                                                 data-judul="{{ $item->judul }}"
+                                                data-tanggal="{{ $item->tanggal_dokumen ? $item->tanggal_dokumen->format('Y-m-d') : '' }}"
                                                 data-unit="{{ $item->unit }}"
                                                 data-lokasi="{{ $item->lokasi_arsip_fisik }}"
                                                 data-deskripsi="{{ $item->deskripsi }}"
@@ -460,9 +461,15 @@
                             <input type="text" name="judul" id="editJudul" class="form-control rounded-3" required>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Unit Kerja</label>
-                            <input type="text" name="unit" id="editUnit" class="form-control rounded-3" placeholder="Contoh: Cilacap">
+                        <div class="row g-2 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Tanggal Dokumen</label>
+                                <input type="date" name="tanggal_dokumen" id="editTanggalDokumen" class="form-control rounded-3">
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Unit Kerja</label>
+                                <input type="text" name="unit" id="editUnit" class="form-control rounded-3" placeholder="Contoh: Cilacap">
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -647,6 +654,7 @@
                 const id = this.getAttribute('data-id');
                 const nomor = this.getAttribute('data-nomor');
                 const judul = this.getAttribute('data-judul');
+                const tanggal = this.getAttribute('data-tanggal');
                 const unit = this.getAttribute('data-unit');
                 const lokasi = this.getAttribute('data-lokasi') || '';
                 const deskripsi = this.getAttribute('data-deskripsi');
@@ -657,6 +665,7 @@
                 if (editNomorDokumen) editNomorDokumen.textContent = nomor || '';
 
                 document.getElementById('editJudul').value = judul || '';
+                document.getElementById('editTanggalDokumen').value = tanggal || '';
                 document.getElementById('editUnit').value = unit || '';
                 document.getElementById('editDeskripsi').value = deskripsi || '';
 

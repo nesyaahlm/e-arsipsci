@@ -21,7 +21,7 @@ class LogAktivitasController extends Controller
             ->filterLog($cari, $aktivitas, $tanggal)
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
 
         $daftarAktivitas = LogAktivitas::aktif()

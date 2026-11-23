@@ -2,7 +2,7 @@
     $infoArsip = [
         ['Kode Sampel', $sampel->kode_sampel, 'fw-bold text-primary font-monospace'],
         ['Nama Sampel', $sampel->nama_sampel, ''],
-        ['Bagian', $sampel->bagian->nama ?? '-', ''],
+        ['Portofolio', $sampel->portofolio->nama ?? $sampel->bagian->nama ?? '-', ''],
         ['Tgl Masuk Arsip', $sampel->tanggal_masuk_arsip?->format('d/m/Y') ?? '-', ''],
         ['No. Rak', $sampel->nomor_ruang_arsip, ''],
         ['No. Tingkat', $sampel->nomor_tingkat_arsip ?: '-', ''],
@@ -14,10 +14,12 @@
     $infoSampel = [
         ['Shipper', $sampel->shipper ?: '-', ''],
         ['Vessel', $sampel->vessel ?: '-', ''],
-        ['BL', $sampel->bill_of_lading ?: '-', ''],
+        // ['BL', $sampel->bill_of_lading ?: '-', ''],
         ['Tgl Pengambilan', $sampel->tanggal_pengambilan?->format('d/m/Y') ?? '-', ''],
-        ['Tempat Pengambilan', $sampel->tempat_pengambilan, ''],
-        ['Analysis For', $sampel->analysis_for, ''],
+        ['Tempat Pengambilan', $sampel->tempat_pengambilan ?: '-', ''],
+        ['Keterangan 1', $sampel->keterangan_1 ?: '-', ''],
+        ['Keterangan 2', $sampel->keterangan_2 ?: '-', ''],
+        ['Keterangan 3', $sampel->keterangan_3 ?: '-', ''],
     ];
 @endphp
 

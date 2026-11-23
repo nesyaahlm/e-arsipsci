@@ -11,6 +11,7 @@ class KodeSurat extends Model
 
     protected $fillable = [
         'bagian_id',
+        'portofolio_id',
         'kode',
         'nama',
         'retensi_aktif',
@@ -21,5 +22,10 @@ class KodeSurat extends Model
     public function bagian(): BelongsTo
     {
         return $this->belongsTo(Bagian::class, 'bagian_id');
+    }
+
+    public function portofolio(): BelongsTo
+    {
+        return $this->belongsTo(Portofolio::class, 'portofolio_id');
     }
 }

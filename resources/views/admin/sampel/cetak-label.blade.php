@@ -128,12 +128,20 @@
                 size: auto;
                 margin: 5mm;
             }
-
-            
         }
     </style>
 </head>
 <body>
+    @php
+        $daftarKeterangan = collect([
+            1 => $sampel->keterangan_1,
+            2 => $sampel->keterangan_2,
+            3 => $sampel->keterangan_3,
+        ])
+            ->map(fn ($k) => trim((string) $k))
+            ->filter(fn ($k) => $k !== '' && $k !== '-');
+    @endphp
+
     <div class="container my-3 no-print">
         <div class="d-flex justify-content-between align-items-center max-w-650 mx-auto" style="max-width: 650px;">
             <a href="{{ route('admin.sampel.show', $sampel->id) }}" class="btn btn-outline-secondary btn-sm px-3 fw-semibold">
@@ -160,12 +168,7 @@
             <tr>
                 <td class="field-title">SAMPLE NAME</td>
                 <td class="field-colon">:</td>
-                <td class="field-value">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>{{ $sampel->nama_sampel }}</span>
-                        <span class="ps-3 text-nowrap"><strong>BL :</strong> {{ $sampel->bill_of_lading ?: '-' }}</span>
-                    </div>
-                </td>
+                <td class="field-value">{{ $sampel->nama_sampel }}</td>
             </tr>
             <tr>
                 <td class="field-title">VESSEL</td>
@@ -173,10 +176,28 @@
                 <td class="field-value">{{ $sampel->vessel ?: '-' }}</td>
             </tr>
             <tr>
-                <td class="field-title">ANALYSIS FOR</td>
+                <td class="field-title">TEMPAT PENGAMBILAN</td>
                 <td class="field-colon">:</td>
-                <td class="field-value">{{ $sampel->analysis_for }}</td>
+                <td class="field-value">{{ $sampel->tempat_pengambilan ?: '-' }}</td>
             </tr>
+            <tr>
+                <td class="field-title">TANGGAL PENGAMBILAN</td>
+                <td class="field-colon">:</td>
+                <td class="field-value">{{ $sampel->tanggal_pengambilan?->format('d/m/Y') ?? '-' }}</td>
+            </tr>
+            @forelse ($daftarKeterangan as $nomor => $keterangan)
+                <tr>
+                    <td class="field-title">KETERANGAN {{ $nomor }}</td>
+                    <td class="field-colon">:</td>
+                    <td class="field-value">{{ $keterangan }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td class="field-title">KETERANGAN</td>
+                    <td class="field-colon">:</td>
+                    <td class="field-value">-</td>
+                </tr>
+            @endforelse
             <tr>
                 <td class="field-title">SAMPEL ID</td>
                 <td class="field-colon">:</td>
