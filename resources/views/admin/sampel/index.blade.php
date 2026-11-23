@@ -48,16 +48,16 @@
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-secondary mb-1">Cari</label>
                     <input type="text" name="cari" value="{{ request('cari') }}"
-                           class="form-control form-control-sm" placeholder="Cari kode, nama, shipper, vessel, ruang, pengunggah, dll.">
+                           class="form-control form-control-sm" placeholder="Cari kode, nama, shipper, vessel, keterangan, ruang, pengunggah, dll.">
                 </div>
 
                 <div class="col-12 col-md-3">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Bagian</label>
-                    <select name="bagian_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Semua Bagian</option>
-                        @foreach ($daftarBagian as $bagian)
-                            <option value="{{ $bagian->id }}" @selected(request('bagian_id') == $bagian->id)>
-                                {{ $bagian->nama }}
+                    <label class="form-label small fw-semibold text-secondary mb-1">Portofolio</label>
+                    <select name="portofolio_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Semua Portofolio</option>
+                        @foreach ($daftarPortofolio as $portofolio)
+                            <option value="{{ $portofolio->id }}" @selected(request('portofolio_id') == $portofolio->id)>
+                                {{ $portofolio->nama }}
                             </option>
                         @endforeach
                     </select>
@@ -91,7 +91,8 @@
                         </th>
                         <th class="py-2 text-center fw-bold">Kode Sampel</th>
                         <th class="py-2 text-center fw-bold">Nama Sampel</th>
-                        <th class="py-2 text-center fw-bold">Bagian</th>
+                        <th class="py-2 text-center fw-bold">Portofolio</th>
+                        <th class="py-2 text-center fw-bold">Keterangan</th>
                         <th class="py-2 text-center fw-bold">Status</th>
                         <th class="py-2 text-center fw-bold">Tgl Masuk</th>
                         <th class="py-2 text-center fw-bold">Ruang Arsip</th>
@@ -107,6 +108,10 @@
                                 'inaktif' => 'bg-secondary-subtle text-secondary',
                                 'pemusnahan' => 'bg-danger-subtle text-danger',
                             ][$item->status] ?? 'bg-light text-dark';
+
+                            $daftarKeterangan = collect([$item->keterangan_1, $item->keterangan_2, $item->keterangan_3])
+                                ->map(fn ($k) => trim((string) $k))
+                                ->filter(fn ($k) => $k !== '' && $k !== '-');
                         @endphp
                         <tr>
                             <td class="ps-3 py-2 text-center">
@@ -121,7 +126,15 @@
                                    title="Lihat detail">{{ $item->nama_sampel }}</a>
                             </td>
 
-                            <td class="py-2 text-center">{{ $item->bagian->nama ?? '-' }}</td>
+                            <td class="py-2 text-center">{{ $item->portofolio->nama ?? $item->bagian->nama ?? '-' }}</td>
+
+                            <td class="py-2" style="font-size: 0.75rem;">
+                                @forelse ($daftarKeterangan as $keterangan)
+                                    <div>{{ $keterangan }}</div>
+                                @empty
+                                    <span class="text-muted">-</span>
+                                @endforelse
+                            </td>
 
                             <td class="py-2 text-center">
                                 <span class="badge {{ $warnaStatus }}">{{ ucfirst($item->status) }}</span>
@@ -178,7 +191,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted py-4">Belum ada sampel.</td>
+                            <td colspan="10" class="text-center text-muted py-4">Belum ada sampel.</td>
                         </tr>
                     @endforelse
                 </tbody>

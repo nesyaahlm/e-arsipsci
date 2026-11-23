@@ -100,7 +100,7 @@
                                 @if (is_null($item->cabang_id))
                                     <span class="badge bg-primary-subtle text-primary border" style="font-size: 0.7rem;">Standar Nasional</span>
                                 @else
-                                    <span class="badge bg-success-subtle text-success border" style="font-size: 0.7rem;">Khusus Cabang</span>
+                                    <span class="badge bg-success-subtle text-success border" style="font-size: 0.7rem;">Khusus Unit Kerja</span>
                                 @endif
                             </td>
                             <td class="text-center">{{ $item->retensi_tahun ? $item->retensi_tahun.' '.($item->retensi_satuan ?? 'bulan') : '-' }}</td>

@@ -60,8 +60,8 @@
             <div class="row g-2">
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Kode Sampel <span class="text-danger">*</span></label>
-                    <input type="text" name="kode_sampel" class="form-control form-control-sm rounded-3 @error('kode_sampel') is-invalid @enderror" 
-                           value="{{ old('kode_sampel', $sampel->kode_sampel ?? '') }}" 
+                    <input type="text" name="kode_sampel" class="form-control form-control-sm rounded-3 @error('kode_sampel') is-invalid @enderror"
+                           value="{{ old('kode_sampel', $sampel->kode_sampel ?? '') }}"
                            placeholder="Contoh: SMP-2611-001" required>
                     @error('kode_sampel')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -70,8 +70,8 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Nama Sampel / Komoditas <span class="text-danger">*</span></label>
-                    <input type="text" name="nama_sampel" class="form-control form-control-sm rounded-3 @error('nama_sampel') is-invalid @enderror" 
-                           value="{{ old('nama_sampel', $sampel->nama_sampel ?? '') }}" 
+                    <input type="text" name="nama_sampel" class="form-control form-control-sm rounded-3 @error('nama_sampel') is-invalid @enderror"
+                           value="{{ old('nama_sampel', $sampel->nama_sampel ?? '') }}"
                            placeholder="Contoh: Batubara Lot 2610-C" required>
                     @error('nama_sampel')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -92,16 +92,6 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-
-                {{-- <div class="col-12 col-md-6">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Tujuan Analisis (Analysis For) <span class="text-danger">*</span></label>
-                    <input type="text" name="analysis_for" class="form-control form-control-sm rounded-3 @error('analysis_for') is-invalid @enderror" 
-                           value="{{ old('analysis_for', $sampel->analysis_for ?? '') }}" 
-                           placeholder="Contoh: GA UMPIRE / Uji kadar sulfur" required>
-                    @error('analysis_for')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div> --}}
             </div>
         </div>
     </div>
@@ -109,33 +99,26 @@
     <div class="card shadow-sm rounded-4 border-0 mb-3">
         <div class="card-body p-3">
             <h6 class="fw-bold text-primary mb-1" style="font-size: 0.95rem;">2. Informasi Sampel / Keterangan</h6>
-            <p class="text-muted small mb-2" style="font-size: 0.78rem;">Kolom Shipper dan Vessel bersifat opsional.</p>
+            <p class="text-muted small mb-2" style="font-size: 0.78rem;">Kolom Shipper, Vessel, dan Keterangan 1 sampai 3 bersifat opsional.</p>
             <div class="row g-2">
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Shipper (Klien)</label>
-                    <input type="text" name="shipper" class="form-control form-control-sm rounded-3" 
-                           value="{{ old('shipper', $sampel->shipper ?? '') }}" 
+                    <input type="text" name="shipper" class="form-control form-control-sm rounded-3"
+                           value="{{ old('shipper', $sampel->shipper ?? '') }}"
                            placeholder="Contoh: PT. Berau Coal">
                 </div>
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Vessel (Nama Kapal / Tongkang)</label>
-                    <input type="text" name="vessel" class="form-control form-control-sm rounded-3" 
-                           value="{{ old('vessel', $sampel->vessel ?? '') }}" 
+                    <input type="text" name="vessel" class="form-control form-control-sm rounded-3"
+                           value="{{ old('vessel', $sampel->vessel ?? '') }}"
                            placeholder="Contoh: SPB. DIONYSOS">
                 </div>
-{{-- 
-                <div class="col-12 col-md-6">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Bill of Lading (BL / Kuantitas Kargo)</label>
-                    <input type="text" name="bill_of_lading" class="form-control form-control-sm rounded-3" 
-                           value="{{ old('bill_of_lading', $sampel->bill_of_lading ?? '') }}" 
-                           placeholder="Contoh: 10.024 MT">
-                </div> --}}
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tempat Pengambilan Sampel <span class="text-danger">*</span></label>
-                    <input type="text" name="tempat_pengambilan" class="form-control form-control-sm rounded-3 @error('tempat_pengambilan') is-invalid @enderror" 
-                           value="{{ old('tempat_pengambilan', $sampel->tempat_pengambilan ?? '') }}" 
+                    <input type="text" name="tempat_pengambilan" class="form-control form-control-sm rounded-3 @error('tempat_pengambilan') is-invalid @enderror"
+                           value="{{ old('tempat_pengambilan', $sampel->tempat_pengambilan ?? '') }}"
                            placeholder="Contoh: Jetty 2 TUKS PLTU" required>
                     @error('tempat_pengambilan')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -144,9 +127,39 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tanggal Pengambilan Sampel <span class="text-danger">*</span></label>
-                    <input type="date" name="tanggal_pengambilan" class="form-control form-control-sm rounded-3 @error('tanggal_pengambilan') is-invalid @enderror" 
+                    <input type="date" name="tanggal_pengambilan" class="form-control form-control-sm rounded-3 @error('tanggal_pengambilan') is-invalid @enderror"
                            value="{{ old('tanggal_pengambilan', isset($sampel->tanggal_pengambilan) ? $sampel->tanggal_pengambilan->format('Y-m-d') : '') }}" required>
                     @error('tanggal_pengambilan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Keterangan 1</label>
+                    <input type="text" name="keterangan_1" class="form-control form-control-sm rounded-3 @error('keterangan_1') is-invalid @enderror"
+                           value="{{ old('keterangan_1', $sampel->keterangan_1 ?? '') }}"
+                           maxlength="255" placeholder="Isi keterangan 1">
+                    @error('keterangan_1')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Keterangan 2</label>
+                    <input type="text" name="keterangan_2" class="form-control form-control-sm rounded-3 @error('keterangan_2') is-invalid @enderror"
+                           value="{{ old('keterangan_2', $sampel->keterangan_2 ?? '') }}"
+                           maxlength="255" placeholder="Isi keterangan 2">
+                    @error('keterangan_2')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Keterangan 3</label>
+                    <input type="text" name="keterangan_3" class="form-control form-control-sm rounded-3 @error('keterangan_3') is-invalid @enderror"
+                           value="{{ old('keterangan_3', $sampel->keterangan_3 ?? '') }}"
+                           maxlength="255" placeholder="Isi keterangan 3">
+                    @error('keterangan_3')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -160,8 +173,8 @@
             <div class="row g-2">
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-secondary mb-1">No. Rak <span class="text-danger">*</span></label>
-                    <input type="text" name="nomor_ruang_arsip" class="form-control form-control-sm rounded-3 @error('nomor_ruang_arsip') is-invalid @enderror" 
-                           value="{{ old('nomor_ruang_arsip', $sampel->nomor_ruang_arsip ?? '') }}" 
+                    <input type="text" name="nomor_ruang_arsip" class="form-control form-control-sm rounded-3 @error('nomor_ruang_arsip') is-invalid @enderror"
+                           value="{{ old('nomor_ruang_arsip', $sampel->nomor_ruang_arsip ?? '') }}"
                            placeholder="Contoh: 01" required>
                     @error('nomor_ruang_arsip')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -180,8 +193,8 @@
 
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-secondary mb-1">Nama Ruang Arsip Sampel <span class="text-danger">*</span></label>
-                    <input type="text" name="nama_ruang_arsip" class="form-control form-control-sm rounded-3 @error('nama_ruang_arsip') is-invalid @enderror" 
-                           value="{{ old('nama_ruang_arsip', $sampel->nama_ruang_arsip ?? '') }}" 
+                    <input type="text" name="nama_ruang_arsip" class="form-control form-control-sm rounded-3 @error('nama_ruang_arsip') is-invalid @enderror"
+                           value="{{ old('nama_ruang_arsip', $sampel->nama_ruang_arsip ?? '') }}"
                            placeholder="Contoh: Ruang Arsip A" required>
                     @error('nama_ruang_arsip')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -201,7 +214,7 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tanggal Masuk Arsip <span class="text-danger">*</span></label>
-                    <input type="date" name="tanggal_masuk_arsip" class="form-control form-control-sm rounded-3 @error('tanggal_masuk_arsip') is-invalid @enderror" 
+                    <input type="date" name="tanggal_masuk_arsip" class="form-control form-control-sm rounded-3 @error('tanggal_masuk_arsip') is-invalid @enderror"
                            value="{{ old('tanggal_masuk_arsip', isset($sampel->tanggal_masuk_arsip) ? $sampel->tanggal_masuk_arsip->format('Y-m-d') : date('Y-m-d')) }}" required>
                     @error('tanggal_masuk_arsip')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -242,7 +255,7 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Deskripsi / Catatan Fisik Sampel</label>
-                    <textarea name="deskripsi" class="form-control form-control-sm rounded-3" rows="3" 
+                    <textarea name="deskripsi" class="form-control form-control-sm rounded-3" rows="3"
                               placeholder="Contoh: Segel kantong utuh">{{ old('deskripsi', $sampel->deskripsi ?? '') }}</textarea>
                 </div>
             </div>

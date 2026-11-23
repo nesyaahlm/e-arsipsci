@@ -17,10 +17,14 @@ class Sampel extends Model
         'vessel',
         'bill_of_lading',
         'tanggal_pengambilan',
+        'keterangan_1',
+        'keterangan_2',
+        'keterangan_3',
         'tahun_arsip',
         'tempat_pengambilan',
         'analysis_for',
         'bagian_id',
+        'portofolio_id',
         'nomor_ruang_arsip',
         'nomor_tingkat_arsip',
         'nama_ruang_arsip',
@@ -41,10 +45,6 @@ class Sampel extends Model
         'tanggal_hapus_buku' => 'date',
     ];
 
-    /**
-     * Tahun di label: isi kolom tahun_arsip bila ada (boleh lebih dari satu tahun,
-     * mis. "2026 dan 2027"), selain itu tahun tanggal pengambilan.
-     */
     public function getLabelTahunAttribute(): string
     {
         if (filled($this->tahun_arsip)) {
