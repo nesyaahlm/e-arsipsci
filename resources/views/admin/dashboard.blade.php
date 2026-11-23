@@ -22,8 +22,6 @@
             </div>
         </form>
     </div>
-
-    {{-- Statistik diubah menjadi 3 kolom (col-lg-4) karena card Jenis Dokumen dihapus --}}
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-lg-4">
             <a href="{{ route('dokumen.index') }}" class="text-decoration-none">
