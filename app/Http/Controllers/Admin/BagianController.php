@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bagian;
 use App\Models\Cabang;
+use App\Models\KodeSurat;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class BagianController extends Controller
         $cari = trim((string) $request->input('cari'));
         $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
 
-        $daftarBagian = Bagian::query()
+        $daftarBagian = Bagian::with('kodeSurat')
             ->where(function ($q) use ($userCabangId) {
                 $q->whereNull('cabang_id')
                     ->orWhere('cabang_id', $userCabangId);
@@ -27,7 +28,11 @@ class BagianController extends Controller
                 $query->where(function ($q) use ($cari) {
                     $q->where('kode', 'like', "%{$cari}%")
                       ->orWhere('nama', 'like', "%{$cari}%")
-                      ->orWhere('retensi_tahun', 'like', "%{$cari}%");
+                      ->orWhere('retensi_tahun', 'like', "%{$cari}%")
+                      ->orWhereHas('kodeSurat', function ($ks) use ($cari) {
+                          $ks->where('kode', 'like', "%{$cari}%")
+                             ->orWhere('nama', 'like', "%{$cari}%");
+                      });
                 });
             })
             ->orderByRaw('CASE WHEN cabang_id IS NULL THEN 0 ELSE 1 END')
@@ -86,6 +91,66 @@ class BagianController extends Controller
         return redirect()
             ->route('bagian.index')
             ->with('sukses', 'Bagian berhasil dihapus.');
+    }
+
+    public function storeKlasifikasi(Request $request, Bagian $bagian): RedirectResponse
+    {
+        $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
+
+        if (is_null($bagian->cabang_id) || (int) $bagian->cabang_id !== (int) $userCabangId) {
+            return redirect()
+                ->route('bagian.index')
+                ->with('galat', 'Klasifikasi pada bagian standar nasional hanya dapat dikelola oleh Superadmin.');
+        }
+
+        $request->merge(['kode' => strtoupper(trim((string) $request->input('kode')))]);
+
+        $data = $request->validate([
+            'kode' => ['required', 'string', 'max:20', 'unique:kode_surat,kode'],
+            'nama' => ['required', 'string', 'max:255'],
+            'retensi_aktif' => ['required', 'integer', 'min:1', 'max:50'],
+            'retensi_inaktif' => ['required', 'integer', 'min:0', 'max:50'],
+            'keterangan' => ['nullable', 'string'],
+        ], [
+            'kode.required' => 'Kode surat wajib diisi.',
+            'kode.unique' => 'Kode surat sudah digunakan.',
+            'nama.required' => 'Nama klasifikasi surat wajib diisi.',
+            'retensi_aktif.required' => 'Masa retensi aktif wajib diisi.',
+            'retensi_inaktif.required' => 'Masa retensi inaktif wajib diisi.',
+        ]);
+
+        KodeSurat::create([
+            'bagian_id' => $bagian->id,
+            'portofolio_id' => null,
+            'kode' => $data['kode'],
+            'nama' => $data['nama'],
+            'retensi_aktif' => $data['retensi_aktif'],
+            'retensi_inaktif' => $data['retensi_inaktif'],
+            'keterangan' => $data['keterangan'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('bagian.index')
+            ->with('sukses', 'Klasifikasi surat berhasil ditambahkan ke bagian ' . $bagian->nama . '.');
+    }
+
+    public function destroyKlasifikasi(KodeSurat $kodeSurat): RedirectResponse
+    {
+        $userCabangId = Auth::user()->cabang_id ?? Cabang::where('kode', 'CLC')->value('id') ?? 1;
+        $bagian = $kodeSurat->bagian;
+
+        if (!$bagian || is_null($bagian->cabang_id) || (int) $bagian->cabang_id !== (int) $userCabangId) {
+            return redirect()
+                ->route('bagian.index')
+                ->with('galat', 'Anda tidak memiliki hak akses untuk menghapus klasifikasi ini.');
+        }
+
+        $kode = $kodeSurat->kode;
+        $kodeSurat->delete();
+
+        return redirect()
+            ->route('bagian.index')
+            ->with('sukses', 'Klasifikasi surat ' . $kode . ' berhasil dihapus.');
     }
 
     private function aturan(?int $abaikanId = null): array
