@@ -99,16 +99,8 @@
                         <dd>{{ $sampel->nama_sampel }}</dd>
                     </div>
                     <div class="dk-info__item">
-                        
-                        {{-- <dt>Bagian</dt>
-                        <dd>{{ $sampel->bagian?->nama ?? '-' }}</dd>
-                    </div>
-                    <div class="dk-info__item">
-                        <dt>Tujuan Analisis</dt>
-                        <dd>{{ $sampel->analysis_for }}</dd> --}}
-
-                        <dt>Bagian</dt>
-                        <dd>{{ $isi($sampel->bagian?->nama) }}</dd>
+                        <dt>Portofolio</dt>
+                        <dd>{{ $isi($sampel->portofolio?->nama ?? $sampel->bagian?->nama) }}</dd>
                     </div>
                     <div class="dk-info__item">
                         <dt>Shipper</dt>
@@ -119,10 +111,6 @@
                         <dd>{{ $isi($sampel->vessel) }}</dd>
                     </div>
                     <div class="dk-info__item">
-                        <dt>Bill of Lading</dt>
-                        <dd>{{ $isi($sampel->bill_of_lading) }}</dd>
-                    </div>
-                    <div class="dk-info__item">
                         <dt>Tanggal Pengambilan</dt>
                         <dd>{{ $tanggal($sampel->tanggal_pengambilan) }}</dd>
                     </div>
@@ -130,9 +118,17 @@
                         <dt>Tempat Pengambilan</dt>
                         <dd>{{ $isi($sampel->tempat_pengambilan) }}</dd>
                     </div>
-                    <div class="dk-info__item sp-info__full">
-                        <dt>Tujuan Analisis</dt>
-                        <dd>{{ $isi($sampel->analysis_for) }}</dd>
+                    <div class="dk-info__item">
+                        <dt>Keterangan 1</dt>
+                        <dd>{{ $isi($sampel->keterangan_1) }}</dd>
+                    </div>
+                    <div class="dk-info__item">
+                        <dt>Keterangan 2</dt>
+                        <dd>{{ $isi($sampel->keterangan_2) }}</dd>
+                    </div>
+                    <div class="dk-info__item">
+                        <dt>Keterangan 3</dt>
+                        <dd>{{ $isi($sampel->keterangan_3) }}</dd>
                     </div>
                     <div class="dk-info__item">
                         <dt>Tanggal Masuk Arsip</dt>

@@ -181,7 +181,7 @@
     <form method="GET" action="{{ route('user.sampel.index') }}" class="dk-search" role="search">
         <div class="dk-search__field">
             <x-user.icon name="magnify" :size="20" class="dk-search__icon" />
-            <input type="search" name="q" value="{{ $kata }}" class="dk-search__input" placeholder="Cari kode, nama sampel, atau tujuan analisis..." aria-label="Cari sampel">
+            <input type="search" name="q" value="{{ $kata }}" class="dk-search__input" placeholder="Cari kode, nama sampel..." aria-label="Cari sampel">
         </div>
         <button type="submit" class="ua-btn ua-btn--primary dk-search__btn">Cari</button>
         @if ($kata !== '')
@@ -253,7 +253,6 @@
                             <th>Portofolio</th>
                             <th>Status</th>
                             <th>Shipper</th>
-                            <th>Tujuan Analisis</th>
                             <th>Ruang Arsip</th>
                             <th>Tgl Unggah</th>
                             <th>Label</th>
@@ -267,6 +266,8 @@
                                     'inaktif' => 'bg-secondary-subtle text-secondary',
                                     'pemusnahan' => 'bg-danger-subtle text-danger',
                                 ][$item->status] ?? 'bg-light text-dark';
+
+                                $sudahDimusnahkan = $item->status === 'pemusnahan';
                             @endphp
                             <tr>
                                 <td class="dk-check" data-label="Pilih">
@@ -281,11 +282,14 @@
                                     <span class="badge {{ $warnaStatus }}">{{ ucfirst($item->status) }}</span>
                                 </td>
                                 <td data-label="Shipper">{{ filled($item->shipper) ? $item->shipper : '-' }}</td>
-                                <td data-label="Tujuan Analisis">{{ filled($item->analysis_for) ? $item->analysis_for : '-' }}</td>
                                 <td data-label="Ruang Arsip">
-                                    <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
-                                    @if (filled($item->nomor_ruang_arsip))
-                                        <small class="d-block" style="color: var(--ua-active);">Rak {{ $item->nomor_ruang_arsip }}@if (filled($item->nomor_tingkat_arsip)), Tingkat {{ $item->nomor_tingkat_arsip }}@endif</small>
+                                    @if ($sudahDimusnahkan)
+                                        <span class="d-block">-</span>
+                                    @else
+                                        <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
+                                        @if (filled($item->nomor_ruang_arsip))
+                                            <small class="d-block" style="color: var(--ua-active);">Rak {{ $item->nomor_ruang_arsip }}@if (filled($item->nomor_tingkat_arsip)), Tingkat {{ $item->nomor_tingkat_arsip }}@endif</small>
+                                        @endif
                                     @endif
                                 </td>
                                 <td data-label="Tgl Unggah" class="text-nowrap">{{ $item->created_at->copy()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y') }}</td>

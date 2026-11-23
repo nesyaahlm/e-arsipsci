@@ -30,7 +30,6 @@ class SampelController extends Controller
         $userCabangId = Auth::user()->cabang_id ?? 1;
 
         $sampel = $this->kueriCari($kata)
-            ->with(['portofolio:id,nama', 'bagian:id,nama'])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(10)
@@ -48,7 +47,7 @@ class SampelController extends Controller
 
     public function show(int $sampel)
     {
-        $data = Sampel::with('bagian:id,nama')
+        $data = Sampel::with(['portofolio:id,nama', 'bagian:id,nama'])
             ->where('diunggah_oleh', Auth::id())
             ->findOrFail($sampel);
 
@@ -64,7 +63,6 @@ class SampelController extends Controller
 
     private function urlKembali(): string
     {
-        // Kembali ke Cari Arsip (lengkap dengan filternya) bila user datang dari sana.
         $arsip = route('user.arsip.index');
         $sebelumnya = url()->previous();
 
@@ -80,7 +78,7 @@ class SampelController extends Controller
 
     public function labelPdf(int $sampel): Response
     {
-        $data = Sampel::with('bagian:id,nama')
+        $data = Sampel::with(['portofolio:id,nama', 'bagian:id,nama'])
             ->where('diunggah_oleh', Auth::id())
             ->findOrFail($sampel);
 
@@ -128,7 +126,7 @@ class SampelController extends Controller
                 ->with('label_error', 'Maksimal '.self::BATAS_LABEL.' label dalam sekali unduh.');
         }
 
-        $daftar = Sampel::with('bagian:id,nama')
+        $daftar = Sampel::with(['portofolio:id,nama', 'bagian:id,nama'])
             ->where('diunggah_oleh', Auth::id())
             ->whereIn('id', $ids)
             ->orderByDesc('created_at')
@@ -191,7 +189,7 @@ class SampelController extends Controller
     private function kueriCari(string $kata): Builder
     {
         return Sampel::query()
-            ->with('bagian:id,nama')
+            ->with(['portofolio:id,nama', 'bagian:id,nama'])
             ->where('diunggah_oleh', Auth::id())
             ->when($kata !== '', function (Builder $query) use ($kata) {
                 $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $kata).'%';
@@ -199,6 +197,9 @@ class SampelController extends Controller
                 $query->where(function (Builder $cari) use ($like) {
                     $cari->whereRaw("kode_sampel LIKE ? ESCAPE '!'", [$like])
                         ->orWhereRaw("nama_sampel LIKE ? ESCAPE '!'", [$like])
+                        ->orWhereRaw("keterangan_1 LIKE ? ESCAPE '!'", [$like])
+                        ->orWhereRaw("keterangan_2 LIKE ? ESCAPE '!'", [$like])
+                        ->orWhereRaw("keterangan_3 LIKE ? ESCAPE '!'", [$like])
                         ->orWhereRaw("analysis_for LIKE ? ESCAPE '!'", [$like]);
                 });
             });
@@ -255,6 +256,9 @@ class SampelController extends Controller
             'bill_of_lading' => ['nullable', 'string', 'max:255'],
             'tanggal_pengambilan' => ['required', 'date'],
             'tempat_pengambilan' => ['required', 'string', 'max:255'],
+            'keterangan_1' => ['nullable', 'string', 'max:255'],
+            'keterangan_2' => ['nullable', 'string', 'max:255'],
+            'keterangan_3' => ['nullable', 'string', 'max:255'],
             'analysis_for' => ['nullable', 'string', 'max:255'],
             'portofolio_id' => ['required', 'exists:portofolio,id'],
             'nomor_ruang_arsip' => ['required', 'string', 'max:50'],
@@ -304,6 +308,9 @@ class SampelController extends Controller
             'bill_of_lading' => $validated['bill_of_lading'] ?? null,
             'tanggal_pengambilan' => $validated['tanggal_pengambilan'],
             'tempat_pengambilan' => $validated['tempat_pengambilan'],
+            'keterangan_1' => $validated['keterangan_1'] ?? null,
+            'keterangan_2' => $validated['keterangan_2'] ?? null,
+            'keterangan_3' => $validated['keterangan_3'] ?? null,
             'analysis_for' => $validated['analysis_for'] ?? null,
             'portofolio_id' => $validated['portofolio_id'],
             'nomor_ruang_arsip' => $validated['nomor_ruang_arsip'],
