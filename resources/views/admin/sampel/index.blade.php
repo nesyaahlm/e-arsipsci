@@ -142,11 +142,16 @@
 
                             <td class="py-2 text-center text-nowrap">{{ $item->tanggal_masuk_arsip?->format('d/m/Y') }}</td>
 
-                            <td class="py-2">
-                                <span class="d-inline-block text-nowrap rounded border px-2 py-1"
-                                      style="background-color: #f4f8f7; font-size: 0.75rem;">
-                                    {{ $item->nama_ruang_arsip }} &middot; Rak {{ $item->nomor_ruang_arsip }}@if (filled($item->nomor_tingkat_arsip)), Tingkat {{ $item->nomor_tingkat_arsip }}@endif
-                                </span>
+                            <td class="py-2" style="font-size: 0.75rem; min-width: 110px;">
+                                @if ($item->status === 'pemusnahan')
+                                    <span class="text-muted">-</span>
+                                @else
+                                    <div class="fw-semibold text-dark">{{ $item->nama_ruang_arsip ?: '-' }}</div>
+                                    <div class="text-secondary">Rak {{ $item->nomor_ruang_arsip ?: '-' }}</div>
+                                    @if (filled($item->nomor_tingkat_arsip))
+                                        <div class="text-secondary">Tingkat {{ $item->nomor_tingkat_arsip }}</div>
+                                    @endif
+                                @endif
                             </td>
                             <td class="py-2">{{ $item->pengunggah->name ?? '-' }}</td>
                             <td class="py-2 text-center pe-3">
