@@ -8,13 +8,21 @@
         return;
     }
 
+    function kotakAktif() {
+        return kotak.filter(function (k) { return !k.disabled; });
+    }
+
     function segarkan() {
-        var n = kotak.filter(function (k) { return k.checked; }).length;
+        var aktif = kotakAktif();
+        var n = aktif.filter(function (k) { return k.checked; }).length;
+
         jumlah.textContent = n;
         tombol.disabled = n === 0;
+
         if (cekSemua) {
-            cekSemua.checked = n > 0 && n === kotak.length;
-            cekSemua.indeterminate = n > 0 && n < kotak.length;
+            cekSemua.checked = aktif.length > 0 && n === aktif.length;
+            cekSemua.indeterminate = n > 0 && n < aktif.length;
+            cekSemua.disabled = aktif.length === 0;
         }
     }
 
@@ -24,14 +32,17 @@
 
     if (cekSemua) {
         cekSemua.addEventListener('change', function () {
-            kotak.forEach(function (k) {
-                if (!k.disabled) {
-                    k.checked = cekSemua.checked;
-                }
+            var status = cekSemua.checked;
+
+            kotakAktif().forEach(function (k) {
+                k.checked = status;
             });
+
             segarkan();
         });
     }
+
+    window.addEventListener('pageshow', segarkan);
 
     segarkan();
 })();
