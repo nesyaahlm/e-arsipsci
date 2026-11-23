@@ -14,7 +14,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
-        @if ($errors->any())
+    @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
             <div class="fw-semibold mb-1">Gagal menyimpan klasifikasi:</div>
             <ul class="mb-0 ps-3">
@@ -114,6 +114,7 @@
                                     {{ $bagian->kode }}
                                 </span>
                             </td>
+                            <td class="text-start fw-semibold text-dark">{{ $bagian->nama }}</td>
                             <td class="text-start">
                                 @if ($bagian->kodeSurat && $bagian->kodeSurat->isNotEmpty())
                                     <div class="d-flex flex-wrap gap-1 align-items-center">
