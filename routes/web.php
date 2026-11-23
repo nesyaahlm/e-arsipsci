@@ -61,6 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
+    Route::get('/sampel/generate-kode', [AdminSampelController::class, 'generateKode'])->name('sampel.generate-kode');
+
     Route::get('/pemusnahan', [PemusnahanController::class, 'index'])->name('pemusnahan.index');
     Route::post('/pemusnahan/ajukan', [PemusnahanController::class, 'ajukan'])->name('pemusnahan.ajukan');
     Route::post('/pemusnahan', [PemusnahanController::class, 'musnahkan'])->name('pemusnahan.musnahkan');
@@ -123,6 +125,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/bagian', [BagianController::class, 'store'])->name('bagian.store');
     Route::put('/bagian/{bagian}', [BagianController::class, 'update'])->name('bagian.update');
     Route::delete('/bagian/{bagian}', [BagianController::class, 'destroy'])->name('bagian.destroy');
+    Route::post('/bagian/{bagian}/klasifikasi', [BagianController::class, 'storeKlasifikasi'])->name('bagian.klasifikasi.store');
+    Route::delete('/bagian/klasifikasi/{kodeSurat}', [BagianController::class, 'destroyKlasifikasi'])->name('bagian.klasifikasi.destroy');
 
     Route::get('/portofolio', [\App\Http\Controllers\Admin\PortofolioController::class, 'index'])->name('portofolio.index');
     Route::post('/portofolio', [\App\Http\Controllers\Admin\PortofolioController::class, 'store'])->name('portofolio.store');

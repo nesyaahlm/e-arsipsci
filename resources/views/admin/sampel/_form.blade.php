@@ -60,12 +60,18 @@
             <div class="row g-2">
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Kode Sampel <span class="text-danger">*</span></label>
-                    <input type="text" name="kode_sampel" class="form-control form-control-sm rounded-3 @error('kode_sampel') is-invalid @enderror"
-                           value="{{ old('kode_sampel', $sampel->kode_sampel ?? '') }}"
-                           placeholder="Contoh: SMP-2611-001" required>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="kode_sampel" id="inputKodeSampel" class="form-control rounded-start-3 @error('kode_sampel') is-invalid @enderror"
+                               value="{{ old('kode_sampel', $sampel->kode_sampel ?? '') }}"
+                               placeholder="Contoh: 0001/SMP-MNR/CLC/XI/2026" required>
+                        <button type="button" class="btn btn-outline-secondary rounded-end-3" id="btnBuatKodeOtomatis" title="Buat Ulang Kode Otomatis">
+                            Otomatis
+                        </button>
+                    </div>
                     @error('kode_sampel')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
+                    <small class="text-muted" style="font-size: 0.72rem;">Otomatis dibuat saat memilih Portofolio, namun tetap bisa diedit manual.</small>
                 </div>
 
                 <div class="col-12 col-md-6">
@@ -80,17 +86,35 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Portofolio <span class="text-danger">*</span></label>
-                    <select name="portofolio_id" class="form-select form-select-sm rounded-3 @error('portofolio_id') is-invalid @enderror" required>
+                    <select name="portofolio_id" id="selectPortofolio" class="form-select form-select-sm rounded-3 @error('portofolio_id') is-invalid @enderror" required>
                         <option value="" disabled {{ old('portofolio_id', $sampel->portofolio_id ?? '') == '' ? 'selected' : '' }}>Pilih Portofolio</option>
                         @foreach ($portofolioList as $portofolio)
-                            <option value="{{ $portofolio->id }}" {{ old('portofolio_id', $sampel->portofolio_id ?? '') == $portofolio->id ? 'selected' : '' }}>
-                                {{ $portofolio->nama }}
+                            <option value="{{ $portofolio->id }}" data-kode="{{ $portofolio->kode }}" {{ old('portofolio_id', $sampel->portofolio_id ?? '') == $portofolio->id ? 'selected' : '' }}>
+                                {{ $portofolio->nama }} ({{ $portofolio->kode }})
                             </option>
                         @endforeach
                     </select>
                     @error('portofolio_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label small fw-semibold text-secondary mb-1">Klasifikasi Sampel</label>
+                    <select name="kode_surat_id" id="selectKodeSurat" class="form-select form-select-sm rounded-3 @error('kode_surat_id') is-invalid @enderror">
+                        <option value="">Pilih Klasifikasi Sampel</option>
+                        @if(isset($kodeSuratList))
+                            @foreach ($kodeSuratList as $ks)
+                                <option value="{{ $ks->id }}" data-portofolio="{{ $ks->portofolio_id }}" data-kode="{{ $ks->kode }}" {{ old('kode_surat_id', $sampel->kode_surat_id ?? '') == $ks->id ? 'selected' : '' }}>
+                                    {{ $ks->kode }} - {{ $ks->nama }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @error('kode_surat_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted" style="font-size: 0.72rem;">Otomatis terfilter berdasarkan Portofolio yang dipilih.</small>
                 </div>
             </div>
         </div>
@@ -214,7 +238,7 @@
 
                 <div class="col-12 col-md-6">
                     <label class="form-label small fw-semibold text-secondary mb-1">Tanggal Masuk Arsip <span class="text-danger">*</span></label>
-                    <input type="date" name="tanggal_masuk_arsip" class="form-control form-control-sm rounded-3 @error('tanggal_masuk_arsip') is-invalid @enderror"
+                    <input type="date" name="tanggal_masuk_arsip" id="inputTanggalMasukArsip" class="form-control form-control-sm rounded-3 @error('tanggal_masuk_arsip') is-invalid @enderror"
                            value="{{ old('tanggal_masuk_arsip', isset($sampel->tanggal_masuk_arsip) ? $sampel->tanggal_masuk_arsip->format('Y-m-d') : date('Y-m-d')) }}" required>
                     @error('tanggal_masuk_arsip')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -289,6 +313,79 @@
                 boxPreview.classList.add('d-none');
                 imgPreview.src = '';
             }
+        });
+    }
+
+    const selectPortofolio = document.getElementById('selectPortofolio');
+    const selectKodeSurat = document.getElementById('selectKodeSurat');
+    const inputTanggalMasuk = document.getElementById('inputTanggalMasukArsip');
+    const inputKodeSampel = document.getElementById('inputKodeSampel');
+    const btnBuatKodeOtomatis = document.getElementById('btnBuatKodeOtomatis');
+
+    function ambilKodeOtomatis(paksa = false) {
+        if (!selectPortofolio || !inputKodeSampel) return;
+        const portofolioId = selectPortofolio.value;
+        if (!portofolioId) return;
+
+        if (!paksa && inputKodeSampel.value.trim() !== '') {
+            return;
+        }
+
+        const kodeSuratId = selectKodeSurat ? selectKodeSurat.value : '';
+        const tgl = inputTanggalMasuk ? inputTanggalMasuk.value : '';
+        const url = '{{ route('sampel.generate-kode') }}?portofolio_id=' + encodeURIComponent(portofolioId) + '&kode_surat_id=' + encodeURIComponent(kodeSuratId) + '&tanggal=' + encodeURIComponent(tgl);
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.kode_sampel) {
+                    inputKodeSampel.value = data.kode_sampel;
+                }
+            })
+            .catch(() => {});
+    }
+
+    if (selectPortofolio && selectKodeSurat) {
+        const daftarOpsiKlasifikasi = Array.from(selectKodeSurat.options);
+
+        function saringKlasifikasiSampel() {
+            const portoId = selectPortofolio.value;
+            const nilaiTerpilih = selectKodeSurat.value;
+
+            selectKodeSurat.innerHTML = '';
+            daftarOpsiKlasifikasi.forEach(opsi => {
+                if (!opsi.value || opsi.dataset.portofolio === portoId) {
+                    selectKodeSurat.appendChild(opsi.cloneNode(true));
+                }
+            });
+
+            const opsiMasihAda = Array.from(selectKodeSurat.options).some(o => o.value === nilaiTerpilih);
+            selectKodeSurat.value = opsiMasihAda ? nilaiTerpilih : '';
+        }
+
+        selectPortofolio.addEventListener('change', function () {
+            saringKlasifikasiSampel();
+            ambilKodeOtomatis(true);
+        });
+
+        selectKodeSurat.addEventListener('change', function () {
+            ambilKodeOtomatis(true);
+        });
+
+        saringKlasifikasiSampel();
+    }
+
+    if (inputTanggalMasuk) {
+        inputTanggalMasuk.addEventListener('change', function () {
+            if (inputKodeSampel && inputKodeSampel.value.trim().includes('/SMP-')) {
+                ambilKodeOtomatis(true);
+            }
+        });
+    }
+
+    if (btnBuatKodeOtomatis) {
+        btnBuatKodeOtomatis.addEventListener('click', function () {
+            ambilKodeOtomatis(true);
         });
     }
 </script>

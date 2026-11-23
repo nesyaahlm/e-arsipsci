@@ -27,4 +27,9 @@ class Portofolio extends Model
     {
         return $this->hasMany(Sampel::class, 'portofolio_id');
     }
+
+    public function kodeSurat(): HasMany
+    {
+        return $this->hasMany(KodeSurat::class, 'portofolio_id');
+    }
 }

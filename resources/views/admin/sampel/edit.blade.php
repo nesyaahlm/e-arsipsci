@@ -19,5 +19,6 @@
         'sampel' => $sampel,
         'kembali' => route('admin.sampel.index'),
         'portofolioList' => $portofolioList,
+        'kodeSuratList' => $kodeSuratList,
     ])
 </x-admin.layout>
