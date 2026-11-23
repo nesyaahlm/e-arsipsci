@@ -91,7 +91,7 @@
     @if ($logs->total() > 0)
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-3">
             <span class="text-secondary small">Menampilkan {{ $logs->firstItem() }} sampai {{ $logs->lastItem() }} dari {{ $logs->total() }} aktivitas</span>
-            {{ $logs->links('pagination::bootstrap-5') }}
+            {{ $logs->links('vendor.pagination.ringkas') }}
         </div>
     @endif
 </x-admin.layout>
