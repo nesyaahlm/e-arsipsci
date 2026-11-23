@@ -103,9 +103,11 @@
                                 </span>
                             </td>
                             <td class="px-3 text-center">
-                                <span class="badge rounded-pill bg-light text-secondary border px-2.5 py-1">
-                                    {{ $item->kode_surat_count }} Kode
-                                </span>
+                                <a href="{{ route('superadmin.kode-surat.index', ['tab' => 'dokumen', 'bagian_id' => $item->id]) }}"
+                                   class="badge rounded-pill bg-primary-subtle text-primary border text-decoration-none px-2.5 py-1"
+                                   title="Lihat klasifikasi kode surat bagian {{ $item->nama }}">
+                                    {{ $item->kode_surat_count }} Kode &rarr;
+                                </a>
                             </td>
                             <td class="px-3 text-center">
                                 <span class="badge rounded-pill bg-light text-secondary border px-2.5 py-1">

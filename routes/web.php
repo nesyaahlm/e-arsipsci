@@ -132,6 +132,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/portofolio', [\App\Http\Controllers\Admin\PortofolioController::class, 'store'])->name('portofolio.store');
     Route::put('/portofolio/{portofolio}', [\App\Http\Controllers\Admin\PortofolioController::class, 'update'])->name('portofolio.update');
     Route::delete('/portofolio/{portofolio}', [\App\Http\Controllers\Admin\PortofolioController::class, 'destroy'])->name('portofolio.destroy');
+    Route::post('/portofolio/{portofolio}/klasifikasi', [\App\Http\Controllers\Admin\PortofolioController::class, 'storeKlasifikasi'])->name('portofolio.klasifikasi.store');
+    Route::delete('/portofolio/klasifikasi/{kodeSurat}', [\App\Http\Controllers\Admin\PortofolioController::class, 'destroyKlasifikasi'])->name('portofolio.klasifikasi.destroy');
 
     Route::get('/dokumen', [DokumenController::class, 'index'])->name('dokumen.index');
     Route::post('/dokumen', [DokumenController::class, 'store'])->name('dokumen.store');

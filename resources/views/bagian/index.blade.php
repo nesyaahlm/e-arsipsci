@@ -14,6 +14,17 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show alert-otomatis" role="alert">
+            <div class="fw-semibold mb-1">Gagal menyimpan klasifikasi:</div>
+            <ul class="mb-0 ps-3">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+        </div>
+    @endif
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <form action="{{ route('bagian.index') }}" method="GET" class="d-flex gap-2 flex-grow-1" style="max-width: 420px;">
@@ -103,14 +114,7 @@
                                     {{ $bagian->kode }}
                                 </span>
                             </td>
-                            <td class="text-start">
-                                <div class="fw-semibold text-dark">{{ $bagian->nama }}</div>
-                                @if (!$bisaKelola)
-                                    <span class="badge bg-primary-subtle text-primary border" style="font-size: 0.7rem;">Standar Nasional</span>
-                                @else
-                                    <span class="badge bg-success-subtle text-success border" style="font-size: 0.7rem;">Khusus Cabang</span>
-                                @endif
-                            </td>
+                            <td class="text-start fw-semibold text-dark">{{ $bagian->nama }}</td>
                             <td class="text-start">
                                 @if ($bagian->kodeSurat && $bagian->kodeSurat->isNotEmpty())
                                     <div class="d-flex flex-wrap gap-1 align-items-center">
@@ -127,29 +131,27 @@
                                                 data-id="{{ $bagian->id }}"
                                                 data-nama="{{ $bagian->nama }}"
                                                 data-kode="{{ $bagian->kode }}"
-                                                data-bisa-kelola="{{ $bisaKelola ? '1' : '0' }}"
+                                                data-bisa-kelola="1"
                                                 data-item="{{ json_encode($bagian->kodeSurat) }}">
-                                            Lihat Rincian ({{ $bagian->kodeSurat->count() }})
+                                            Lihat &amp; Kelola ({{ $bagian->kodeSurat->count() }})
                                         </button>
                                     </div>
                                 @else
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="text-muted small fst-italic">Belum ada klasifikasi surat</span>
-                                        @if ($bisaKelola)
-                                            <button type="button"
-                                                    class="btn btn-outline-primary btn-sm py-0 px-2 rounded-2 btn-tambah-langsung"
-                                                    style="font-size: 0.72rem;"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalKlasifikasiBagian"
-                                                    data-id="{{ $bagian->id }}"
-                                                    data-nama="{{ $bagian->nama }}"
-                                                    data-kode="{{ $bagian->kode }}"
-                                                    data-bisa-kelola="1"
-                                                    data-buka-form="1"
-                                                    data-item="[]">
-                                                + Tambah
-                                            </button>
-                                        @endif
+                                        <button type="button"
+                                                class="btn btn-outline-primary btn-sm py-0 px-2 rounded-2 btn-tambah-langsung"
+                                                style="font-size: 0.72rem;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalKlasifikasiBagian"
+                                                data-id="{{ $bagian->id }}"
+                                                data-nama="{{ $bagian->nama }}"
+                                                data-kode="{{ $bagian->kode }}"
+                                                data-bisa-kelola="1"
+                                                data-buka-form="1"
+                                                data-item="[]">
+                                            + Tambah
+                                        </button>
                                     </div>
                                 @endif
                             </td>
@@ -403,43 +405,37 @@
                 if (modalKlasifikasi) {
                     modalKlasifikasi.addEventListener('show.bs.modal', function (event) {
                         var btn = event.relatedTarget;
+                        if (!btn) return;
+
                         var bagianId = btn.getAttribute('data-id');
                         var nama = btn.getAttribute('data-nama');
                         var kode = btn.getAttribute('data-kode');
-                        var bisaKelola = btn.getAttribute('data-bisa-kelola') === '1';
                         var bukaFormOtomatis = btn.getAttribute('data-buka-form') === '1';
                         var items = JSON.parse(btn.getAttribute('data-item') || '[]');
 
                         document.getElementById('modalKlasifikasiBagianLabel').textContent = 'Klasifikasi Dokumen - ' + nama + ' (' + kode + ')';
                         var subtitleEl = document.getElementById('modalKlasifikasiSubtitle');
-                        subtitleEl.textContent = bisaKelola
-                            ? 'Khusus unit kerja cabang — Anda dapat mengelola klasifikasi surat ini.'
-                            : 'Standar nasional korporat — ditetapkan oleh Kantor Pusat (Read-Only).';
+                        subtitleEl.textContent = 'Kelola standarisasi kode surat dinas dan masa retensi arsip.';
 
                         formTambahKlasifikasi.action = '/bagian/' + bagianId + '/klasifikasi';
 
-                        if (bisaKelola) {
-                            boxAksiHeaderKlasifikasi.classList.remove('d-none');
-                            document.querySelector('.th-aksi-klasifikasi').classList.remove('d-none');
-                        } else {
-                            boxAksiHeaderKlasifikasi.classList.add('d-none');
-                            document.querySelector('.th-aksi-klasifikasi').classList.add('d-none');
-                        }
+                        if (boxAksiHeaderKlasifikasi) boxAksiHeaderKlasifikasi.classList.remove('d-none');
+                        var thAksi = document.querySelector('#modalKlasifikasiBagian .th-aksi-klasifikasi');
+                        if (thAksi) thAksi.classList.remove('d-none');
 
-                        if (bisaKelola && (bukaFormOtomatis || items.length === 0)) {
+                        if (bukaFormOtomatis || items.length === 0) {
                             boxFormTambahKlasifikasi.classList.remove('d-none');
                             btnBukaFormKlasifikasi.classList.add('d-none');
                         } else {
                             boxFormTambahKlasifikasi.classList.add('d-none');
-                            btnBukaFormKlasifikasi.classList.remove('d-none');
+                            if (btnBukaFormKlasifikasi) btnBukaFormKlasifikasi.classList.remove('d-none');
                         }
 
                         var tbody = document.getElementById('tbodyKlasifikasiBagian');
                         tbody.innerHTML = '';
 
                         if (items.length === 0) {
-                            var colspan = bisaKelola ? '6' : '5';
-                            tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="text-center py-3 text-muted">Belum ada klasifikasi surat untuk bagian ini.</td></tr>';
+                            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">Belum ada klasifikasi surat untuk bagian ini. Silakan klik tombol "+ Tambah Klasifikasi Baru" di atas.</td></tr>';
                             return;
                         }
 
@@ -447,8 +443,14 @@
 
                         items.forEach(function (ks) {
                             var tr = document.createElement('tr');
+                            var badgeAsal = !ks.cabang_id
+                                ? '<span class="badge bg-primary-subtle text-primary border ms-1" style="font-size: 0.68rem;">Pusat</span>'
+                                : '<span class="badge bg-success-subtle text-success border ms-1" style="font-size: 0.68rem;">Cabang</span>';
+
                             var kolomAksi = '';
-                            if (bisaKelola) {
+                            if (!ks.cabang_id) {
+                                kolomAksi = `<td class="pe-3 py-2 text-center text-muted small fst-italic">Terkunci</td>`;
+                            } else {
                                 kolomAksi = `
                                     <td class="pe-3 py-2 text-center">
                                         <form method="POST" action="/bagian/klasifikasi/${ks.id}" onsubmit="return confirm('Hapus klasifikasi ${ks.kode}?')">
@@ -464,7 +466,7 @@
 
                             tr.innerHTML = `
                                 <td class="ps-3 fw-bold font-monospace text-primary">${ks.kode}</td>
-                                <td class="fw-semibold text-dark">${ks.nama}</td>
+                                <td class="fw-semibold text-dark">${ks.nama} ${badgeAsal}</td>
                                 <td class="text-center"><span class="badge bg-light text-dark border">${ks.retensi_aktif} Tahun</span></td>
                                 <td class="text-center"><span class="badge bg-light text-secondary border">${ks.retensi_inaktif} Tahun</span></td>
                                 <td class="text-muted small">${ks.keterangan || '-'}</td>
