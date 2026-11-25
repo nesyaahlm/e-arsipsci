@@ -182,6 +182,7 @@ class DokumenSayaController extends Controller
         return DB::table('dokumen')
             ->leftJoin('layanan', 'layanan.id', '=', 'dokumen.layanan_id')
             ->leftJoin('bagian', 'bagian.id', '=', 'dokumen.bagian_id')
+            ->leftJoin('pemusnahan_item', 'pemusnahan_item.dokumen_id', '=', 'dokumen.id')
             ->whereNull('dokumen.deleted_at')
             ->where('dokumen.diunggah_oleh', $userId)
             ->select([
@@ -199,9 +200,11 @@ class DokumenSayaController extends Controller
                 'dokumen.file_nama_asli',
                 'dokumen.file_ukuran',
                 'dokumen.retensi_sampai',
+                'dokumen.status',
                 'dokumen.file_path',
                 'dokumen.created_at',
                 DB::raw('COALESCE(bagian.nama, layanan.nama) as portofolio'),
+                'pemusnahan_item.lokasi_sebelumnya as lokasi_semula',
             ]);
     }
 
@@ -214,6 +217,7 @@ class DokumenSayaController extends Controller
             'id' => $d->id,
             'nomor' => $d->nomor,
             'judul' => $d->judul,
+            'status' => $d->status,
             'deskripsi' => $d->deskripsi,
             'nomor_rak' => $d->nomor_rak,
             'no_tingkat' => $d->no_tingkat,
@@ -221,6 +225,7 @@ class DokumenSayaController extends Controller
             'lokasi_terisi' => collect([$d->nomor_rak, $d->no_tingkat, $d->no_box_file])
                 ->contains(fn ($nilai) => filled($nilai)),
             'lokasi_lama' => $d->lokasi_arsip_fisik,
+            'lokasi_semula' => $this->bersihkanLokasi($d->lokasi_semula),
             'unit_kerja' => $d->unit,
             'portofolio' => $d->portofolio,
             'tahun' => filled($d->tahun_arsip) ? $d->tahun_arsip : (string) $tanggal->year,
@@ -240,9 +245,15 @@ class DokumenSayaController extends Controller
         ];
     }
 
+    private function bersihkanLokasi(?string $lokasi): ?string
+    {
+        $lokasi = trim((string) $lokasi, " \t\n\r\0\x0B/-");
+
+        return $lokasi !== '' ? $lokasi : null;
+    }
+
     private function urlKembali(): string
     {
-        // Kembali ke Cari Arsip (lengkap dengan filternya) bila user datang dari sana.
         $arsip = route('user.arsip.index');
         $sebelumnya = url()->previous();
 

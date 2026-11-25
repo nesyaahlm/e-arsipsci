@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\PemusnahanItem;
 use App\Models\Sampel;
 use App\Models\Bagian;
 use App\Models\Portofolio;
@@ -38,6 +39,12 @@ class SampelController extends Controller
 
         $jumlahLabel = $this->kueriCari($kata)->count();
 
+        $lokasiSemula = PemusnahanItem::query()
+            ->whereIn('sampel_id', $sampel->pluck('id'))
+            ->pluck('lokasi_sebelumnya', 'sampel_id')
+            ->map(fn ($lokasi) => trim((string) $lokasi, " \t\n\r\0\x0B/-"))
+            ->filter(fn ($lokasi) => $lokasi !== '');
+
         $portofolioList = Portofolio::where(function ($q) use ($userCabangId) {
             $q->whereNull('cabang_id')
                 ->orWhere('cabang_id', $userCabangId);
@@ -45,7 +52,7 @@ class SampelController extends Controller
 
         $kodeSuratList = KodeSurat::whereNotNull('portofolio_id')->orderBy('kode')->get();
 
-        return view('user.sampel.index', compact('sampel', 'kata', 'portofolioList', 'kodeSuratList', 'jumlahLabel'));
+        return view('user.sampel.index', compact('sampel', 'kata', 'portofolioList', 'kodeSuratList', 'jumlahLabel', 'lokasiSemula'));
     }
 
     public function show(int $sampel)

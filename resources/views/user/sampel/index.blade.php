@@ -70,6 +70,13 @@
             --bs-btn-disabled-border-color: #2a7f72;
             --bs-btn-focus-shadow-rgb: 42, 127, 114;
         }
+
+        .dk-label-btn--ikon {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            justify-content: center;
+        }
     </style>
 @endpush
 
@@ -284,7 +291,10 @@
                                 </td>
                                 <td data-label="Shipper">{{ filled($item->shipper) ? $item->shipper : '-' }}</td>
                                 <td data-label="Ruang Arsip">
-                                    @if ($sudahDimusnahkan)
+                                    @if ($sudahDimusnahkan && $lokasiSemula->has($item->id))
+                                        <span class="d-block text-muted text-decoration-line-through">{{ $lokasiSemula[$item->id] }}</span>
+                                        <small class="d-block text-muted">Lokasi semula</small>
+                                    @elseif ($sudahDimusnahkan)
                                         <span class="d-block">-</span>
                                     @else
                                         <span class="d-block">{{ filled($item->nama_ruang_arsip) ? $item->nama_ruang_arsip : '-' }}</span>
@@ -295,9 +305,8 @@
                                 </td>
                                 <td data-label="Tgl Unggah" class="text-nowrap">{{ $item->created_at->copy()->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y') }}</td>
                                 <td data-label="Label">
-                                    <a href="{{ route('user.sampel.label', $item->id) }}" class="dk-label-btn" title="Download label sampel ini">
+                                    <a href="{{ route('user.sampel.label', $item->id) }}" class="dk-label-btn dk-label-btn--ikon" title="Download label sampel ini" aria-label="Download label sampel {{ $item->kode_sampel }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                        <span>Unduh</span>
                                     </a>
                                 </td>
                             </tr>

@@ -24,7 +24,10 @@ class PemusnahanController extends Controller
             })
             ->orderBy('tipe')
             ->latest()
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(10, ['*'], 'antrean')
+            ->withQueryString()
+            ->fragment('antrean');
 
         $riwayatDokumen = $this->queryRiwayat('dokumen')
             ->paginate(10, ['*'], 'riwayat_dokumen')

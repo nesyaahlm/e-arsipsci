@@ -40,7 +40,7 @@
     <ul class="nav nav-tabs flex-nowrap overflow-x-auto overflow-y-hidden mb-3" id="pemusnahanTab" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-semibold text-nowrap" id="antrean-tab" data-bs-toggle="tab" data-bs-target="#antrean-pane" type="button" role="tab" aria-controls="antrean-pane" aria-selected="true">
-                Menunggu Dimusnahkan <span class="badge bg-danger ms-1">{{ $antrean->count() }}</span>
+                Menunggu Dimusnahkan <span class="badge bg-danger ms-1">{{ $antrean->total() }}</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -59,7 +59,7 @@
         <div class="tab-pane fade show active" id="antrean-pane" role="tabpanel" aria-labelledby="antrean-tab" tabindex="0">
             <div class="card shadow-sm rounded-4 mb-4" style="border: 1.5px solid #cfdedb;">
                 <div class="card-header bg-white border-0 pt-3 pb-0 px-4 d-flex justify-content-between align-items-center">
-                    <h2 class="h6 fw-bold mb-0" style="color: #1f5f55;">Daftar Menunggu Dimusnahkan ({{ $antrean->count() }})</h2>
+                    <h2 class="h6 fw-bold mb-0" style="color: #1f5f55;">Daftar Menunggu Dimusnahkan ({{ $antrean->total() }})</h2>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm small align-middle mb-0">
@@ -111,6 +111,43 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if ($antrean->hasPages())
+                    <div class="card-footer bg-white border-0 py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                        <div class="small text-muted">
+                            Menampilkan {{ $antrean->firstItem() }}&ndash;{{ $antrean->lastItem() }} dari {{ $antrean->total() }} data menunggu dimusnahkan
+                        </div>
+                        <div>
+                            <nav aria-label="Navigasi Halaman Menunggu Dimusnahkan">
+                                <ul class="pagination pagination-sm mb-0">
+                                    @if ($antrean->onFirstPage())
+                                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                    @else
+                                        <li class="page-item"><a class="page-link" href="{{ $antrean->previousPageUrl() }}" rel="prev">&laquo;</a></li>
+                                    @endif
+
+                                    @foreach ($antrean->getUrlRange(1, $antrean->lastPage()) as $page => $url)
+                                        @if ($page == 1 || $page == $antrean->lastPage() || abs($page - $antrean->currentPage()) <= 1)
+                                            @if ($page == $antrean->currentPage())
+                                                <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
+                                            @else
+                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                            @endif
+                                        @elseif ($page == $antrean->currentPage() - 2 || $page == $antrean->currentPage() + 2)
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        @endif
+                                    @endforeach
+
+                                    @if ($antrean->hasMorePages())
+                                        <li class="page-item"><a class="page-link" href="{{ $antrean->nextPageUrl() }}" rel="next">&raquo;</a></li>
+                                    @else
+                                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                    @endif
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -204,6 +241,7 @@
         const elModal = document.getElementById('modalMusnah');
         const modalMusnah = new bootstrap.Modal(elModal);
         const kotak = Array.from(document.querySelectorAll('.cek-antrean'));
+        const totalAntrean = {{ $antrean->total() }};
         const cekSemua = document.getElementById('cek-semua-antrean');
         const btnTerpilih = document.getElementById('btn-musnah-terpilih');
         const btnSemua = document.getElementById('btn-musnah-semua');
@@ -261,7 +299,9 @@
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('riwayat_dokumen')) {
+        if (window.location.hash === '#antrean') {
+            aturWarnaTab('antrean');
+        } else if (urlParams.has('riwayat_dokumen')) {
             aturWarnaTab('riwayat-dokumen');
         } else if (urlParams.has('riwayat_sampel')) {
             aturWarnaTab('riwayat-sampel');
@@ -291,7 +331,7 @@
         }
 
         function isiRingkasan() {
-            const n = inputMode.value === 'semua' ? kotak.length : jumlahDipilih();
+            const n = inputMode.value === 'semua' ? totalAntrean : jumlahDipilih();
             ringkasan.textContent = n + ' data akan dimusnahkan';
         }
 

@@ -2,6 +2,14 @@
     @push('styles')
         <link rel="stylesheet" href="{{ asset('css/user/dokumen-saya.css') }}">
         <link rel="stylesheet" href="{{ asset('css/user/unggah.css') }}">
+        <style>
+            .dk-label-btn--ikon {
+                width: 34px;
+                height: 34px;
+                padding: 0;
+                justify-content: center;
+            }
+        </style>
     @endpush
 
     @push('scripts')
@@ -15,7 +23,7 @@
                 }
 
                 var master = form.querySelector('[data-label-semua-halaman]');
-                var items = Array.prototype.slice.call(form.querySelectorAll('[data-label-item]'));
+                var items = Array.prototype.slice.call(form.querySelectorAll('[data-label-item]:not(:disabled)'));
                 var button = document.querySelector('[data-label-terpilih]');
                 var badge = document.querySelector('[data-label-jumlah]');
                 var tombolMusnah = document.querySelector('[data-pemusnahan-terpilih]');
@@ -198,7 +206,10 @@
                                                 </span>
                                             @endforeach
                                         </div>
-                                    @elseif (filled($arsip['lokasi_lama']))
+                                    @elseif ($statusArsip === 'pemusnahan' && filled($arsip['lokasi_semula']))
+                                        <span class="d-block text-muted text-decoration-line-through">{{ $arsip['lokasi_semula'] }}</span>
+                                        <small class="d-block text-muted">Lokasi semula</small>
+                                    @elseif (filled($arsip['lokasi_lama']) && $arsip['lokasi_lama'] !== '-')
                                         {{ $arsip['lokasi_lama'] }}
                                     @else
                                         <span class="is-empty">-</span>
@@ -206,9 +217,8 @@
                                 </td>
                                 <td data-label="Label">
                                     @if ($arsip['lokasi_terisi'])
-                                        <a href="{{ route('user.dokumen-saya.label-box', $arsip['id']) }}" class="dk-label-btn" title="Download label box dokumen ini">
+                                        <a href="{{ route('user.dokumen-saya.label-box', $arsip['id']) }}" class="dk-label-btn dk-label-btn--ikon" title="Download label box dokumen ini" aria-label="Download label box dokumen {{ $arsip['nomor'] }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                            <span>Unduh</span>
                                         </a>
                                     @else
                                         <span class="is-empty">-</span>
